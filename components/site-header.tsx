@@ -6,13 +6,32 @@ const navItems = [
   { href: "/now", label: "Now" },
   { href: "/identity", label: "Identity" },
   { href: "/timeline", label: "Timeline" },
+  { href: "/activity", label: "Activity" },
+  { href: "/gallery", label: "Gallery" },
+  { href: "/library", label: "Library" },
+  { href: "/records", label: "Records" },
+  { href: "/birthdays", label: "Birthdays" },
+  { href: "/contact", label: "Contact" },
+  { href: "/dashboard", label: "Dashboard" },
 ] as const;
 
 export function SiteHeader({
   activePath,
   timestamp,
 }: {
-  activePath: "/" | "/archives" | "/now" | "/identity" | "/timeline";
+  activePath:
+    | "/"
+    | "/archives"
+    | "/now"
+    | "/identity"
+    | "/timeline"
+    | "/activity"
+    | "/gallery"
+    | "/library"
+    | "/records"
+    | "/birthdays"
+    | "/contact"
+    | "/dashboard";
   timestamp?: string;
 }) {
   return (
