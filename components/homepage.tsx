@@ -5,6 +5,7 @@ import { useEffect } from "react";
 import Link from "next/link";
 import Lenis from "lenis";
 import { motion, useReducedMotion } from "framer-motion";
+import { SiteHeader } from "@/components/site-header";
 
 const storyLines = ["Every life leaves traces.", "Most disappear.", "Some are archived."];
 
@@ -115,10 +116,7 @@ export function Homepage() {
       <div aria-hidden className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(139,92,246,0.18),transparent_30%),radial-gradient(circle_at_bottom_right,rgba(255,255,255,0.05),transparent_25%)]" />
 
       <div className="relative mx-auto flex w-full max-w-7xl flex-col px-5 pb-24 pt-5 sm:px-8 lg:px-12">
-        <header className="flex items-center justify-between border-b border-white/5 py-4 text-[0.72rem] uppercase tracking-[0.38em] text-muted">
-          <span>hisarchives.xyz</span>
-          <span>last updated 05 jun 2026</span>
-        </header>
+        <SiteHeader activePath="/" timestamp="last updated 05 jun 2026" />
 
         <section className="flex min-h-[calc(100vh-6rem)] flex-col items-center justify-center text-center">
           <motion.div

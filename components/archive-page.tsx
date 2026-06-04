@@ -3,6 +3,7 @@
 import type { ReactNode } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import Link from "next/link";
+import { SiteHeader } from "@/components/site-header";
 
 const archivedWork = [
   {
@@ -74,12 +75,14 @@ function CatalogItem({
   description,
   status,
   year,
+  href,
 }: {
   id: string;
   title: string;
   description: string;
   status: string;
   year: string;
+  href: string;
 }) {
   const reduceMotion = useReducedMotion();
 
@@ -94,7 +97,11 @@ function CatalogItem({
       <div className="flex flex-col gap-8 sm:flex-row sm:items-start sm:justify-between">
         <div className="space-y-4">
           <p className="text-[0.72rem] uppercase tracking-[0.4em] text-muted">{id}</p>
-          <h3 className="text-2xl font-light tracking-wide text-text sm:text-3xl">{title}</h3>
+          <h3 className="text-2xl font-light tracking-wide text-text sm:text-3xl">
+            <Link href={href} className="transition-colors hover:text-muted">
+              {title}
+            </Link>
+          </h3>
           <p className="max-w-2xl text-sm leading-7 text-muted">{description}</p>
         </div>
         <div className="grid gap-4 text-sm uppercase tracking-[0.25em] text-muted sm:text-right">
@@ -180,12 +187,7 @@ export function ArchivePage() {
       <div aria-hidden className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(139,92,246,0.18),transparent_30%),radial-gradient(circle_at_bottom_right,rgba(255,255,255,0.05),transparent_25%)]" />
 
       <div className="relative mx-auto flex w-full max-w-7xl flex-col px-5 pb-24 pt-5 sm:px-8 lg:px-12">
-        <header className="flex items-center justify-between border-b border-white/5 py-4 text-[0.72rem] uppercase tracking-[0.38em] text-muted">
-          <span>hisarchives.xyz</span>
-          <Link href="/" className="transition-colors hover:text-text">
-            Back to home
-          </Link>
-        </header>
+        <SiteHeader activePath="/archives" />
 
         <section className="flex min-h-[52vh] items-end py-18 sm:py-24">
           <motion.div
@@ -218,6 +220,7 @@ export function ArchivePage() {
                 description={item.description}
                 status={item.status}
                 year={item.year}
+                href={`/archives/${item.id === "001" ? "discord-automation" : item.id === "002" ? "tournament-platform" : "hisarchives"}`}
               />
             ))}
           </div>
@@ -235,9 +238,9 @@ export function ArchivePage() {
           </div>
         </Section>
 
-          <Section eyebrow="Active Record" title="RECORD IN PROGRESS">
-            <StatusCard />
-          </Section>
+        <Section eyebrow="Active Record" title="RECORD IN PROGRESS">
+          <StatusCard />
+        </Section>
 
       </div>
     </main>
