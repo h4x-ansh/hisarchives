@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" role="img" aria-label="hisarchives.xyz">
+  <rect width="1200" height="630" fill="#050505"/>
+  <rect x="0" y="0" width="1200" height="630" fill="url(#g)"/>
+  <defs>
+    <radialGradient id="g" cx="50%" cy="20%" r="80%">
+      <stop offset="0%" stop-color="#1d1433" stop-opacity="0.85"/>
+      <stop offset="55%" stop-color="#050505" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <text x="72" y="90" fill="#7a7a7a" font-family="Arial, Helvetica, sans-serif" font-size="24" letter-spacing="8">HISARCHIVES.XYZ</text>
+  <text x="72" y="345" fill="#fafafa" font-family="Arial, Helvetica, sans-serif" font-size="92" font-weight="300" letter-spacing="-4">A living archive.</text>
+  <text x="72" y="425" fill="#7a7a7a" font-family="Arial, Helvetica, sans-serif" font-size="34" letter-spacing="0">A living archive of projects, progress, lessons, and records.</text>
+  <text x="72" y="560" fill="#7a7a7a" font-family="Arial, Helvetica, sans-serif" font-size="24" letter-spacing="8">ESTABLISHED 2026</text>
+</svg>
