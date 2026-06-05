@@ -4,10 +4,10 @@ import { motion, useReducedMotion } from "framer-motion";
 import { ArchiveFrame, ArchiveHero, ArchiveSection } from "@/components/archive-frame";
 
 const contactMethods = [
-  { label: "Email", value: "hello@example.com" },
+  { label: "Email", value: "anuneet.og@gmail.com" },
   { label: "GitHub", value: "@h4x-ansh" },
-  { label: "Discord", value: "hisarchives#0001" },
-  { label: "Instagram", value: "@hisarchives" },
+  { label: "Discord", value: "11.11arc" },
+  { label: "Instagram", value: "@_anuneet1x" },
 ] as const;
 
 const otherLinks = [
