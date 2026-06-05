@@ -1,78 +1,100 @@
 "use client";
 
 import { motion, useReducedMotion } from "framer-motion";
-import { SiteHeader } from "@/components/site-header";
+import { ArchiveFrame, ArchiveHero, ArchiveSection } from "@/components/archive-frame";
 
 const timelineEntries = [
   {
     date: "2026.06.04",
-    text: "Purchased hisarchives.xyz",
+    title: "Purchased hisarchives.xyz",
+    note: "The archive received its permanent home.",
   },
   {
     date: "2026.06.04",
-    text: "Built the first version of the archive",
+    title: "Built the first version of the archive",
+    note: "The first structure was assembled and published.",
   },
   {
     date: "2026.06.05",
-    text: "Connected the custom domain",
+    title: "Connected the custom domain",
+    note: "The archive became reachable through its own name.",
   },
 ] as const;
 
-export function TimelinePage() {
+function TimelineCard({
+  date,
+  title,
+  note,
+  index,
+}: {
+  date: string;
+  title: string;
+  note: string;
+  index: number;
+}) {
   const reduceMotion = useReducedMotion();
 
   return (
-    <main className="relative isolate overflow-hidden bg-bg text-text">
-      <div aria-hidden className="pointer-events-none absolute inset-0 bg-archive-grid bg-[length:100%_100%,112px_112px] opacity-[0.08]" />
-      <div aria-hidden className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(139,92,246,0.18),transparent_30%),radial-gradient(circle_at_bottom_right,rgba(255,255,255,0.05),transparent_25%)]" />
+    <motion.article
+      initial={reduceMotion ? false : { opacity: 0, y: 18 }}
+      whileInView={reduceMotion ? undefined : { opacity: 1, y: 0 }}
+      viewport={{ once: true, amount: 0.4 }}
+      transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1], delay: index * 0.05 }}
+      className="grid gap-4 sm:grid-cols-[12rem_1fr] sm:gap-8"
+    >
+      <div className="flex items-start gap-4 sm:justify-end sm:pt-1">
+        <div className="relative flex w-full items-center gap-4 sm:w-auto sm:flex-col sm:items-end sm:gap-3">
+          <span className="hidden h-px w-12 bg-white/10 sm:block" />
+          <p className="text-sm uppercase tracking-[0.35em] text-muted">{date}</p>
+        </div>
+      </div>
 
-      <div className="relative mx-auto flex w-full max-w-7xl flex-col px-5 pb-24 pt-5 sm:px-8 lg:px-12">
-        <SiteHeader activePath="/timeline" />
+      <div className="relative pl-6 sm:pl-8">
+        <span className="absolute left-0 top-3 h-3 w-3 rounded-full border border-accent/70 bg-accent/20 shadow-[0_0_0_6px_rgba(139,92,246,0.08)] sm:top-4" />
+        <div className="rounded-[2rem] border border-white/8 bg-surface/80 p-5 shadow-glow sm:p-6">
+          <p className="text-lg font-light tracking-wide text-text sm:text-2xl">{title}</p>
+          <p className="mt-3 max-w-2xl text-sm leading-7 text-muted sm:text-base sm:leading-8">{note}</p>
+        </div>
+      </div>
+    </motion.article>
+  );
+}
 
-        <section className="flex min-h-[52vh] items-end py-18 sm:py-24">
-          <motion.div
-            initial={reduceMotion ? false : { opacity: 0, y: 20 }}
-            animate={reduceMotion ? undefined : { opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
-            className="max-w-4xl space-y-6"
-          >
-            <p className="text-[0.72rem] uppercase tracking-[0.5em] text-muted">Timeline</p>
-            <h1 className="text-balance text-6xl font-light tracking-[0.15em] sm:text-8xl lg:text-[8rem]">
-              TIMELINE
-            </h1>
-            <p className="max-w-2xl text-base leading-8 text-muted sm:text-lg">
-              A chronological record with space left open for future entries.
-            </p>
-          </motion.div>
-        </section>
+export function TimelinePage() {
+  return (
+    <ArchiveFrame activePath="/timeline">
+      <ArchiveHero
+        eyebrow="Archive Log"
+        title="TIMELINE"
+        subtitle="A chronological record of the archive's formation, with room for the next entries."
+      />
 
-        <section className="border-t border-white/5 py-20 sm:py-28">
-          <div className="space-y-6">
-            <p className="text-[0.72rem] uppercase tracking-[0.45em] text-muted">Archive Log</p>
-            <div className="rounded-[2rem] border border-white/8 bg-surface/70 px-6 py-3 backdrop-blur-sm sm:px-8">
-              {timelineEntries.map((entry) => (
-                <motion.div
-                  key={`${entry.date}-${entry.text}`}
-                  initial={reduceMotion ? false : { opacity: 0, y: 14 }}
-                  whileInView={reduceMotion ? undefined : { opacity: 1, y: 0 }}
-                  viewport={{ once: true, amount: 0.45 }}
-                  transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-                  className="grid gap-4 border-b border-white/5 py-5 sm:grid-cols-[12rem_1fr]"
-                >
-                  <p className="text-sm uppercase tracking-[0.35em] text-muted">{entry.date}</p>
-                  <p className="text-lg font-light leading-8 text-text sm:text-xl">{entry.text}</p>
-                </motion.div>
-              ))}
-              <div className="grid gap-4 py-5 sm:grid-cols-[12rem_1fr]">
-                <p className="text-sm uppercase tracking-[0.35em] text-muted">Future</p>
-                <p className="text-lg font-light leading-8 text-text sm:text-xl">
+      <ArchiveSection eyebrow="Archive Log" title="Recorded Moments" subtitle="Each entry is preserved as a dated record. Future moments can be added without changing the structure.">
+        <div className="relative">
+          <div
+            aria-hidden
+            className="absolute left-3 top-1 h-full w-px bg-gradient-to-b from-white/0 via-white/10 to-white/0 sm:left-[12rem]"
+          />
+          <div className="space-y-4 sm:space-y-6">
+            {timelineEntries.map((entry, index) => (
+              <TimelineCard key={`${entry.date}-${entry.title}`} index={index} {...entry} />
+            ))}
+          </div>
+
+          <div className="mt-6 grid gap-4 sm:grid-cols-[12rem_1fr] sm:gap-8">
+            <div className="hidden sm:block" />
+            <div className="relative pl-6 sm:pl-8">
+              <span className="absolute left-0 top-3 h-3 w-3 rounded-full border border-white/20 bg-white/5" />
+              <div className="rounded-[2rem] border border-dashed border-white/10 bg-white/[0.02] p-5 sm:p-6">
+                <p className="text-[0.68rem] uppercase tracking-[0.45em] text-muted">Future</p>
+                <p className="mt-3 text-lg font-light leading-8 text-text sm:text-xl">
                   Reserved for the next recorded moments.
                 </p>
               </div>
             </div>
           </div>
-        </section>
-      </div>
-    </main>
+        </div>
+      </ArchiveSection>
+    </ArchiveFrame>
   );
 }
