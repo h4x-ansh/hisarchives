@@ -1,6 +1,7 @@
 "use client";
 
 import type { ReactNode } from "react";
+import Image from "next/image";
 import { motion, useReducedMotion } from "framer-motion";
 import Link from "next/link";
 import { SiteHeader } from "@/components/site-header";
@@ -12,6 +13,8 @@ const archivedWork = [
     description: "Utility tooling and workflow automation preserved as an active line of work.",
     status: "Active",
     year: "2026",
+    accent: "#8b5cf6",
+    coverLabel: "Discord-inspired visual",
   },
   {
     id: "002",
@@ -19,6 +22,8 @@ const archivedWork = [
     description: "A structured competitive system archived after its first complete pass.",
     status: "Archived",
     year: "2026",
+    accent: "#ef4444",
+    coverLabel: "Competitive / esports visual",
   },
   {
     id: "003",
@@ -26,6 +31,8 @@ const archivedWork = [
     description: "The record itself, evolving in public while staying personal.",
     status: "Building",
     year: "2026",
+    accent: "#6d28d9",
+    coverLabel: "Archive aesthetic",
   },
 ];
 
@@ -76,6 +83,8 @@ function CatalogItem({
   status,
   year,
   href,
+  accent,
+  coverLabel,
 }: {
   id: string;
   title: string;
@@ -83,6 +92,8 @@ function CatalogItem({
   status: string;
   year: string;
   href: string;
+  accent: string;
+  coverLabel: string;
 }) {
   const reduceMotion = useReducedMotion();
 
@@ -92,10 +103,38 @@ function CatalogItem({
       whileInView={reduceMotion ? undefined : { opacity: 1, y: 0 }}
       viewport={{ once: true, amount: 0.5 }}
       transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
-      className="group rounded-[1.75rem] border border-white/8 bg-surface/70 p-6 backdrop-blur-sm transition-colors duration-300 hover:border-white/14 sm:p-7"
+      className="group overflow-hidden rounded-[2rem] border border-white/8 bg-surface/70 backdrop-blur-sm transition-colors duration-300 hover:border-white/14"
+      style={{ boxShadow: `0 0 0 1px ${accent}22, 0 30px 100px rgba(0, 0, 0, 0.35)` }}
     >
-      <div className="flex flex-col gap-8 sm:flex-row sm:items-start sm:justify-between">
-        <div className="space-y-4">
+      <div className="relative aspect-[16/10] overflow-hidden">
+        <div className="absolute inset-0 bg-[#090909]" />
+        <div
+          aria-hidden
+          className="absolute inset-0 opacity-90"
+          style={{
+            backgroundImage: `radial-gradient(circle at 20% 10%, ${accent}35, transparent 32%), radial-gradient(circle at 80% 90%, ${accent}14, transparent 38%)`,
+          }}
+        />
+        <Image
+          src="/record-placeholder.svg"
+          alt={title}
+          fill
+          className="object-cover opacity-70 mix-blend-screen transition duration-500 group-hover:scale-[1.02]"
+          sizes="(max-width: 768px) 100vw, 50vw"
+          priority={id === "001"}
+        />
+        <div
+          className="absolute inset-x-0 bottom-0 h-28"
+          style={{
+            background: `linear-gradient(to top, rgba(5,5,5,0.92), transparent), linear-gradient(135deg, ${accent}24, transparent 60%)`,
+          }}
+        />
+        <div className="absolute left-6 top-6 inline-flex rounded-full border border-white/10 bg-black/35 px-3 py-1 text-[0.65rem] uppercase tracking-[0.35em] text-text backdrop-blur-sm">
+          {coverLabel}
+        </div>
+      </div>
+      <div className="space-y-5 p-6 sm:p-7">
+        <div className="space-y-3">
           <p className="text-[0.72rem] uppercase tracking-[0.4em] text-muted">{id}</p>
           <h3 className="text-2xl font-light tracking-wide text-text sm:text-3xl">
             <Link href={href} className="transition-colors hover:text-muted">
@@ -104,12 +143,12 @@ function CatalogItem({
           </h3>
           <p className="max-w-2xl text-sm leading-7 text-muted">{description}</p>
         </div>
-        <div className="grid gap-4 text-sm uppercase tracking-[0.25em] text-muted sm:text-right">
+        <div className="grid gap-4 border-t border-white/5 pt-5 text-sm uppercase tracking-[0.25em] text-muted sm:grid-cols-2">
           <div>
             <p>Status</p>
             <p className="mt-1 text-text">{status}</p>
           </div>
-          <div>
+          <div className="sm:text-right">
             <p>Year</p>
             <p className="mt-1 text-text">{year}</p>
           </div>
@@ -211,7 +250,7 @@ export function ArchivePage() {
           title="Catalogued entries."
           subtitle="Each item is treated as a record, not a showcase."
         >
-          <div className="grid gap-4">
+          <div className="grid gap-6 lg:grid-cols-2 xl:grid-cols-2">
             {archivedWork.map((item) => (
               <CatalogItem
                 key={item.id}
@@ -221,6 +260,8 @@ export function ArchivePage() {
                 status={item.status}
                 year={item.year}
                 href={`/archives/${item.id === "001" ? "discord-automation" : item.id === "002" ? "tournament-platform" : "hisarchives"}`}
+                accent={item.accent}
+                coverLabel={item.coverLabel}
               />
             ))}
           </div>
