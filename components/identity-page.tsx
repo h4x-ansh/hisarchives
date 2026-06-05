@@ -7,47 +7,42 @@ const floatingCards = [
   {
     label: "Established",
     value: "22 OCT 2007",
-    className: "left-4 top-4 sm:left-8 sm:top-8 w-[min(42vw,15rem)] sm:w-[15rem]",
-  },
-  {
-    label: "Current Phase",
-    value: "CLASS 11",
-    className: "right-4 top-8 sm:right-10 sm:top-14 w-[min(40vw,14rem)] sm:w-[14rem]",
+    className: "left-0 top-0 w-[min(42vw,15rem)] sm:left-[7%] sm:top-[6%] sm:w-[14rem]",
   },
   {
     label: "Primary Objective",
     value: "JEE 2027",
-    className: "left-2 top-[19%] sm:left-[8%] sm:top-[20%] w-[min(44vw,16rem)] sm:w-[16rem]",
+    className: "left-0 top-[12rem] w-[min(46vw,16rem)] sm:left-[11%] sm:top-[24%] sm:w-[15rem]",
+  },
+  {
+    label: "Current Phase",
+    value: "CLASS 11",
+    className: "right-0 top-0 w-[min(40vw,14rem)] sm:right-[8%] sm:top-[8%] sm:w-[13rem]",
   },
   {
     label: "Status",
     value: "BUILDING",
-    className: "right-2 top-[21%] sm:right-[8%] sm:top-[24%] w-[min(38vw,13rem)] sm:w-[13rem]",
+    className: "right-0 top-[11rem] w-[min(38vw,13rem)] sm:right-[10%] sm:top-[26%] sm:w-[12.5rem]",
   },
   {
     label: "Location",
     value: "INDIA",
-    className: "left-0 bottom-[24%] sm:left-[10%] sm:bottom-[22%] w-[min(36vw,12rem)] sm:w-[12rem]",
-  },
-  {
-    label: "Active Systems",
-    value: "HisArchives / Fitness / Learning / Projects",
-    className: "right-0 bottom-[26%] sm:right-[8%] sm:bottom-[24%] w-[min(54vw,18rem)] sm:w-[18rem]",
+    className: "left-0 bottom-[12rem] w-[min(36vw,12rem)] sm:left-[8%] sm:bottom-[20%] sm:w-[11.5rem]",
   },
   {
     label: "Archive Start",
     value: "2026",
-    className: "left-8 bottom-6 sm:left-[22%] sm:bottom-12 w-[min(32vw,11rem)] sm:w-[11rem]",
-  },
-  {
-    label: "Current Version",
-    value: "v1.0",
-    className: "right-8 bottom-8 sm:right-[22%] sm:bottom-14 w-[min(32vw,11rem)] sm:w-[11rem]",
+    className: "right-0 bottom-[12rem] w-[min(34vw,11rem)] sm:right-[9%] sm:bottom-[20%] sm:w-[10.5rem]",
   },
   {
     label: "Philosophy",
     value: "Document the work while it is still becoming.",
-    className: "left-1/2 top-[44%] w-[min(66vw,20rem)] -translate-x-1/2 sm:top-[46%] sm:w-[20rem]",
+    className: "left-0 bottom-0 w-[min(56vw,18rem)] sm:left-[16%] sm:bottom-[6%] sm:w-[17rem]",
+  },
+  {
+    label: "Active Systems",
+    value: "HisArchives / Fitness / Learning / Projects",
+    className: "right-0 bottom-0 w-[min(60vw,20rem)] sm:right-[10%] sm:bottom-[7%] sm:w-[18rem]",
   },
 ] as const;
 
@@ -91,9 +86,10 @@ export function IdentityPage() {
             </h1>
           </div>
 
-          <div className="relative isolate mt-8 min-h-[980px] overflow-hidden rounded-[3rem] border border-white/5 bg-white/[0.02] px-4 py-8 shadow-glow sm:min-h-[840px] sm:px-8 sm:py-10">
+          <div className="relative isolate mt-8 min-h-[1000px] rounded-[3rem] border border-white/5 bg-white/[0.02] px-4 py-8 shadow-glow sm:min-h-[900px] sm:px-8 sm:py-10">
             <div className="absolute inset-6 rounded-[2.5rem] border border-white/[0.04]" />
             <div className="absolute left-1/2 top-1/2 h-[34rem] w-[34rem] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(circle,_rgba(139,92,246,0.16)_0%,_rgba(139,92,246,0.06)_34%,_transparent_72%)] opacity-80 blur-3xl" />
+            <div className="absolute left-1/2 top-1/2 h-[48rem] w-[48rem] -translate-x-1/2 -translate-y-1/2 rounded-full border border-white/[0.05] sm:h-[52rem] sm:w-[52rem]" />
 
             <motion.article
               initial={reduceMotion ? false : { opacity: 0, scale: 0.98, y: 18 }}
@@ -128,7 +124,7 @@ export function IdentityPage() {
               </div>
             </motion.article>
 
-            <div className="relative h-full min-h-[920px] sm:min-h-[760px]">
+            <div className="relative h-full min-h-[940px] sm:min-h-[780px]">
               {floatingCards.map((item, index) => (
                 <motion.div
                   key={item.label}
@@ -136,7 +132,7 @@ export function IdentityPage() {
                   animate={reduceMotion ? undefined : { opacity: 1, y: 0 }}
                   transition={{ duration: 0.65, delay: index * 0.04, ease: [0.22, 1, 0.36, 1] }}
                   className={`absolute ${item.className}`}
-                  style={{ zIndex: index < 4 ? 18 : 14 }}
+                  style={{ zIndex: index < 2 ? 22 : index < 4 ? 20 : 16 }}
                 >
                   <FloatingCard label={item.label} value={item.value} large={index < 4} />
                 </motion.div>
