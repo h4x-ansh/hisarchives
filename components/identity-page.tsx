@@ -4,15 +4,51 @@ import { motion, useReducedMotion } from "framer-motion";
 import { ArchiveFrame } from "@/components/archive-frame";
 
 const floatingCards = [
-  { label: "Established", value: "22 OCT 2007", x: "sm:translate-x-4", y: "sm:-translate-y-2" },
-  { label: "Current Phase", value: "CLASS 11", x: "sm:-translate-x-2", y: "sm:translate-y-4" },
-  { label: "Primary Objective", value: "JEE 2027", x: "sm:translate-x-6", y: "sm:translate-y-2" },
-  { label: "Status", value: "BUILDING", x: "sm:-translate-x-6", y: "sm:-translate-y-3" },
-  { label: "Location", value: "INDIA", x: "sm:translate-x-3", y: "sm:-translate-y-6" },
-  { label: "Active Systems", value: "HisArchives / Fitness / Learning / Projects", x: "sm:translate-x-0", y: "sm:translate-y-2" },
-  { label: "Archive Start", value: "2026", x: "sm:-translate-x-4", y: "sm:translate-y-0" },
-  { label: "Current Version", value: "v1.0", x: "sm:translate-x-5", y: "sm:-translate-y-1" },
-  { label: "Philosophy", value: "Document the work while it is still becoming.", x: "sm:-translate-x-3", y: "sm:translate-y-3" },
+  {
+    label: "Established",
+    value: "22 OCT 2007",
+    className: "left-4 top-4 sm:left-8 sm:top-8 w-[min(42vw,15rem)] sm:w-[15rem]",
+  },
+  {
+    label: "Current Phase",
+    value: "CLASS 11",
+    className: "right-4 top-8 sm:right-10 sm:top-14 w-[min(40vw,14rem)] sm:w-[14rem]",
+  },
+  {
+    label: "Primary Objective",
+    value: "JEE 2027",
+    className: "left-2 top-[19%] sm:left-[8%] sm:top-[20%] w-[min(44vw,16rem)] sm:w-[16rem]",
+  },
+  {
+    label: "Status",
+    value: "BUILDING",
+    className: "right-2 top-[21%] sm:right-[8%] sm:top-[24%] w-[min(38vw,13rem)] sm:w-[13rem]",
+  },
+  {
+    label: "Location",
+    value: "INDIA",
+    className: "left-0 bottom-[24%] sm:left-[10%] sm:bottom-[22%] w-[min(36vw,12rem)] sm:w-[12rem]",
+  },
+  {
+    label: "Active Systems",
+    value: "HisArchives / Fitness / Learning / Projects",
+    className: "right-0 bottom-[26%] sm:right-[8%] sm:bottom-[24%] w-[min(54vw,18rem)] sm:w-[18rem]",
+  },
+  {
+    label: "Archive Start",
+    value: "2026",
+    className: "left-8 bottom-6 sm:left-[22%] sm:bottom-12 w-[min(32vw,11rem)] sm:w-[11rem]",
+  },
+  {
+    label: "Current Version",
+    value: "v1.0",
+    className: "right-8 bottom-8 sm:right-[22%] sm:bottom-14 w-[min(32vw,11rem)] sm:w-[11rem]",
+  },
+  {
+    label: "Philosophy",
+    value: "Document the work while it is still becoming.",
+    className: "left-1/2 top-[44%] w-[min(66vw,20rem)] -translate-x-1/2 sm:top-[46%] sm:w-[20rem]",
+  },
 ] as const;
 
 function FloatingCard({
@@ -45,34 +81,37 @@ export function IdentityPage() {
 
   return (
     <ArchiveFrame activePath="/identity">
-      <section className="border-t border-white/5 py-20 sm:py-28">
-        <div className="space-y-6">
-          <div className="max-w-4xl space-y-5">
+      <section className="border-t border-white/5 py-16 sm:py-20">
+        <div className="mx-auto max-w-7xl space-y-5 px-4 sm:px-6">
+          <div className="max-w-3xl space-y-4">
             <p className="text-[0.72rem] uppercase tracking-[0.5em] text-muted">File 001</p>
             <p className="text-[0.72rem] uppercase tracking-[0.5em] text-muted">Active Record</p>
-            <h1 className="text-balance text-6xl font-light tracking-[0.15em] sm:text-8xl lg:text-[8rem]">
+            <h1 className="text-balance text-4xl font-light tracking-[0.16em] sm:text-5xl lg:text-6xl">
               IDENTITY RECORD
             </h1>
           </div>
 
-          <div className="relative mt-10 min-h-[980px] sm:min-h-[860px]">
+          <div className="relative isolate mt-8 min-h-[980px] overflow-hidden rounded-[3rem] border border-white/5 bg-white/[0.02] px-4 py-8 shadow-glow sm:min-h-[840px] sm:px-8 sm:py-10">
+            <div className="absolute inset-6 rounded-[2.5rem] border border-white/[0.04]" />
+            <div className="absolute left-1/2 top-1/2 h-[34rem] w-[34rem] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(circle,_rgba(139,92,246,0.16)_0%,_rgba(139,92,246,0.06)_34%,_transparent_72%)] opacity-80 blur-3xl" />
+
             <motion.article
               initial={reduceMotion ? false : { opacity: 0, scale: 0.98, y: 18 }}
               animate={reduceMotion ? undefined : { opacity: 1, scale: 1, y: 0 }}
               transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
-              className="absolute left-1/2 top-1/2 z-10 w-[min(88vw,42rem)] -translate-x-1/2 -translate-y-1/2 rounded-[2.5rem] border border-white/10 bg-[#0a0a0a] p-6 shadow-[0_40px_120px_rgba(0,0,0,0.5)] sm:p-8"
+              className="absolute left-1/2 top-1/2 z-20 w-[min(88vw,40rem)] -translate-x-1/2 -translate-y-1/2 rounded-[2.5rem] border border-white/10 bg-[#0a0a0a] p-6 shadow-[0_40px_120px_rgba(0,0,0,0.5)] sm:p-8"
             >
-              <div className="space-y-8">
+              <div className="space-y-7 sm:space-y-8">
                 <div className="flex items-start justify-between gap-4">
                   <div className="space-y-2">
                     <p className="text-[0.68rem] uppercase tracking-[0.45em] text-muted">Center Record</p>
-                    <h2 className="text-4xl font-light tracking-[0.16em] sm:text-5xl">ANSH</h2>
+                    <h2 className="text-3xl font-light tracking-[0.16em] sm:text-5xl">ANSH</h2>
                   </div>
                   <p className="text-[0.68rem] uppercase tracking-[0.4em] text-muted">Archive Node</p>
                 </div>
 
                 <div className="space-y-4">
-                  <p className="text-lg font-light leading-8 text-text sm:text-2xl">
+                  <p className="text-base font-light leading-7 text-text sm:text-xl sm:leading-8">
                     Building.
                     <br />
                     Learning.
@@ -84,25 +123,20 @@ export function IdentityPage() {
 
                 <div className="rounded-[1.5rem] border border-white/8 bg-white/[0.03] px-5 py-4">
                   <p className="text-[0.68rem] uppercase tracking-[0.45em] text-muted">Current Mission</p>
-                  <p className="mt-3 text-xl font-light tracking-wide text-text sm:text-2xl">JEE 2027</p>
+                  <p className="mt-3 text-lg font-light tracking-wide text-text sm:text-2xl">JEE 2027</p>
                 </div>
               </div>
             </motion.article>
 
-            <div className="relative h-full">
+            <div className="relative h-full min-h-[920px] sm:min-h-[760px]">
               {floatingCards.map((item, index) => (
                 <motion.div
                   key={item.label}
                   initial={reduceMotion ? false : { opacity: 0, y: 18 }}
                   animate={reduceMotion ? undefined : { opacity: 1, y: 0 }}
                   transition={{ duration: 0.65, delay: index * 0.04, ease: [0.22, 1, 0.36, 1] }}
-                  className={`absolute w-[min(78vw,18rem)] sm:w-[min(32vw,18rem)] ${
-                    index % 2 === 0 ? "left-0" : "right-0"
-                  } ${item.x} ${item.y}`}
-                  style={{
-                    top: `${8 + index * 8}%`,
-                    zIndex: index < 3 ? 20 : 15,
-                  }}
+                  className={`absolute ${item.className}`}
+                  style={{ zIndex: index < 4 ? 18 : 14 }}
                 >
                   <FloatingCard label={item.label} value={item.value} large={index < 4} />
                 </motion.div>
