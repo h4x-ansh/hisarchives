@@ -132,9 +132,9 @@ export function Homepage() {
     }
 
     const lenis = new Lenis({
-      duration: 0.85,
+      duration: 0.55,
       smoothWheel: true,
-      lerp: 0.12,
+      lerp: 0.18,
     });
 
     let frame = 0;
