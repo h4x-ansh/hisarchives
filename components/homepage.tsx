@@ -28,9 +28,10 @@ const objectives = [
 ];
 
 const livingRecords = [
-  { date: "06 JUN 2026", text: "Identity system updated" },
-  { date: "05 JUN 2026", text: "Navigation rebuilt" },
+  { date: "22 OCT 2007", text: "Record initialized" },
   { date: "04 JUN 2026", text: "hisarchives.xyz launched" },
+  { date: "06 JUN 2026", text: "Identity system updated" },
+  { date: "JEE 2027", text: "Mission archived" },
 ] as const;
 
 const archiveQuotes = [
@@ -249,8 +250,38 @@ export function Homepage() {
           }}
           onMouseLeave={() => setHeroShift({ x: 0, y: 0 })}
           className="relative min-h-[calc(100vh-6rem)]"
-        >
-          <div className="relative grid min-h-[calc(100vh-6rem)] gap-8 py-10 lg:grid-cols-[1.1fr_0.9fr] lg:items-center lg:py-0">
+          >
+          <motion.div
+            aria-hidden
+            initial={reduceMotion ? false : { opacity: 0, y: 6 }}
+            animate={reduceMotion ? undefined : { opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+            className="pointer-events-none absolute right-8 top-24 hidden text-[0.62rem] uppercase tracking-[0.45em] text-muted/45 lg:block"
+            style={{ transform: `translate3d(${heroShift.x * 0.08}px, ${heroShift.y * 0.08}px, 0)` }}
+          >
+            REC-001
+          </motion.div>
+          <motion.div
+            aria-hidden
+            initial={reduceMotion ? false : { opacity: 0, y: 6 }}
+            animate={reduceMotion ? undefined : { opacity: 1, y: 0 }}
+            transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+            className="pointer-events-none absolute left-[4%] top-[52%] hidden text-[0.62rem] uppercase tracking-[0.45em] text-muted/35 lg:block"
+            style={{ transform: `translate3d(${heroShift.x * 0.05}px, ${heroShift.y * 0.05}px, 0)` }}
+          >
+            NODE: INDIA
+          </motion.div>
+          <motion.div
+            aria-hidden
+            initial={reduceMotion ? false : { opacity: 0, y: 6 }}
+            animate={reduceMotion ? undefined : { opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+            className="pointer-events-none absolute right-10 bottom-16 hidden text-[0.62rem] uppercase tracking-[0.45em] text-muted/30 lg:block"
+            style={{ transform: `translate3d(${heroShift.x * 0.04}px, ${heroShift.y * 0.04}px, 0)` }}
+          >
+            EST. 2007
+          </motion.div>
+            <div className="relative grid min-h-[calc(100vh-6rem)] gap-8 py-10 lg:grid-cols-[1.1fr_0.9fr] lg:items-center lg:py-0">
             <div
               className="relative z-10 flex flex-col justify-center text-left"
               style={{
@@ -307,7 +338,7 @@ export function Homepage() {
                 aria-hidden
                 animate={reduceMotion ? undefined : { opacity: [0.12, 0.18, 0.12] }}
                 transition={reduceMotion ? undefined : { duration: 12, repeat: Infinity, ease: "easeInOut" }}
-                className="pointer-events-none absolute right-[-12%] top-[-10%] h-[min(82vw,72rem)] w-[min(82vw,72rem)]"
+                className="pointer-events-none absolute right-[-15%] top-[-12%] h-[min(82vw,72rem)] w-[min(82vw,72rem)]"
                 style={{
                   background:
                     "radial-gradient(circle at 50% 50%, rgba(139,92,246,0.18) 0%, rgba(88,28,135,0.14) 18%, rgba(28,20,48,0.08) 40%, transparent 72%)",
@@ -319,7 +350,7 @@ export function Homepage() {
                 aria-hidden
                 animate={reduceMotion ? undefined : { opacity: [0.2, 0.28, 0.2] }}
                 transition={reduceMotion ? undefined : { duration: 11, repeat: Infinity, ease: "easeInOut" }}
-                className="pointer-events-none absolute right-[-8%] top-[0%] h-[min(72vw,60rem)] w-[min(72vw,60rem)]"
+                className="pointer-events-none absolute right-[-10%] top-[-2%] h-[min(72vw,60rem)] w-[min(72vw,60rem)]"
                 style={{
                   background:
                     "radial-gradient(ellipse at 58% 44%, rgba(198,168,255,0.28) 0%, rgba(139,92,246,0.22) 16%, rgba(88,28,135,0.09) 34%, transparent 58%)",
@@ -339,10 +370,10 @@ export function Homepage() {
                 initial={reduceMotion ? false : { opacity: 0, y: 16 }}
                 animate={reduceMotion ? undefined : { opacity: 1, y: 0 }}
                 transition={{ duration: 0.42, ease: [0.22, 1, 0.36, 1] }}
-                className="relative z-10 w-[min(92vw,54rem)] translate-y-6 sm:w-[min(82vw,60rem)] lg:absolute lg:bottom-[-10rem] lg:right-[-14rem] lg:w-[min(62vw,76rem)]"
+                className="relative z-10 w-[min(92vw,54rem)] translate-y-6 sm:w-[min(82vw,60rem)] lg:absolute lg:bottom-[-7rem] lg:right-[-18rem] lg:w-[min(64vw,78rem)]"
                 style={{
                   opacity: Math.max(0.3, 1 - heroProgress * 0.7),
-                  transform: `translate3d(${heroShift.x * 0.16 + 42}px, ${heroShift.y * 0.16 + 34}px, 0)`,
+                  transform: `translate3d(${heroShift.x * 0.14 + 18}px, ${heroShift.y * 0.14 + 12}px, 0)`,
                 }}
               >
                 <motion.div
