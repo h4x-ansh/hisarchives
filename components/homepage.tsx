@@ -28,6 +28,21 @@ const objectives = [
   },
 ];
 
+const statusLines = [
+  "Current Phase: Building",
+  "Mission: JEE 2027",
+  "Location: India",
+  "Record State: Active",
+  "Last Updated: Live",
+] as const;
+
+const archiveFragments = [
+  "/record-placeholder.svg",
+  "/record-placeholder.svg",
+  "/record-placeholder.svg",
+  "/record-placeholder.svg",
+] as const;
+
 function Section({
   eyebrow,
   title,
@@ -65,11 +80,12 @@ function ObjectiveCard({
 }) {
   return (
     <motion.article
-      whileHover={{ y: -6 }}
-      transition={{ type: "spring", stiffness: 240, damping: 24 }}
-      className="group relative overflow-hidden rounded-3xl border border-white/8 bg-surface/80 p-6 shadow-glow backdrop-blur-sm sm:p-7"
+      whileHover={{ y: -4 }}
+      transition={{ type: "spring", stiffness: 220, damping: 24 }}
+      className="group relative overflow-hidden rounded-3xl border border-white/8 bg-surface/80 p-6 shadow-[0_0_0_1px_rgba(255,255,255,0.02)] backdrop-blur-sm transition-shadow duration-300 hover:shadow-[0_0_0_1px_rgba(255,255,255,0.04),0_0_24px_rgba(139,92,246,0.08)] sm:p-7"
     >
-      <div className="absolute inset-0 bg-gradient-to-br from-white/[0.03] via-transparent to-accent/10 opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
+      <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(255,255,255,0.03),transparent_45%,rgba(139,92,246,0.08))] opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.06),transparent_35%)] opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
       <div className="relative space-y-4">
         <p className="text-sm uppercase tracking-[0.35em] text-muted">
           ACTIVE OBJECTIVE #{String(index).padStart(2, "0")}
@@ -112,8 +128,19 @@ export function Homepage() {
 
   return (
     <main className="relative isolate overflow-hidden bg-bg text-text">
-      <div aria-hidden className="pointer-events-none absolute inset-0 bg-archive-grid bg-[length:100%_100%,112px_112px] opacity-[0.08]" />
-      <div aria-hidden className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(139,92,246,0.18),transparent_30%),radial-gradient(circle_at_bottom_right,rgba(255,255,255,0.05),transparent_25%)]" />
+      <motion.div
+        aria-hidden
+        animate={reduceMotion ? undefined : { x: ["-1.5%", "1.5%", "-1.5%"], y: ["-1%", "1%", "-1%"] }}
+        transition={reduceMotion ? undefined : { duration: 28, repeat: Infinity, ease: "linear" }}
+        className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(139,92,246,0.12),transparent_34%),radial-gradient(circle_at_bottom_right,rgba(255,255,255,0.03),transparent_28%)]"
+      />
+      <div aria-hidden className="pointer-events-none absolute inset-0 bg-archive-grid bg-[length:100%_100%,112px_112px] opacity-[0.06]" />
+      <motion.div
+        aria-hidden
+        animate={reduceMotion ? undefined : { opacity: [0.18, 0.24, 0.18] }}
+        transition={reduceMotion ? undefined : { duration: 12, repeat: Infinity, ease: "easeInOut" }}
+        className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.015),rgba(255,255,255,0))]"
+      />
 
       <div className="relative mx-auto flex w-full max-w-7xl flex-col px-5 pb-24 pt-5 sm:px-8 lg:px-12">
         <SiteHeader activePath="/" timestamp="last updated 05 jun 2026" />
@@ -141,6 +168,28 @@ export function Homepage() {
               memories.
             </p>
           </motion.div>
+
+          <motion.div
+            initial={reduceMotion ? false : { opacity: 0, y: 12 }}
+            animate={reduceMotion ? undefined : { opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
+            className="mt-8 w-full max-w-sm rounded-[1.75rem] border border-white/8 bg-white/[0.03] p-5 text-left shadow-[0_0_0_1px_rgba(255,255,255,0.03)] backdrop-blur-sm sm:mt-10 sm:max-w-md sm:p-6"
+          >
+            <p className="text-[0.72rem] uppercase tracking-[0.45em] text-muted">Archive Status</p>
+            <div className="mt-4 space-y-2">
+              {statusLines.map((line, index) => (
+                <motion.p
+                  key={line}
+                  initial={reduceMotion ? false : { opacity: 0 }}
+                  animate={reduceMotion ? undefined : { opacity: 1 }}
+                  transition={{ duration: 0.45, delay: index * 0.18 }}
+                  className="text-sm uppercase tracking-[0.3em] text-text/90"
+                >
+                  {line}
+                </motion.p>
+              ))}
+            </div>
+          </motion.div>
         </section>
 
         <Section className="border-t border-white/5">
@@ -160,21 +209,29 @@ export function Homepage() {
           </div>
         </Section>
 
-        <Section className="border-t border-white/5">
+        <Section className="relative border-t border-white/5">
+          <div aria-hidden className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
           <div className="grid gap-10 lg:grid-cols-[1.25fr_0.75fr] lg:items-end">
             <div className="space-y-5">
-              <p className="text-[0.72rem] uppercase tracking-[0.45em] text-muted">Beginning</p>
-              <h2 className="text-[clamp(6rem,18vw,13rem)] font-light leading-none tracking-[-0.08em]">
+              <p className="text-[0.72rem] uppercase tracking-[0.45em] text-muted">Archive Entry #0001</p>
+              <h2 className="text-[clamp(4.5rem,16vw,11rem)] font-light leading-none tracking-[-0.08em]">
                 2026
               </h2>
             </div>
             <p className="max-w-md text-2xl font-light leading-tight text-muted sm:text-3xl">
-              The beginning.
+              Restarted.
+              <br />
+              Rebuilding.
+              <br />
+              Class 11.
+              <br />
+              JEE 2027 initiated.
             </p>
           </div>
         </Section>
 
-        <Section className="border-t border-white/5">
+        <Section className="relative border-t border-white/5">
+          <div aria-hidden className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
           <div className="grid gap-8 lg:grid-cols-[0.9fr_1.1fr] lg:gap-16">
             <div className="space-y-5">
               <p className="text-[0.72rem] uppercase tracking-[0.45em] text-muted">
@@ -186,24 +243,22 @@ export function Homepage() {
             </div>
             <div className="grid gap-8 sm:grid-cols-2">
               <div className="space-y-2">
-                <p className="text-xs uppercase tracking-[0.35em] text-muted">Archive age</p>
-                <p className="text-3xl font-light">18</p>
+                <p className="text-xs uppercase tracking-[0.35em] text-muted">Subject</p>
+                <p className="text-3xl font-light">Ansh</p>
               </div>
               <div className="space-y-2">
-                <p className="text-xs uppercase tracking-[0.35em] text-muted">Recorded in</p>
-                <p className="text-3xl font-light">India</p>
+                <p className="text-xs uppercase tracking-[0.35em] text-muted">Status</p>
+                <p className="text-3xl font-light">Active</p>
               </div>
               <div className="space-y-2">
-                <p className="text-xs uppercase tracking-[0.35em] text-muted">Current phase</p>
-                <p className="text-xl font-light text-muted sm:text-2xl">Class 11</p>
+                <p className="text-xs uppercase tracking-[0.35em] text-muted">Location</p>
+                <p className="text-xl font-light text-muted sm:text-2xl">India</p>
               </div>
               <div className="space-y-2 sm:col-span-2">
-                <p className="text-xs uppercase tracking-[0.35em] text-muted">Current state</p>
-                <p className="text-xl font-light text-muted sm:text-2xl">Building</p>
+                <p className="text-xs uppercase tracking-[0.35em] text-muted">Mission</p>
+                <p className="text-xl font-light text-muted sm:text-2xl">JEE 2027</p>
                 <p className="max-w-lg text-2xl font-light leading-tight text-text sm:text-3xl">
-                  Studying.
-                  <br />
-                  Creating.
+                  Classified record in motion.
                 </p>
               </div>
             </div>
@@ -233,8 +288,32 @@ export function Homepage() {
           </div>
         </Section>
 
-        <Section className="border-t border-white/5 pb-10">
-          <div className="flex flex-col items-start gap-6 rounded-[2rem] border border-white/8 bg-surface/70 p-8 shadow-glow backdrop-blur-sm sm:p-12 lg:flex-row lg:items-end lg:justify-between">
+        <Section className="relative overflow-hidden border-t border-white/5 pb-10">
+          <div aria-hidden className="pointer-events-none absolute inset-0">
+            {archiveFragments.map((src, index) => (
+              <motion.img
+                key={`${src}-${index}`}
+                src={src}
+                alt=""
+                aria-hidden="true"
+                initial={reduceMotion ? false : { opacity: 0, y: 18 }}
+                whileInView={reduceMotion ? undefined : { opacity: 0.06, y: 0 }}
+                viewport={{ once: true, amount: 0.35 }}
+                transition={{ duration: 1.2, delay: index * 0.15, ease: [0.22, 1, 0.36, 1] }}
+                className={`absolute rounded-2xl object-cover blur-[1px] ${
+                  index === 0
+                    ? "left-[7%] top-[18%] h-28 w-20 sm:h-40 sm:w-28"
+                    : index === 1
+                      ? "right-[10%] top-[36%] h-24 w-24 sm:h-32 sm:w-32"
+                      : index === 2
+                        ? "left-[14%] bottom-[26%] h-20 w-28 sm:h-28 sm:w-40"
+                        : "right-[18%] bottom-[15%] h-28 w-20 sm:h-36 sm:w-28"
+                }`}
+                style={{ transform: `rotate(${index % 2 === 0 ? -4 : 4}deg)` }}
+              />
+            ))}
+          </div>
+          <div className="relative flex flex-col items-start gap-6 rounded-[2rem] border border-white/8 bg-surface/70 p-8 shadow-glow backdrop-blur-sm sm:p-12 lg:flex-row lg:items-end lg:justify-between">
             <div className="space-y-4">
               <p className="text-[0.72rem] uppercase tracking-[0.45em] text-muted">Enter Archives</p>
               <h2 className="text-balance text-4xl font-light tracking-[-0.04em] sm:text-6xl">
