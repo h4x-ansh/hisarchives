@@ -250,7 +250,7 @@ export function Homepage() {
           onMouseLeave={() => setHeroShift({ x: 0, y: 0 })}
           className="relative min-h-[calc(100vh-6rem)]"
         >
-          <div className="relative grid min-h-[calc(100vh-6rem)] gap-8 py-10 lg:grid-cols-[1.08fr_0.92fr] lg:items-center lg:py-0">
+          <div className="relative grid min-h-[calc(100vh-6rem)] gap-8 py-10 lg:grid-cols-[1.1fr_0.9fr] lg:items-center lg:py-0">
             <div
               className="relative z-10 flex flex-col justify-center text-left"
               style={{
@@ -302,58 +302,62 @@ export function Homepage() {
               </div>
             </div>
 
-            <div className="relative flex min-h-[28rem] items-end justify-center overflow-visible lg:min-h-[42rem] lg:justify-end">
+            <div className="relative flex min-h-[28rem] items-end justify-center overflow-visible lg:min-h-[46rem] lg:justify-end">
               <motion.div
                 aria-hidden
-                animate={reduceMotion ? undefined : { opacity: [0.42, 0.58, 0.42] }}
+                animate={reduceMotion ? undefined : { opacity: [0.12, 0.18, 0.12] }}
                 transition={reduceMotion ? undefined : { duration: 12, repeat: Infinity, ease: "easeInOut" }}
-                className="pointer-events-none absolute inset-x-[-8%] bottom-[-6%] top-[6%] rounded-full bg-[radial-gradient(circle_at_center,rgba(139,92,246,0.2),rgba(88,28,135,0.12)_28%,transparent_66%)]"
+                className="pointer-events-none absolute inset-0"
                 style={{
-                  transform: `translate3d(${heroShift.x * 0.18}px, ${heroShift.y * 0.16 + 18}px, 0)`,
-                  opacity: 0.6 - heroProgress * 0.16,
+                  background:
+                    "radial-gradient(circle at 52% 56%, rgba(139,92,246,0.18) 0%, rgba(88,28,135,0.15) 24%, rgba(28,20,48,0.08) 44%, transparent 72%)",
+                  transform: `translate3d(${heroShift.x * 0.12}px, ${heroShift.y * 0.12 + 14}px, 0)`,
+                  opacity: 0.9 - heroProgress * 0.18,
                 }}
               />
               <motion.div
                 aria-hidden
-                animate={reduceMotion ? undefined : { opacity: [0.08, 0.14, 0.08] }}
-                transition={reduceMotion ? undefined : { duration: 14, repeat: Infinity, ease: "easeInOut" }}
-                className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.06),transparent_42%)]"
+                animate={reduceMotion ? undefined : { opacity: [0.2, 0.28, 0.2] }}
+                transition={reduceMotion ? undefined : { duration: 11, repeat: Infinity, ease: "easeInOut" }}
+                className="pointer-events-none absolute inset-0"
                 style={{
-                  transform: `translate3d(${heroShift.x * 0.12}px, ${heroShift.y * 0.12}px, 0)`,
+                  background:
+                    "radial-gradient(ellipse at 56% 44%, rgba(198,168,255,0.26) 0%, rgba(139,92,246,0.2) 16%, rgba(88,28,135,0.08) 34%, transparent 58%)",
+                  transform: `translate3d(${heroShift.x * 0.1}px, ${heroShift.y * 0.1}px, 0)`,
                 }}
               />
               <motion.div
                 aria-hidden
-                animate={reduceMotion ? undefined : { opacity: [0.02, 0.05, 0.02] }}
+                animate={reduceMotion ? undefined : { opacity: [0.02, 0.04, 0.02] }}
                 transition={reduceMotion ? undefined : { duration: 18, repeat: Infinity, ease: "easeInOut" }}
-                className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle,rgba(255,255,255,0.18)_0.8px,transparent_1px)] bg-[length:24px_24px]"
+                className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle,rgba(255,255,255,0.2)_0.7px,transparent_1px)] bg-[length:22px_22px]"
                 style={{
-                  transform: `translate3d(${heroShift.x * 0.08}px, ${heroShift.y * 0.08}px, 0)`,
+                  transform: `translate3d(${heroShift.x * 0.06}px, ${heroShift.y * 0.06}px, 0)`,
                 }}
               />
               <motion.div
                 initial={reduceMotion ? false : { opacity: 0, y: 16 }}
                 animate={reduceMotion ? undefined : { opacity: 1, y: 0 }}
                 transition={{ duration: 0.42, ease: [0.22, 1, 0.36, 1] }}
-                className="relative z-10 w-[min(92vw,52rem)] translate-y-6 sm:w-[min(82vw,56rem)] lg:absolute lg:bottom-[-4rem] lg:right-[-2rem] lg:w-[min(52vw,58rem)]"
+                className="relative z-10 w-[min(92vw,54rem)] translate-y-6 sm:w-[min(82vw,60rem)] lg:absolute lg:bottom-[-5rem] lg:right-[-5rem] lg:w-[min(56vw,66rem)]"
                 style={{
-                  opacity: Math.max(0.28, 1 - heroProgress * 0.72),
-                  transform: `translate3d(${heroShift.x * 0.28 + 18}px, ${heroShift.y * 0.28 + 8}px, 0)`,
+                  opacity: Math.max(0.3, 1 - heroProgress * 0.7),
+                  transform: `translate3d(${heroShift.x * 0.24 + 28}px, ${heroShift.y * 0.24 + 8}px, 0)`,
                 }}
               >
                 <motion.div
-                  animate={reduceMotion ? undefined : { y: [0, -4, 0], x: [0, 2, 0] }}
-                  transition={reduceMotion ? undefined : { duration: 16, repeat: Infinity, ease: "easeInOut" }}
+                  animate={reduceMotion ? undefined : { y: [0, -3, 0], x: [0, 1.5, 0] }}
+                  transition={reduceMotion ? undefined : { duration: 18, repeat: Infinity, ease: "easeInOut" }}
                   className="relative"
                 >
                   <Image
-                    src="/potrait.png"
+                    src="/potrait.jpeg"
                     alt="Portrait of Ansh"
                     width={1200}
                     height={1400}
                     priority
                     sizes="(min-width: 1024px) 36rem, 88vw"
-                    className="h-auto w-full select-none object-contain drop-shadow-[0_24px_60px_rgba(0,0,0,0.42)]"
+                    className="h-auto w-full select-none object-contain drop-shadow-[0_28px_80px_rgba(0,0,0,0.42)] [mask-image:linear-gradient(to_bottom,rgba(0,0,0,1)_72%,rgba(0,0,0,0.92)_84%,transparent_100%)]"
                   />
                 </motion.div>
               </motion.div>
