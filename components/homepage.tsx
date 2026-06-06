@@ -302,28 +302,28 @@ export function Homepage() {
               </div>
             </div>
 
-            <div className="relative flex min-h-[28rem] items-end justify-center overflow-visible lg:min-h-[46rem] lg:justify-end">
+            <div className="relative flex min-h-[28rem] items-end justify-center overflow-visible lg:min-h-[48rem] lg:justify-end">
               <motion.div
                 aria-hidden
                 animate={reduceMotion ? undefined : { opacity: [0.12, 0.18, 0.12] }}
                 transition={reduceMotion ? undefined : { duration: 12, repeat: Infinity, ease: "easeInOut" }}
-                className="pointer-events-none absolute inset-0"
+                className="pointer-events-none absolute right-[-12%] top-[-10%] h-[min(82vw,72rem)] w-[min(82vw,72rem)]"
                 style={{
                   background:
-                    "radial-gradient(circle at 52% 56%, rgba(139,92,246,0.18) 0%, rgba(88,28,135,0.15) 24%, rgba(28,20,48,0.08) 44%, transparent 72%)",
-                  transform: `translate3d(${heroShift.x * 0.12}px, ${heroShift.y * 0.12 + 14}px, 0)`,
-                  opacity: 0.9 - heroProgress * 0.18,
+                    "radial-gradient(circle at 50% 50%, rgba(139,92,246,0.18) 0%, rgba(88,28,135,0.14) 18%, rgba(28,20,48,0.08) 40%, transparent 72%)",
+                  transform: `translate3d(${heroShift.x * 0.1}px, ${heroShift.y * 0.1 + 10}px, 0)`,
+                  opacity: 0.84 - heroProgress * 0.16,
                 }}
               />
               <motion.div
                 aria-hidden
                 animate={reduceMotion ? undefined : { opacity: [0.2, 0.28, 0.2] }}
                 transition={reduceMotion ? undefined : { duration: 11, repeat: Infinity, ease: "easeInOut" }}
-                className="pointer-events-none absolute inset-0"
+                className="pointer-events-none absolute right-[-8%] top-[0%] h-[min(72vw,60rem)] w-[min(72vw,60rem)]"
                 style={{
                   background:
-                    "radial-gradient(ellipse at 56% 44%, rgba(198,168,255,0.26) 0%, rgba(139,92,246,0.2) 16%, rgba(88,28,135,0.08) 34%, transparent 58%)",
-                  transform: `translate3d(${heroShift.x * 0.1}px, ${heroShift.y * 0.1}px, 0)`,
+                    "radial-gradient(ellipse at 58% 44%, rgba(198,168,255,0.28) 0%, rgba(139,92,246,0.22) 16%, rgba(88,28,135,0.09) 34%, transparent 58%)",
+                  transform: `translate3d(${heroShift.x * 0.08}px, ${heroShift.y * 0.08}px, 0)`,
                 }}
               />
               <motion.div
@@ -339,10 +339,10 @@ export function Homepage() {
                 initial={reduceMotion ? false : { opacity: 0, y: 16 }}
                 animate={reduceMotion ? undefined : { opacity: 1, y: 0 }}
                 transition={{ duration: 0.42, ease: [0.22, 1, 0.36, 1] }}
-                className="relative z-10 w-[min(92vw,54rem)] translate-y-6 sm:w-[min(82vw,60rem)] lg:absolute lg:bottom-[-7rem] lg:right-[-7rem] lg:w-[min(58vw,70rem)]"
+                className="relative z-10 w-[min(92vw,54rem)] translate-y-6 sm:w-[min(82vw,60rem)] lg:absolute lg:bottom-[-10rem] lg:right-[-14rem] lg:w-[min(62vw,76rem)]"
                 style={{
                   opacity: Math.max(0.3, 1 - heroProgress * 0.7),
-                  transform: `translate3d(${heroShift.x * 0.24 + 28}px, ${heroShift.y * 0.24 + 8}px, 0)`,
+                  transform: `translate3d(${heroShift.x * 0.16 + 42}px, ${heroShift.y * 0.16 + 34}px, 0)`,
                 }}
               >
                 <motion.div
@@ -351,7 +351,7 @@ export function Homepage() {
                   className="relative"
                 >
                   <Image
-                    src="/potrait-cutout.png"
+                    src="/potrait-fotor-bg-remover-20260606231944.png"
                     alt="Portrait of Ansh"
                     width={1200}
                     height={1400}
