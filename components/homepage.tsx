@@ -339,7 +339,7 @@ export function Homepage() {
                 initial={reduceMotion ? false : { opacity: 0, y: 16 }}
                 animate={reduceMotion ? undefined : { opacity: 1, y: 0 }}
                 transition={{ duration: 0.42, ease: [0.22, 1, 0.36, 1] }}
-                className="relative z-10 w-[min(92vw,54rem)] translate-y-6 sm:w-[min(82vw,60rem)] lg:absolute lg:bottom-[-5rem] lg:right-[-5rem] lg:w-[min(56vw,66rem)]"
+                className="relative z-10 w-[min(92vw,54rem)] translate-y-6 sm:w-[min(82vw,60rem)] lg:absolute lg:bottom-[-7rem] lg:right-[-7rem] lg:w-[min(58vw,70rem)]"
                 style={{
                   opacity: Math.max(0.3, 1 - heroProgress * 0.7),
                   transform: `translate3d(${heroShift.x * 0.24 + 28}px, ${heroShift.y * 0.24 + 8}px, 0)`,
@@ -351,7 +351,7 @@ export function Homepage() {
                   className="relative"
                 >
                   <Image
-                    src="/potrait.jpeg"
+                    src="/potrait-cutout.png"
                     alt="Portrait of Ansh"
                     width={1200}
                     height={1400}
