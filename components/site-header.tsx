@@ -1,6 +1,9 @@
 "use client";
 
+import { useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
 import Link from "next/link";
+import { AnimatePresence, motion } from "framer-motion";
 import {
   Activity,
   BookOpen,
@@ -11,7 +14,9 @@ import {
   House,
   Images,
   Mail,
+  Menu,
   User,
+  X,
 } from "lucide-react";
 
 const archiveNavItems = [
@@ -47,9 +52,97 @@ export function SiteHeader({
     | "/dashboard";
   timestamp?: string;
 }) {
+  const pathname = usePathname();
+  const [mobileOpen, setMobileOpen] = useState(false);
+
+  useEffect(() => {
+    setMobileOpen(false);
+  }, [pathname]);
+
   return (
     <>
-      <aside className="group fixed left-3 top-3 bottom-3 z-30 flex w-[56px] flex-col rounded-[1.4rem] bg-black/18 shadow-[0_16px_40px_rgba(0,0,0,0.18)] backdrop-blur-3xl transition-[width] duration-300 lg:left-5 lg:top-5 lg:bottom-5 lg:w-[72px] lg:hover:w-[18rem] lg:focus-within:w-[18rem]">
+      <button
+        type="button"
+        aria-label="Open archive navigation"
+        aria-expanded={mobileOpen}
+        onClick={() => setMobileOpen(true)}
+        className="fixed left-4 top-4 z-50 inline-flex h-11 w-11 items-center justify-center rounded-[1rem] bg-black/35 text-text shadow-[0_16px_40px_rgba(0,0,0,0.24)] backdrop-blur-2xl transition-transform hover:scale-[1.03] lg:hidden"
+      >
+        <Menu className="h-4.5 w-4.5" />
+      </button>
+
+      <AnimatePresence>
+        {mobileOpen ? (
+          <>
+            <motion.button
+              type="button"
+              aria-label="Close archive navigation"
+              className="fixed inset-0 z-40 bg-black/50 backdrop-blur-[2px] lg:hidden"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              onClick={() => setMobileOpen(false)}
+            />
+            <motion.aside
+              initial={{ x: "-100%" }}
+              animate={{ x: 0 }}
+              exit={{ x: "-100%" }}
+              transition={{ type: "spring", stiffness: 300, damping: 34 }}
+              className="fixed inset-y-0 left-0 z-50 w-[min(86vw,20rem)] bg-black/22 shadow-[0_24px_80px_rgba(0,0,0,0.3)] backdrop-blur-3xl lg:hidden"
+            >
+              <div className="flex items-center justify-between px-5 py-4">
+                <div>
+                  <p className="text-[0.68rem] uppercase tracking-[0.45em] text-muted">HisArchives</p>
+                  <p className="mt-1 text-sm uppercase tracking-[0.3em] text-text">Archive Index</p>
+                </div>
+                <button
+                  type="button"
+                  aria-label="Close archive navigation"
+                  onClick={() => setMobileOpen(false)}
+                  className="inline-flex h-10 w-10 items-center justify-center rounded-[0.9rem] bg-white/[0.05] text-text"
+                >
+                  <X className="h-4.5 w-4.5" />
+                </button>
+              </div>
+
+              <nav className="px-3 pb-4">
+                <div className="space-y-1">
+                  {archiveNavItems.map((item) => {
+                    const isActive = item.href === activePath;
+                    const Icon = item.icon;
+
+                    return (
+                      <Link
+                        key={item.href}
+                        href={item.href}
+                        aria-current={isActive ? "page" : undefined}
+                        onClick={() => setMobileOpen(false)}
+                        className={`grid grid-cols-[2rem_1fr] items-start gap-3 rounded-[1rem] px-3 py-3 transition-colors ${
+                          isActive ? "bg-white/[0.08] text-text" : "text-text hover:bg-white/[0.04]"
+                        }`}
+                      >
+                        <span className="mt-0.5 flex h-8 w-8 items-center justify-center rounded-lg bg-black/25">
+                          <Icon className="h-4 w-4" />
+                        </span>
+                        <span>
+                          <span className="block text-sm font-light tracking-wide">{item.label}</span>
+                          <span className="mt-1 block text-[0.62rem] leading-4 text-muted">{item.description}</span>
+                        </span>
+                      </Link>
+                    );
+                  })}
+                </div>
+                <div className="mt-3 rounded-[1rem] bg-white/[0.03] px-3 py-2 text-[0.68rem] uppercase tracking-[0.3em] text-muted shadow-[0_0_0_1px_rgba(255,255,255,0.03)]">
+                  {timestamp ?? "Archive State"}
+                </div>
+              </nav>
+            </motion.aside>
+          </>
+        ) : null}
+      </AnimatePresence>
+
+      <aside className="group fixed left-5 top-5 bottom-5 z-30 hidden w-[72px] flex-col rounded-[1.5rem] bg-black/18 shadow-[0_16px_40px_rgba(0,0,0,0.18)] backdrop-blur-3xl transition-[width] duration-300 lg:flex lg:hover:w-[18rem] lg:focus-within:w-[18rem]">
         <div className="flex h-18 items-center px-2.5">
           <Link
             href="/"
