@@ -79,11 +79,11 @@ function ObjectiveCard({
   return (
     <motion.article
       whileHover={{ y: -4 }}
-      transition={{ type: "spring", stiffness: 220, damping: 24 }}
+      transition={{ type: "spring", stiffness: 260, damping: 26 }}
       className="group relative overflow-hidden rounded-3xl border border-white/8 bg-surface/80 p-6 shadow-[0_0_0_1px_rgba(255,255,255,0.02)] backdrop-blur-sm transition-shadow duration-300 hover:shadow-[0_0_0_1px_rgba(255,255,255,0.04),0_0_24px_rgba(139,92,246,0.08)] sm:p-7"
     >
-      <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(255,255,255,0.03),transparent_45%,rgba(139,92,246,0.08))] opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.06),transparent_35%)] opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
+      <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(255,255,255,0.03),transparent_45%,rgba(139,92,246,0.08))] opacity-0 transition-opacity duration-200 group-hover:opacity-100" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.06),transparent_35%)] opacity-0 transition-opacity duration-200 group-hover:opacity-100" />
       <p className="absolute right-5 top-5 text-[0.62rem] uppercase tracking-[0.4em] text-muted">REC-{String(index).padStart(2, "0")}</p>
       <div className="relative space-y-4">
         <p className="text-sm uppercase tracking-[0.35em] text-muted">
@@ -93,6 +93,29 @@ function ObjectiveCard({
         <p className="max-w-xs text-sm leading-7 text-muted">{description}</p>
       </div>
     </motion.article>
+  );
+}
+
+function ArchiveEntryMarker({
+  number,
+  line,
+}: {
+  number: string;
+  line: string;
+}) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, amount: 0.7 }}
+      transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+      className="py-8 sm:py-10"
+    >
+      <div className="max-w-xs space-y-2">
+        <p className="text-[0.62rem] uppercase tracking-[0.55em] text-muted/65">ENTRY {number}</p>
+        <p className="text-sm font-light tracking-wide text-text/80">{line}</p>
+      </div>
+    </motion.div>
   );
 }
 
@@ -109,9 +132,9 @@ export function Homepage() {
     }
 
     const lenis = new Lenis({
-      duration: 1.15,
+      duration: 0.85,
       smoothWheel: true,
-      lerp: 0.085,
+      lerp: 0.12,
     });
 
     let frame = 0;
@@ -136,7 +159,7 @@ export function Homepage() {
 
     const interval = window.setInterval(() => {
       setStatusIndex((current) => (current + 1) % livingRecords.length);
-    }, 3200);
+    }, 2800);
 
     return () => window.clearInterval(interval);
   }, [reduceMotion]);
@@ -148,7 +171,7 @@ export function Homepage() {
 
     const interval = window.setInterval(() => {
       setStoryIndex((current) => (current + 1) % archiveQuotes.length);
-    }, 5400);
+    }, 4200);
 
     return () => window.clearInterval(interval);
   }, [reduceMotion]);
@@ -223,7 +246,7 @@ export function Homepage() {
             </motion.p>
             <motion.p
               aria-hidden
-              className="absolute bottom-6 right-0 text-[0.62rem] uppercase tracking-[0.45em] text-muted/70"
+              className="absolute bottom-1 right-0 text-[0.62rem] uppercase tracking-[0.45em] text-muted/70"
               style={{ transform: `translate(${heroShift.x * 0.18}px, ${heroShift.y * 0.18}px)` }}
             >
               NODE: INDIA
@@ -234,7 +257,7 @@ export function Homepage() {
             <motion.div
               initial={reduceMotion ? false : { opacity: 0, y: 24 }}
               animate={reduceMotion ? undefined : { opacity: 1, y: 0 }}
-              transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
+              transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
               className="space-y-7"
             >
               <p className="text-[0.72rem] uppercase tracking-[0.5em] text-muted">
@@ -257,12 +280,12 @@ export function Homepage() {
             <div className="mt-10 flex min-h-[9rem] w-full max-w-md flex-col items-center justify-center gap-4 text-center sm:mt-12">
               <p className="text-[0.68rem] uppercase tracking-[0.55em] text-muted">Live Record</p>
               <AnimatePresence mode="wait">
-                <motion.div
+              <motion.div
                   key={`${livingRecords[statusIndex].date}-${livingRecords[statusIndex].text}`}
                   initial={reduceMotion ? false : { opacity: 0, y: 10 }}
                   animate={reduceMotion ? undefined : { opacity: 1, y: 0 }}
                   exit={reduceMotion ? undefined : { opacity: 0, y: -10 }}
-                  transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+                  transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
                   className="space-y-3"
                 >
                   <p className="text-sm uppercase tracking-[0.35em] text-muted">{livingRecords[statusIndex].date}</p>
@@ -279,7 +302,7 @@ export function Homepage() {
               whileInView={reduceMotion ? undefined : { opacity: 1, y: 0 }}
               viewport={{ once: true, amount: 0.6 }}
               transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
-              className="absolute bottom-16 right-0 hidden sm:block"
+              className="absolute bottom-20 right-0 hidden sm:block"
             >
               <div className="group relative">
                 <button
@@ -297,6 +320,8 @@ export function Homepage() {
           </div>
         </section>
 
+        <ArchiveEntryMarker number="#003" line="Discipline compounds." />
+
         <Section className="border-t border-white/5">
           <div className="max-w-5xl space-y-4 sm:space-y-6">
             <p className="text-[0.72rem] uppercase tracking-[0.45em] text-muted">Archive quote</p>
@@ -306,7 +331,7 @@ export function Homepage() {
                 initial={reduceMotion ? false : { opacity: 0, y: 20 }}
                 animate={reduceMotion ? undefined : { opacity: 1, y: 0 }}
                 exit={reduceMotion ? undefined : { opacity: 0, y: -20 }}
-                transition={{ duration: 0.65, ease: [0.22, 1, 0.36, 1] }}
+                transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
                 className="text-balance text-4xl font-light leading-[1.05] tracking-[-0.04em] sm:text-6xl lg:text-7xl"
               >
                 {archiveQuotes[storyIndex]}
@@ -314,6 +339,8 @@ export function Homepage() {
             </AnimatePresence>
           </div>
         </Section>
+
+        <ArchiveEntryMarker number="#007" line="Systems beat motivation." />
 
         <Section id="beginning" className="relative border-t border-white/5">
           <div aria-hidden className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
@@ -335,6 +362,8 @@ export function Homepage() {
             </p>
           </div>
         </Section>
+
+        <ArchiveEntryMarker number="#011" line="The archive remains active." />
 
         <Section id="identity" className="relative border-t border-white/5">
           <div aria-hidden className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
@@ -368,6 +397,8 @@ export function Homepage() {
             </div>
           </div>
         </Section>
+
+        <ArchiveEntryMarker number="#014" line="Progress is recorded." />
 
         <Section id="objectives" className="border-t border-white/5">
           <div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
