@@ -223,7 +223,7 @@ export function Homepage() {
             </motion.p>
             <motion.p
               aria-hidden
-              className="absolute bottom-12 right-0 text-[0.62rem] uppercase tracking-[0.45em] text-muted/70"
+              className="absolute bottom-6 right-0 text-[0.62rem] uppercase tracking-[0.45em] text-muted/70"
               style={{ transform: `translate(${heroShift.x * 0.18}px, ${heroShift.y * 0.18}px)` }}
             >
               NODE: INDIA
@@ -279,7 +279,7 @@ export function Homepage() {
               whileInView={reduceMotion ? undefined : { opacity: 1, y: 0 }}
               viewport={{ once: true, amount: 0.6 }}
               transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
-              className="absolute bottom-4 right-0 hidden sm:block"
+              className="absolute bottom-16 right-0 hidden sm:block"
             >
               <div className="group relative">
                 <button
