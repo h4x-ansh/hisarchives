@@ -1,13 +1,11 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import Lenis from "lenis";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { SiteHeader } from "@/components/site-header";
-
-const storyLines = ["Every life leaves traces.", "Most disappear.", "Some are archived."];
 
 const objectives = [
   {
@@ -28,27 +26,42 @@ const objectives = [
   },
 ];
 
-const statusLines = [
-  "Current Phase: Building",
-  "Mission: JEE 2027",
-  "Location: India",
-  "Record State: Active",
-  "Last Updated: Live",
+const livingRecords = [
+  { date: "06 JUN 2026", text: "Identity system updated" },
+  { date: "05 JUN 2026", text: "Navigation rebuilt" },
+  { date: "04 JUN 2026", text: "hisarchives.xyz launched" },
+] as const;
+
+const archiveQuotes = [
+  "Every life leaves traces.",
+  "Nothing is forgotten.",
+  "The archive remains active.",
+  "Records continue to accumulate.",
+] as const;
+
+const sectionTrail = [
+  { id: "hero", label: "Hero" },
+  { id: "beginning", label: "Beginning" },
+  { id: "identity", label: "Identity" },
+  { id: "objectives", label: "Objectives" },
+  { id: "archives", label: "Archives" },
 ] as const;
 
 function Section({
   eyebrow,
   title,
+  id,
   children,
   className = "",
 }: {
   eyebrow?: string;
   title?: string;
+  id?: string;
   children: ReactNode;
   className?: string;
 }) {
   return (
-    <section className={`py-20 sm:py-28 ${className}`}>
+    <section id={id} className={`py-20 sm:py-28 ${className}`}>
       <div className="space-y-6">
         {eyebrow ? (
           <p className="text-[0.7rem] uppercase tracking-[0.4em] text-muted">
@@ -94,6 +107,10 @@ function ObjectiveCard({
 export function Homepage() {
   const reduceMotion = useReducedMotion();
   const [statusIndex, setStatusIndex] = useState(0);
+  const [storyIndex, setStoryIndex] = useState(0);
+  const [activeSection, setActiveSection] = useState("hero");
+  const [heroShift, setHeroShift] = useState({ x: 0, y: 0 });
+  const heroRef = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
     if (reduceMotion) {
@@ -127,11 +144,50 @@ export function Homepage() {
     }
 
     const interval = window.setInterval(() => {
-      setStatusIndex((current) => (current + 1) % statusLines.length);
+      setStatusIndex((current) => (current + 1) % livingRecords.length);
     }, 3200);
 
     return () => window.clearInterval(interval);
   }, [reduceMotion]);
+
+  useEffect(() => {
+    if (reduceMotion) {
+      return;
+    }
+
+    const interval = window.setInterval(() => {
+      setStoryIndex((current) => (current + 1) % archiveQuotes.length);
+    }, 5400);
+
+    return () => window.clearInterval(interval);
+  }, [reduceMotion]);
+
+  useEffect(() => {
+    const elements = sectionTrail
+      .map((section) => document.getElementById(section.id))
+      .filter((element): element is HTMLElement => Boolean(element));
+
+    if (elements.length === 0) {
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const visible = entries
+          .filter((entry) => entry.isIntersecting)
+          .sort((left, right) => right.intersectionRatio - left.intersectionRatio)[0];
+
+        if (visible?.target instanceof HTMLElement) {
+          setActiveSection(visible.target.id);
+        }
+      },
+      { threshold: [0.2, 0.35, 0.5, 0.65] },
+    );
+
+    elements.forEach((element) => observer.observe(element));
+
+    return () => observer.disconnect();
+  }, []);
 
   return (
     <main className="relative isolate overflow-hidden bg-bg text-text">
@@ -142,6 +198,7 @@ export function Homepage() {
         className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(139,92,246,0.12),transparent_34%),radial-gradient(circle_at_bottom_right,rgba(255,255,255,0.03),transparent_28%)]"
       />
       <div aria-hidden className="pointer-events-none absolute inset-0 bg-archive-grid bg-[length:100%_100%,112px_112px] opacity-[0.06]" />
+      <div aria-hidden className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[length:28px_28px] opacity-[0.02]" />
       <motion.div
         aria-hidden
         animate={reduceMotion ? undefined : { opacity: [0.18, 0.24, 0.18] }}
@@ -149,78 +206,192 @@ export function Homepage() {
         className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.015),rgba(255,255,255,0))]"
       />
 
+      <aside className="fixed left-4 top-1/2 z-20 hidden -translate-y-1/2 lg:block">
+        <div className="flex flex-col gap-3">
+          {sectionTrail.map((section) => {
+            const isActive = activeSection === section.id;
+
+            return (
+              <a
+                key={section.id}
+                href={`#${section.id}`}
+                className="group flex items-center gap-3"
+                aria-label={section.label}
+              >
+                <span
+                  className={`h-2.5 w-2.5 rounded-full transition-all ${
+                    isActive ? "bg-text shadow-[0_0_16px_rgba(255,255,255,0.28)]" : "bg-white/25"
+                  }`}
+                />
+                <span
+                  className={`text-[0.62rem] uppercase tracking-[0.35em] transition-all ${
+                    isActive ? "text-text opacity-100" : "text-muted opacity-50 group-hover:opacity-80"
+                  }`}
+                >
+                  {section.label}
+                </span>
+              </a>
+            );
+          })}
+        </div>
+      </aside>
+
       <div className="relative mx-auto flex w-full max-w-7xl flex-col px-5 pb-24 pt-5 sm:px-8 lg:px-12">
         <SiteHeader activePath="/" timestamp="last updated 05 jun 2026" />
 
-        <section className="flex min-h-[calc(100vh-6rem)] flex-col items-center justify-center text-center">
+        <section
+          ref={heroRef}
+          id="hero"
+          onMouseMove={(event) => {
+            if (reduceMotion || !heroRef.current) {
+              return;
+            }
+
+            const bounds = heroRef.current.getBoundingClientRect();
+            const x = ((event.clientX - bounds.left) / bounds.width - 0.5) * 12;
+            const y = ((event.clientY - bounds.top) / bounds.height - 0.5) * 12;
+            setHeroShift({ x, y });
+          }}
+          onMouseLeave={() => setHeroShift({ x: 0, y: 0 })}
+          className="relative flex min-h-[calc(100vh-6rem)] flex-col items-center justify-center text-center"
+        >
           <motion.div
             aria-hidden
             initial={reduceMotion ? false : { opacity: 0 }}
             animate={reduceMotion ? undefined : { opacity: 1 }}
             transition={{ duration: 1.4, ease: "easeOut" }}
             className="pointer-events-none absolute left-1/2 top-[22%] -z-10 -translate-x-1/2 select-none text-[clamp(8rem,22vw,18rem)] font-light tracking-[-0.12em] text-text/20 blur-2xl opacity-[0.02]"
+            style={{ transform: `translate(calc(-50% + ${heroShift.x * 0.45}px), ${heroShift.y * 0.45}px)` }}
           >
             ARCHIVE_001
           </motion.div>
-
           <motion.div
-            initial={reduceMotion ? false : { opacity: 0, y: 24 }}
-            animate={reduceMotion ? undefined : { opacity: 1, y: 0 }}
-            transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
-            className="space-y-7"
+            aria-hidden
+            initial={reduceMotion ? false : { opacity: 0 }}
+            animate={reduceMotion ? undefined : { opacity: 1 }}
+            transition={{ duration: 1.2, ease: "easeOut" }}
+            className="pointer-events-none absolute left-1/2 top-[52%] -z-10 -translate-x-1/2 select-none text-[clamp(6rem,18vw,14rem)] font-light tracking-[-0.1em] text-text/[0.02]"
+            style={{ transform: `translate(calc(-50% + ${heroShift.x * 0.3}px), ${heroShift.y * 0.3}px)` }}
           >
-            <p className="text-[0.72rem] uppercase tracking-[0.5em] text-muted">
-              a living archive
-            </p>
-            <h1 className="text-balance text-6xl font-light tracking-[0.15em] sm:text-8xl lg:text-[8.75rem]">
-              THE ARCHIVES
-            </h1>
-            <p className="mx-auto max-w-xs text-sm uppercase leading-8 tracking-[0.35em] text-muted sm:max-w-none sm:text-base">
-              projects.
-              <br />
-              thoughts.
-              <br />
-              progress.
-              <br />
-              memories.
-            </p>
+            THE ARCHIVES
           </motion.div>
+          <div className="pointer-events-none absolute inset-x-0 top-8 hidden h-full sm:block">
+            <motion.p
+              aria-hidden
+              className="absolute left-0 top-6 text-[0.62rem] uppercase tracking-[0.45em] text-muted/70"
+              style={{ transform: `translate(${heroShift.x * 0.2}px, ${heroShift.y * 0.2}px)` }}
+            >
+              REC-001
+            </motion.p>
+            <motion.p
+              aria-hidden
+              className="absolute right-2 top-16 text-[0.62rem] uppercase tracking-[0.45em] text-muted/70"
+              style={{ transform: `translate(${heroShift.x * 0.16}px, ${heroShift.y * 0.16}px)` }}
+            >
+              EST. 2026
+            </motion.p>
+            <motion.p
+              aria-hidden
+              className="absolute left-1/2 bottom-10 -translate-x-1/2 text-[0.62rem] uppercase tracking-[0.45em] text-muted/70"
+              style={{ transform: `translate(-50%, ${heroShift.y * 0.18}px)` }}
+            >
+              STATUS: ACTIVE
+            </motion.p>
+            <motion.p
+              aria-hidden
+              className="absolute bottom-12 right-0 text-[0.62rem] uppercase tracking-[0.45em] text-muted/70"
+              style={{ transform: `translate(${heroShift.x * 0.18}px, ${heroShift.y * 0.18}px)` }}
+            >
+              NODE: INDIA
+            </motion.p>
+          </div>
 
-          <div className="mt-10 flex min-h-[6rem] w-full max-w-md flex-col items-center justify-center gap-3 text-center sm:mt-12">
-            <p className="text-[0.68rem] uppercase tracking-[0.55em] text-muted">Archive Status</p>
-            <AnimatePresence mode="wait">
-              <motion.p
-                key={statusLines[statusIndex]}
-                initial={reduceMotion ? false : { opacity: 0, y: 10 }}
-                animate={reduceMotion ? undefined : { opacity: 1, y: 0 }}
-                exit={reduceMotion ? undefined : { opacity: 0, y: -10 }}
-                transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
-                className="text-sm uppercase tracking-[0.3em] text-text/90 sm:text-base"
-              >
-                {statusLines[statusIndex]}
-              </motion.p>
-            </AnimatePresence>
+          <div style={{ transform: `translate3d(${heroShift.x}px, ${heroShift.y}px, 0)` }} className="will-change-transform">
+            <motion.div
+              initial={reduceMotion ? false : { opacity: 0, y: 24 }}
+              animate={reduceMotion ? undefined : { opacity: 1, y: 0 }}
+              transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
+              className="space-y-7"
+            >
+              <p className="text-[0.72rem] uppercase tracking-[0.5em] text-muted">
+                a living archive
+              </p>
+              <h1 className="text-balance text-6xl font-light tracking-[0.15em] sm:text-8xl lg:text-[8.75rem]">
+                THE ARCHIVES
+              </h1>
+              <p className="mx-auto max-w-xs text-sm uppercase leading-8 tracking-[0.35em] text-muted sm:max-w-none sm:text-base">
+                projects.
+                <br />
+                thoughts.
+                <br />
+                progress.
+                <br />
+                memories.
+              </p>
+            </motion.div>
+
+            <div className="mt-10 flex min-h-[9rem] w-full max-w-md flex-col items-center justify-center gap-4 text-center sm:mt-12">
+              <p className="text-[0.68rem] uppercase tracking-[0.55em] text-muted">Live Record</p>
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={`${livingRecords[statusIndex].date}-${livingRecords[statusIndex].text}`}
+                  initial={reduceMotion ? false : { opacity: 0, y: 10 }}
+                  animate={reduceMotion ? undefined : { opacity: 1, y: 0 }}
+                  exit={reduceMotion ? undefined : { opacity: 0, y: -10 }}
+                  transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+                  className="space-y-3"
+                >
+                  <p className="text-sm uppercase tracking-[0.35em] text-muted">{livingRecords[statusIndex].date}</p>
+                  <p className="text-base font-light tracking-wide text-text sm:text-lg">
+                    {livingRecords[statusIndex].text}
+                  </p>
+                </motion.div>
+              </AnimatePresence>
+            </div>
+
+            <motion.div
+              initial={reduceMotion ? false : { opacity: 0, y: 10 }}
+              whileHover={reduceMotion ? undefined : { y: -2 }}
+              whileInView={reduceMotion ? undefined : { opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.6 }}
+              transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+              className="absolute bottom-4 right-0 hidden sm:block"
+            >
+              <div className="group relative">
+                <button
+                  type="button"
+                  className="text-[0.6rem] uppercase tracking-[0.45em] text-muted/60 transition-colors hover:text-text/90"
+                  title="Domain purchased. 04 Jun 2026."
+                >
+                  ARCHIVE FRAGMENT #04
+                </button>
+                <span className="pointer-events-none absolute left-1/2 top-full mt-2 w-max -translate-x-1/2 rounded-full bg-black/70 px-3 py-1 text-[0.62rem] uppercase tracking-[0.3em] text-text opacity-0 transition-opacity group-hover:opacity-100">
+                  Domain purchased. 04 Jun 2026.
+                </span>
+              </div>
+            </motion.div>
           </div>
         </section>
 
         <Section className="border-t border-white/5">
           <div className="max-w-5xl space-y-4 sm:space-y-6">
-            {storyLines.map((line, index) => (
+            <p className="text-[0.72rem] uppercase tracking-[0.45em] text-muted">Archive quote</p>
+            <AnimatePresence mode="wait">
               <motion.p
-                key={line}
-                initial={reduceMotion ? false : { opacity: 0, y: 34 }}
-                whileInView={reduceMotion ? undefined : { opacity: 1, y: 0 }}
-                viewport={{ once: true, amount: 0.6 }}
-                transition={{ duration: 0.8, delay: index * 0.12, ease: [0.22, 1, 0.36, 1] }}
+                key={archiveQuotes[storyIndex]}
+                initial={reduceMotion ? false : { opacity: 0, y: 20 }}
+                animate={reduceMotion ? undefined : { opacity: 1, y: 0 }}
+                exit={reduceMotion ? undefined : { opacity: 0, y: -20 }}
+                transition={{ duration: 0.65, ease: [0.22, 1, 0.36, 1] }}
                 className="text-balance text-4xl font-light leading-[1.05] tracking-[-0.04em] sm:text-6xl lg:text-7xl"
               >
-                {line}
+                {archiveQuotes[storyIndex]}
               </motion.p>
-            ))}
+            </AnimatePresence>
           </div>
         </Section>
 
-        <Section className="relative border-t border-white/5">
+        <Section id="beginning" className="relative border-t border-white/5">
           <div aria-hidden className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
           <div className="grid gap-10 lg:grid-cols-[1.25fr_0.75fr] lg:items-end">
             <div className="space-y-5">
@@ -241,7 +412,7 @@ export function Homepage() {
           </div>
         </Section>
 
-        <Section className="relative border-t border-white/5">
+        <Section id="identity" className="relative border-t border-white/5">
           <div aria-hidden className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
           <div className="grid gap-8 lg:grid-cols-[0.9fr_1.1fr] lg:gap-16">
             <div className="space-y-5">
@@ -274,7 +445,7 @@ export function Homepage() {
           </div>
         </Section>
 
-        <Section className="border-t border-white/5">
+        <Section id="objectives" className="border-t border-white/5">
           <div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
             <div className="space-y-4">
               <p className="text-[0.72rem] uppercase tracking-[0.45em] text-muted">Active record</p>
@@ -297,7 +468,7 @@ export function Homepage() {
           </div>
         </Section>
 
-        <Section className="border-t border-white/5 pb-10">
+        <Section id="archives" className="border-t border-white/5 pb-10">
           <div className="relative flex flex-col items-start gap-6 rounded-[2rem] border border-white/8 bg-surface/70 p-8 shadow-glow backdrop-blur-sm sm:p-12 lg:flex-row lg:items-end lg:justify-between">
             <div className="space-y-4">
               <p className="text-[0.72rem] uppercase tracking-[0.45em] text-muted">Enter Archives</p>
