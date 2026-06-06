@@ -39,14 +39,6 @@ const archiveQuotes = [
   "Records continue to accumulate.",
 ] as const;
 
-const sectionTrail = [
-  { id: "hero", label: "Hero" },
-  { id: "beginning", label: "Beginning" },
-  { id: "identity", label: "Identity" },
-  { id: "objectives", label: "Objectives" },
-  { id: "archives", label: "Archives" },
-] as const;
-
 function Section({
   eyebrow,
   title,
@@ -108,7 +100,6 @@ export function Homepage() {
   const reduceMotion = useReducedMotion();
   const [statusIndex, setStatusIndex] = useState(0);
   const [storyIndex, setStoryIndex] = useState(0);
-  const [activeSection, setActiveSection] = useState("hero");
   const [heroShift, setHeroShift] = useState({ x: 0, y: 0 });
   const heroRef = useRef<HTMLElement | null>(null);
 
@@ -162,33 +153,6 @@ export function Homepage() {
     return () => window.clearInterval(interval);
   }, [reduceMotion]);
 
-  useEffect(() => {
-    const elements = sectionTrail
-      .map((section) => document.getElementById(section.id))
-      .filter((element): element is HTMLElement => Boolean(element));
-
-    if (elements.length === 0) {
-      return;
-    }
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const visible = entries
-          .filter((entry) => entry.isIntersecting)
-          .sort((left, right) => right.intersectionRatio - left.intersectionRatio)[0];
-
-        if (visible?.target instanceof HTMLElement) {
-          setActiveSection(visible.target.id);
-        }
-      },
-      { threshold: [0.2, 0.35, 0.5, 0.65] },
-    );
-
-    elements.forEach((element) => observer.observe(element));
-
-    return () => observer.disconnect();
-  }, []);
-
   return (
     <main className="relative isolate overflow-hidden bg-bg text-text">
       <motion.div
@@ -205,36 +169,6 @@ export function Homepage() {
         transition={reduceMotion ? undefined : { duration: 12, repeat: Infinity, ease: "easeInOut" }}
         className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.015),rgba(255,255,255,0))]"
       />
-
-      <aside className="fixed left-4 top-1/2 z-20 hidden -translate-y-1/2 lg:block">
-        <div className="flex flex-col gap-3">
-          {sectionTrail.map((section) => {
-            const isActive = activeSection === section.id;
-
-            return (
-              <a
-                key={section.id}
-                href={`#${section.id}`}
-                className="group flex items-center gap-3"
-                aria-label={section.label}
-              >
-                <span
-                  className={`h-2.5 w-2.5 rounded-full transition-all ${
-                    isActive ? "bg-text shadow-[0_0_16px_rgba(255,255,255,0.28)]" : "bg-white/25"
-                  }`}
-                />
-                <span
-                  className={`text-[0.62rem] uppercase tracking-[0.35em] transition-all ${
-                    isActive ? "text-text opacity-100" : "text-muted opacity-50 group-hover:opacity-80"
-                  }`}
-                >
-                  {section.label}
-                </span>
-              </a>
-            );
-          })}
-        </div>
-      </aside>
 
       <div className="relative mx-auto flex w-full max-w-7xl flex-col px-5 pb-24 pt-5 sm:px-8 lg:px-12">
         <SiteHeader activePath="/" timestamp="last updated 05 jun 2026" />
@@ -264,16 +198,6 @@ export function Homepage() {
             style={{ transform: `translate(calc(-50% + ${heroShift.x * 0.45}px), ${heroShift.y * 0.45}px)` }}
           >
             ARCHIVE_001
-          </motion.div>
-          <motion.div
-            aria-hidden
-            initial={reduceMotion ? false : { opacity: 0 }}
-            animate={reduceMotion ? undefined : { opacity: 1 }}
-            transition={{ duration: 1.2, ease: "easeOut" }}
-            className="pointer-events-none absolute left-1/2 top-[52%] -z-10 -translate-x-1/2 select-none text-[clamp(6rem,18vw,14rem)] font-light tracking-[-0.1em] text-text/[0.02]"
-            style={{ transform: `translate(calc(-50% + ${heroShift.x * 0.3}px), ${heroShift.y * 0.3}px)` }}
-          >
-            THE ARCHIVES
           </motion.div>
           <div className="pointer-events-none absolute inset-x-0 top-8 hidden h-full sm:block">
             <motion.p
