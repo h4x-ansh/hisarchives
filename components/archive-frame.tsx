@@ -30,7 +30,7 @@ export function ArchiveFrame({
       <div aria-hidden className="pointer-events-none absolute inset-0 bg-archive-grid bg-[length:100%_100%,112px_112px] opacity-[0.08]" />
       <div aria-hidden className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(139,92,246,0.18),transparent_30%),radial-gradient(circle_at_bottom_right,rgba(255,255,255,0.05),transparent_25%)]" />
 
-      <div className="relative mx-auto flex w-full max-w-7xl flex-col px-5 pb-24 pt-5 sm:px-8 lg:px-12">
+      <div className="relative mx-auto flex w-full max-w-7xl flex-col px-5 pb-24 pt-5 pl-[4.5rem] sm:px-8 lg:pl-[6.75rem] lg:pr-12">
         <SiteHeader activePath={activePath} timestamp={timestamp} />
         {children}
       </div>
