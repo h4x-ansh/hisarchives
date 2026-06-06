@@ -280,19 +280,21 @@ export function Homepage() {
                 </p>
               </motion.div>
 
-              <div className="mt-10 flex min-h-[9rem] w-full max-w-md flex-col justify-center gap-4 text-left sm:mt-12">
-                <p className="text-[0.68rem] uppercase tracking-[0.55em] text-muted">Live Record</p>
+              <div className="mt-10 flex w-full max-w-2xl flex-col gap-3 text-left sm:mt-12">
+                <p className="text-[0.68rem] uppercase tracking-[0.55em] text-muted">Live record feed</p>
                 <AnimatePresence mode="wait">
                   <motion.div
                     key={`${livingRecords[statusIndex].date}-${livingRecords[statusIndex].text}`}
-                    initial={reduceMotion ? false : { opacity: 0, y: 8 }}
+                    initial={reduceMotion ? false : { opacity: 0, y: 6 }}
                     animate={reduceMotion ? undefined : { opacity: 1, y: 0 }}
-                    exit={reduceMotion ? undefined : { opacity: 0, y: -8 }}
-                    transition={{ duration: 0.32, ease: [0.22, 1, 0.36, 1] }}
-                    className="space-y-2"
+                    exit={reduceMotion ? undefined : { opacity: 0, y: -6 }}
+                    transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
+                    className="flex flex-wrap items-center gap-x-3 gap-y-1"
                   >
-                    <p className="text-sm uppercase tracking-[0.35em] text-muted">{livingRecords[statusIndex].date}</p>
-                    <p className="text-base font-light tracking-wide text-text sm:text-lg">
+                    <p className="text-sm uppercase tracking-[0.28em] text-muted">
+                      [{livingRecords[statusIndex].date}]
+                    </p>
+                    <p className="text-sm font-light tracking-wide text-text sm:text-base">
                       {livingRecords[statusIndex].text}
                     </p>
                   </motion.div>
@@ -300,39 +302,48 @@ export function Homepage() {
               </div>
             </div>
 
-            <div className="relative flex min-h-[28rem] items-end justify-center lg:min-h-[42rem] lg:justify-end">
+            <div className="relative flex min-h-[28rem] items-end justify-center overflow-visible lg:min-h-[42rem] lg:justify-end">
               <motion.div
                 aria-hidden
-                animate={reduceMotion ? undefined : { opacity: [0.48, 0.66, 0.48] }}
-                transition={reduceMotion ? undefined : { duration: 10, repeat: Infinity, ease: "easeInOut" }}
-                className="pointer-events-none absolute inset-x-[-10%] bottom-[4%] top-[10%] rounded-full bg-[radial-gradient(circle_at_center,rgba(139,92,246,0.24),transparent_60%)] blur-2xl"
+                animate={reduceMotion ? undefined : { opacity: [0.42, 0.58, 0.42] }}
+                transition={reduceMotion ? undefined : { duration: 12, repeat: Infinity, ease: "easeInOut" }}
+                className="pointer-events-none absolute inset-x-[-8%] bottom-[-6%] top-[6%] rounded-full bg-[radial-gradient(circle_at_center,rgba(139,92,246,0.2),rgba(88,28,135,0.12)_28%,transparent_66%)]"
                 style={{
-                  transform: `translate3d(${heroShift.x * 0.22}px, ${heroShift.y * 0.18 + 18}px, 0)`,
+                  transform: `translate3d(${heroShift.x * 0.18}px, ${heroShift.y * 0.16 + 18}px, 0)`,
                   opacity: 0.6 - heroProgress * 0.16,
                 }}
               />
               <motion.div
                 aria-hidden
-                animate={reduceMotion ? undefined : { opacity: [0.12, 0.2, 0.12] }}
-                transition={reduceMotion ? undefined : { duration: 13, repeat: Infinity, ease: "easeInOut" }}
-                className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.05),transparent_42%)]"
+                animate={reduceMotion ? undefined : { opacity: [0.08, 0.14, 0.08] }}
+                transition={reduceMotion ? undefined : { duration: 14, repeat: Infinity, ease: "easeInOut" }}
+                className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.06),transparent_42%)]"
                 style={{
-                  transform: `translate3d(${heroShift.x * 0.14}px, ${heroShift.y * 0.14}px, 0)`,
+                  transform: `translate3d(${heroShift.x * 0.12}px, ${heroShift.y * 0.12}px, 0)`,
+                }}
+              />
+              <motion.div
+                aria-hidden
+                animate={reduceMotion ? undefined : { opacity: [0.02, 0.05, 0.02] }}
+                transition={reduceMotion ? undefined : { duration: 18, repeat: Infinity, ease: "easeInOut" }}
+                className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle,rgba(255,255,255,0.18)_0.8px,transparent_1px)] bg-[length:24px_24px]"
+                style={{
+                  transform: `translate3d(${heroShift.x * 0.08}px, ${heroShift.y * 0.08}px, 0)`,
                 }}
               />
               <motion.div
                 initial={reduceMotion ? false : { opacity: 0, y: 16 }}
                 animate={reduceMotion ? undefined : { opacity: 1, y: 0 }}
                 transition={{ duration: 0.42, ease: [0.22, 1, 0.36, 1] }}
-                className="relative z-10 w-[min(88vw,34rem)] translate-y-6 sm:w-[min(78vw,36rem)] lg:translate-x-10 lg:translate-y-10"
+                className="relative z-10 w-[min(92vw,52rem)] translate-y-6 sm:w-[min(82vw,56rem)] lg:absolute lg:bottom-[-4rem] lg:right-[-2rem] lg:w-[min(52vw,58rem)]"
                 style={{
                   opacity: Math.max(0.28, 1 - heroProgress * 0.72),
-                  transform: `translate3d(${heroShift.x * 0.34 + 24}px, ${heroShift.y * 0.34 + 12}px, 0)`,
+                  transform: `translate3d(${heroShift.x * 0.28 + 18}px, ${heroShift.y * 0.28 + 8}px, 0)`,
                 }}
               >
                 <motion.div
-                  animate={reduceMotion ? undefined : { y: [0, -5, 0], x: [0, 2, 0] }}
-                  transition={reduceMotion ? undefined : { duration: 14, repeat: Infinity, ease: "easeInOut" }}
+                  animate={reduceMotion ? undefined : { y: [0, -4, 0], x: [0, 2, 0] }}
+                  transition={reduceMotion ? undefined : { duration: 16, repeat: Infinity, ease: "easeInOut" }}
                   className="relative"
                 >
                   <Image
@@ -342,7 +353,7 @@ export function Homepage() {
                     height={1400}
                     priority
                     sizes="(min-width: 1024px) 36rem, 88vw"
-                    className="h-auto w-full select-none object-contain drop-shadow-[0_24px_60px_rgba(0,0,0,0.52)]"
+                    className="h-auto w-full select-none object-contain drop-shadow-[0_24px_60px_rgba(0,0,0,0.42)]"
                   />
                 </motion.div>
               </motion.div>
