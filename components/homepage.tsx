@@ -3,6 +3,7 @@
 import type { ReactNode } from "react";
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import Lenis from "lenis";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { SiteHeader } from "@/components/site-header";
@@ -124,6 +125,7 @@ export function Homepage() {
   const [statusIndex, setStatusIndex] = useState(0);
   const [storyIndex, setStoryIndex] = useState(0);
   const [heroShift, setHeroShift] = useState({ x: 0, y: 0 });
+  const [heroProgress, setHeroProgress] = useState(0);
   const heroRef = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
@@ -162,6 +164,42 @@ export function Homepage() {
     }, 2800);
 
     return () => window.clearInterval(interval);
+  }, [reduceMotion]);
+
+  useEffect(() => {
+    if (reduceMotion) {
+      return;
+    }
+
+    let frame = 0;
+
+    const updateHeroProgress = () => {
+      if (!heroRef.current) {
+        return;
+      }
+
+      const bounds = heroRef.current.getBoundingClientRect();
+      const viewportHeight = window.innerHeight || 1;
+      const rawProgress = (viewportHeight - bounds.top) / (bounds.height + viewportHeight * 0.15);
+      const clamped = Math.max(0, Math.min(1, rawProgress));
+
+      setHeroProgress(clamped);
+    };
+
+    const onScroll = () => {
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(updateHeroProgress);
+    };
+
+    updateHeroProgress();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll, { passive: true });
+
+    return () => {
+      cancelAnimationFrame(frame);
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
+    };
   }, [reduceMotion]);
 
   useEffect(() => {
@@ -210,113 +248,105 @@ export function Homepage() {
             setHeroShift({ x, y });
           }}
           onMouseLeave={() => setHeroShift({ x: 0, y: 0 })}
-          className="relative flex min-h-[calc(100vh-6rem)] flex-col items-center justify-center text-center"
+          className="relative min-h-[calc(100vh-6rem)]"
         >
-          <motion.div
-            aria-hidden
-            initial={reduceMotion ? false : { opacity: 0 }}
-            animate={reduceMotion ? undefined : { opacity: 1 }}
-            transition={{ duration: 1.4, ease: "easeOut" }}
-            className="pointer-events-none absolute left-1/2 top-[22%] -z-10 -translate-x-1/2 select-none text-[clamp(8rem,22vw,18rem)] font-light tracking-[-0.12em] text-text/20 blur-2xl opacity-[0.02]"
-            style={{ transform: `translate(calc(-50% + ${heroShift.x * 0.45}px), ${heroShift.y * 0.45}px)` }}
-          >
-            ARCHIVE_001
-          </motion.div>
-          <div className="pointer-events-none absolute inset-x-0 top-8 hidden h-full sm:block">
-            <motion.p
-              aria-hidden
-              className="absolute left-0 top-6 text-[0.62rem] uppercase tracking-[0.45em] text-muted/70"
-              style={{ transform: `translate(${heroShift.x * 0.2}px, ${heroShift.y * 0.2}px)` }}
+          <div className="relative grid min-h-[calc(100vh-6rem)] gap-8 py-10 lg:grid-cols-[1.08fr_0.92fr] lg:items-center lg:py-0">
+            <div
+              className="relative z-10 flex flex-col justify-center text-left"
+              style={{
+                transform: `translate3d(${heroShift.x * 0.22}px, ${heroShift.y * 0.22}px, 0)`,
+              }}
             >
-              REC-001
-            </motion.p>
-            <motion.p
-              aria-hidden
-              className="absolute right-2 top-16 text-[0.62rem] uppercase tracking-[0.45em] text-muted/70"
-              style={{ transform: `translate(${heroShift.x * 0.16}px, ${heroShift.y * 0.16}px)` }}
-            >
-              EST. 2026
-            </motion.p>
-            <motion.p
-              aria-hidden
-              className="absolute left-1/2 bottom-10 -translate-x-1/2 text-[0.62rem] uppercase tracking-[0.45em] text-muted/70"
-              style={{ transform: `translate(-50%, ${heroShift.y * 0.18}px)` }}
-            >
-              STATUS: ACTIVE
-            </motion.p>
-            <motion.p
-              aria-hidden
-              className="absolute bottom-1 right-0 text-[0.62rem] uppercase tracking-[0.45em] text-muted/70"
-              style={{ transform: `translate(${heroShift.x * 0.18}px, ${heroShift.y * 0.18}px)` }}
-            >
-              NODE: INDIA
-            </motion.p>
-          </div>
-
-          <div style={{ transform: `translate3d(${heroShift.x}px, ${heroShift.y}px, 0)` }} className="will-change-transform">
-            <motion.div
-              initial={reduceMotion ? false : { opacity: 0, y: 24 }}
-              animate={reduceMotion ? undefined : { opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-              className="space-y-7"
-            >
-              <p className="text-[0.72rem] uppercase tracking-[0.5em] text-muted">
-                a living archive
-              </p>
-              <h1 className="text-balance text-6xl font-light tracking-[0.15em] sm:text-8xl lg:text-[8.75rem]">
-                THE ARCHIVES
-              </h1>
-              <p className="mx-auto max-w-xs text-sm uppercase leading-8 tracking-[0.35em] text-muted sm:max-w-none sm:text-base">
-                projects.
-                <br />
-                thoughts.
-                <br />
-                progress.
-                <br />
-                memories.
-              </p>
-            </motion.div>
-
-            <div className="mt-10 flex min-h-[9rem] w-full max-w-md flex-col items-center justify-center gap-4 text-center sm:mt-12">
-              <p className="text-[0.68rem] uppercase tracking-[0.55em] text-muted">Live Record</p>
-              <AnimatePresence mode="wait">
               <motion.div
-                  key={`${livingRecords[statusIndex].date}-${livingRecords[statusIndex].text}`}
-                  initial={reduceMotion ? false : { opacity: 0, y: 10 }}
-                  animate={reduceMotion ? undefined : { opacity: 1, y: 0 }}
-                  exit={reduceMotion ? undefined : { opacity: 0, y: -10 }}
-                  transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
-                  className="space-y-3"
-                >
-                  <p className="text-sm uppercase tracking-[0.35em] text-muted">{livingRecords[statusIndex].date}</p>
-                  <p className="text-base font-light tracking-wide text-text sm:text-lg">
-                    {livingRecords[statusIndex].text}
-                  </p>
-                </motion.div>
-              </AnimatePresence>
+                initial={reduceMotion ? false : { opacity: 0, y: 20 }}
+                animate={reduceMotion ? undefined : { opacity: 1, y: 0 }}
+                transition={{ duration: 0.42, ease: [0.22, 1, 0.36, 1] }}
+                className="space-y-6 lg:max-w-2xl"
+              >
+                <p className="text-[0.72rem] uppercase tracking-[0.5em] text-muted">
+                  a living archive
+                </p>
+                <h1 className="text-balance text-6xl font-light tracking-[0.15em] sm:text-8xl lg:text-[8.75rem]">
+                  THE ARCHIVES
+                </h1>
+                <p className="max-w-xs text-sm uppercase leading-8 tracking-[0.35em] text-muted sm:max-w-none sm:text-base">
+                  projects.
+                  <br />
+                  thoughts.
+                  <br />
+                  progress.
+                  <br />
+                  memories.
+                </p>
+              </motion.div>
+
+              <div className="mt-10 flex min-h-[9rem] w-full max-w-md flex-col justify-center gap-4 text-left sm:mt-12">
+                <p className="text-[0.68rem] uppercase tracking-[0.55em] text-muted">Live Record</p>
+                <AnimatePresence mode="wait">
+                  <motion.div
+                    key={`${livingRecords[statusIndex].date}-${livingRecords[statusIndex].text}`}
+                    initial={reduceMotion ? false : { opacity: 0, y: 8 }}
+                    animate={reduceMotion ? undefined : { opacity: 1, y: 0 }}
+                    exit={reduceMotion ? undefined : { opacity: 0, y: -8 }}
+                    transition={{ duration: 0.32, ease: [0.22, 1, 0.36, 1] }}
+                    className="space-y-2"
+                  >
+                    <p className="text-sm uppercase tracking-[0.35em] text-muted">{livingRecords[statusIndex].date}</p>
+                    <p className="text-base font-light tracking-wide text-text sm:text-lg">
+                      {livingRecords[statusIndex].text}
+                    </p>
+                  </motion.div>
+                </AnimatePresence>
+              </div>
             </div>
 
-            <motion.div
-              initial={reduceMotion ? false : { opacity: 0, y: 10 }}
-              whileHover={reduceMotion ? undefined : { y: -2 }}
-              whileInView={reduceMotion ? undefined : { opacity: 1, y: 0 }}
-              viewport={{ once: true, amount: 0.6 }}
-              transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
-              className="absolute bottom-20 right-0 hidden sm:block"
-            >
-              <div className="group relative">
-                <button
-                  type="button"
-                  className="text-[0.6rem] uppercase tracking-[0.45em] text-muted/60 transition-colors hover:text-text/90"
-                  title="Domain purchased. 04 Jun 2026."
+            <div className="relative flex min-h-[28rem] items-end justify-center lg:min-h-[42rem] lg:justify-end">
+              <motion.div
+                aria-hidden
+                animate={reduceMotion ? undefined : { opacity: [0.48, 0.66, 0.48] }}
+                transition={reduceMotion ? undefined : { duration: 10, repeat: Infinity, ease: "easeInOut" }}
+                className="pointer-events-none absolute inset-x-[-10%] bottom-[4%] top-[10%] rounded-full bg-[radial-gradient(circle_at_center,rgba(139,92,246,0.24),transparent_60%)] blur-2xl"
+                style={{
+                  transform: `translate3d(${heroShift.x * 0.22}px, ${heroShift.y * 0.18 + 18}px, 0)`,
+                  opacity: 0.6 - heroProgress * 0.16,
+                }}
+              />
+              <motion.div
+                aria-hidden
+                animate={reduceMotion ? undefined : { opacity: [0.12, 0.2, 0.12] }}
+                transition={reduceMotion ? undefined : { duration: 13, repeat: Infinity, ease: "easeInOut" }}
+                className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.05),transparent_42%)]"
+                style={{
+                  transform: `translate3d(${heroShift.x * 0.14}px, ${heroShift.y * 0.14}px, 0)`,
+                }}
+              />
+              <motion.div
+                initial={reduceMotion ? false : { opacity: 0, y: 16 }}
+                animate={reduceMotion ? undefined : { opacity: 1, y: 0 }}
+                transition={{ duration: 0.42, ease: [0.22, 1, 0.36, 1] }}
+                className="relative z-10 w-[min(88vw,34rem)] translate-y-6 sm:w-[min(78vw,36rem)] lg:translate-x-10 lg:translate-y-10"
+                style={{
+                  opacity: Math.max(0.28, 1 - heroProgress * 0.72),
+                  transform: `translate3d(${heroShift.x * 0.34 + 24}px, ${heroShift.y * 0.34 + 12}px, 0)`,
+                }}
+              >
+                <motion.div
+                  animate={reduceMotion ? undefined : { y: [0, -5, 0], x: [0, 2, 0] }}
+                  transition={reduceMotion ? undefined : { duration: 14, repeat: Infinity, ease: "easeInOut" }}
+                  className="relative"
                 >
-                  ARCHIVE FRAGMENT #04
-                </button>
-                <span className="pointer-events-none absolute left-1/2 top-full mt-2 w-max -translate-x-1/2 rounded-full bg-black/70 px-3 py-1 text-[0.62rem] uppercase tracking-[0.3em] text-text opacity-0 transition-opacity group-hover:opacity-100">
-                  Domain purchased. 04 Jun 2026.
-                </span>
-              </div>
-            </motion.div>
+                  <Image
+                    src="/potrait.png"
+                    alt="Portrait of Ansh"
+                    width={1200}
+                    height={1400}
+                    priority
+                    sizes="(min-width: 1024px) 36rem, 88vw"
+                    className="h-auto w-full select-none object-contain drop-shadow-[0_24px_60px_rgba(0,0,0,0.52)]"
+                  />
+                </motion.div>
+              </motion.div>
+            </div>
           </div>
         </section>
 
