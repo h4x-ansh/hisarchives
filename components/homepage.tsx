@@ -1,10 +1,10 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import Lenis from "lenis";
-import { motion, useReducedMotion } from "framer-motion";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { SiteHeader } from "@/components/site-header";
 
 const storyLines = ["Every life leaves traces.", "Most disappear.", "Some are archived."];
@@ -34,13 +34,6 @@ const statusLines = [
   "Location: India",
   "Record State: Active",
   "Last Updated: Live",
-] as const;
-
-const archiveFragments = [
-  "/record-placeholder.svg",
-  "/record-placeholder.svg",
-  "/record-placeholder.svg",
-  "/record-placeholder.svg",
 ] as const;
 
 function Section({
@@ -86,6 +79,7 @@ function ObjectiveCard({
     >
       <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(255,255,255,0.03),transparent_45%,rgba(139,92,246,0.08))] opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.06),transparent_35%)] opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
+      <p className="absolute right-5 top-5 text-[0.62rem] uppercase tracking-[0.4em] text-muted">REC-{String(index).padStart(2, "0")}</p>
       <div className="relative space-y-4">
         <p className="text-sm uppercase tracking-[0.35em] text-muted">
           ACTIVE OBJECTIVE #{String(index).padStart(2, "0")}
@@ -99,6 +93,7 @@ function ObjectiveCard({
 
 export function Homepage() {
   const reduceMotion = useReducedMotion();
+  const [statusIndex, setStatusIndex] = useState(0);
 
   useEffect(() => {
     if (reduceMotion) {
@@ -126,6 +121,18 @@ export function Homepage() {
     };
   }, [reduceMotion]);
 
+  useEffect(() => {
+    if (reduceMotion) {
+      return;
+    }
+
+    const interval = window.setInterval(() => {
+      setStatusIndex((current) => (current + 1) % statusLines.length);
+    }, 3200);
+
+    return () => window.clearInterval(interval);
+  }, [reduceMotion]);
+
   return (
     <main className="relative isolate overflow-hidden bg-bg text-text">
       <motion.div
@@ -146,6 +153,16 @@ export function Homepage() {
         <SiteHeader activePath="/" timestamp="last updated 05 jun 2026" />
 
         <section className="flex min-h-[calc(100vh-6rem)] flex-col items-center justify-center text-center">
+          <motion.div
+            aria-hidden
+            initial={reduceMotion ? false : { opacity: 0 }}
+            animate={reduceMotion ? undefined : { opacity: 1 }}
+            transition={{ duration: 1.4, ease: "easeOut" }}
+            className="pointer-events-none absolute left-1/2 top-[22%] -z-10 -translate-x-1/2 select-none text-[clamp(8rem,22vw,18rem)] font-light tracking-[-0.12em] text-text/20 blur-2xl opacity-[0.02]"
+          >
+            ARCHIVE_001
+          </motion.div>
+
           <motion.div
             initial={reduceMotion ? false : { opacity: 0, y: 24 }}
             animate={reduceMotion ? undefined : { opacity: 1, y: 0 }}
@@ -169,27 +186,21 @@ export function Homepage() {
             </p>
           </motion.div>
 
-          <motion.div
-            initial={reduceMotion ? false : { opacity: 0, y: 12 }}
-            animate={reduceMotion ? undefined : { opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
-            className="mt-8 w-full max-w-sm rounded-[1.75rem] border border-white/8 bg-white/[0.03] p-5 text-left shadow-[0_0_0_1px_rgba(255,255,255,0.03)] backdrop-blur-sm sm:mt-10 sm:max-w-md sm:p-6"
-          >
-            <p className="text-[0.72rem] uppercase tracking-[0.45em] text-muted">Archive Status</p>
-            <div className="mt-4 space-y-2">
-              {statusLines.map((line, index) => (
-                <motion.p
-                  key={line}
-                  initial={reduceMotion ? false : { opacity: 0 }}
-                  animate={reduceMotion ? undefined : { opacity: 1 }}
-                  transition={{ duration: 0.45, delay: index * 0.18 }}
-                  className="text-sm uppercase tracking-[0.3em] text-text/90"
-                >
-                  {line}
-                </motion.p>
-              ))}
-            </div>
-          </motion.div>
+          <div className="mt-10 flex min-h-[6rem] w-full max-w-md flex-col items-center justify-center gap-3 text-center sm:mt-12">
+            <p className="text-[0.68rem] uppercase tracking-[0.55em] text-muted">Archive Status</p>
+            <AnimatePresence mode="wait">
+              <motion.p
+                key={statusLines[statusIndex]}
+                initial={reduceMotion ? false : { opacity: 0, y: 10 }}
+                animate={reduceMotion ? undefined : { opacity: 1, y: 0 }}
+                exit={reduceMotion ? undefined : { opacity: 0, y: -10 }}
+                transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+                className="text-sm uppercase tracking-[0.3em] text-text/90 sm:text-base"
+              >
+                {statusLines[statusIndex]}
+              </motion.p>
+            </AnimatePresence>
+          </div>
         </section>
 
         <Section className="border-t border-white/5">
@@ -234,30 +245,28 @@ export function Homepage() {
           <div aria-hidden className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
           <div className="grid gap-8 lg:grid-cols-[0.9fr_1.1fr] lg:gap-16">
             <div className="space-y-5">
-              <p className="text-[0.72rem] uppercase tracking-[0.45em] text-muted">
-                Identity record
-              </p>
+              <p className="text-[0.72rem] uppercase tracking-[0.45em] text-muted">Identity record</p>
               <h2 className="text-[clamp(4rem,10vw,8rem)] font-light leading-none tracking-[-0.08em]">
                 ANSH
               </h2>
             </div>
             <div className="grid gap-8 sm:grid-cols-2">
               <div className="space-y-2">
-                <p className="text-xs uppercase tracking-[0.35em] text-muted">Subject</p>
-                <p className="text-3xl font-light">Ansh</p>
+                <p className="text-xs uppercase tracking-[0.35em] text-muted">Recorded in</p>
+                <p className="text-3xl font-light">India</p>
               </div>
               <div className="space-y-2">
-                <p className="text-xs uppercase tracking-[0.35em] text-muted">Status</p>
-                <p className="text-3xl font-light">Active</p>
+                <p className="text-xs uppercase tracking-[0.35em] text-muted">Current phase</p>
+                <p className="text-3xl font-light">Class 11</p>
               </div>
               <div className="space-y-2">
-                <p className="text-xs uppercase tracking-[0.35em] text-muted">Location</p>
-                <p className="text-xl font-light text-muted sm:text-2xl">India</p>
+                <p className="text-xs uppercase tracking-[0.35em] text-muted">Primary objective</p>
+                <p className="text-xl font-light text-muted sm:text-2xl">JEE 2027</p>
               </div>
               <div className="space-y-2 sm:col-span-2">
-                <p className="text-xs uppercase tracking-[0.35em] text-muted">Mission</p>
-                <p className="text-xl font-light text-muted sm:text-2xl">JEE 2027</p>
-                <p className="max-w-lg text-2xl font-light leading-tight text-text sm:text-3xl">
+                <p className="text-xs uppercase tracking-[0.35em] text-muted">Status</p>
+                <p className="text-xl font-light text-text sm:text-2xl">Building</p>
+                <p className="max-w-lg text-2xl font-light leading-tight text-muted sm:text-3xl">
                   Classified record in motion.
                 </p>
               </div>
@@ -288,36 +297,12 @@ export function Homepage() {
           </div>
         </Section>
 
-        <Section className="relative overflow-hidden border-t border-white/5 pb-10">
-          <div aria-hidden className="pointer-events-none absolute inset-0">
-            {archiveFragments.map((src, index) => (
-              <motion.img
-                key={`${src}-${index}`}
-                src={src}
-                alt=""
-                aria-hidden="true"
-                initial={reduceMotion ? false : { opacity: 0, y: 18 }}
-                whileInView={reduceMotion ? undefined : { opacity: 0.06, y: 0 }}
-                viewport={{ once: true, amount: 0.35 }}
-                transition={{ duration: 1.2, delay: index * 0.15, ease: [0.22, 1, 0.36, 1] }}
-                className={`absolute rounded-2xl object-cover blur-[1px] ${
-                  index === 0
-                    ? "left-[7%] top-[18%] h-28 w-20 sm:h-40 sm:w-28"
-                    : index === 1
-                      ? "right-[10%] top-[36%] h-24 w-24 sm:h-32 sm:w-32"
-                      : index === 2
-                        ? "left-[14%] bottom-[26%] h-20 w-28 sm:h-28 sm:w-40"
-                        : "right-[18%] bottom-[15%] h-28 w-20 sm:h-36 sm:w-28"
-                }`}
-                style={{ transform: `rotate(${index % 2 === 0 ? -4 : 4}deg)` }}
-              />
-            ))}
-          </div>
+        <Section className="border-t border-white/5 pb-10">
           <div className="relative flex flex-col items-start gap-6 rounded-[2rem] border border-white/8 bg-surface/70 p-8 shadow-glow backdrop-blur-sm sm:p-12 lg:flex-row lg:items-end lg:justify-between">
             <div className="space-y-4">
               <p className="text-[0.72rem] uppercase tracking-[0.45em] text-muted">Enter Archives</p>
               <h2 className="text-balance text-4xl font-light tracking-[-0.04em] sm:text-6xl">
-                Step inside the record.
+                Open the archive index.
               </h2>
             </div>
             <Link
