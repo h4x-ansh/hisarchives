@@ -265,16 +265,6 @@ export function Homepage() {
             aria-hidden
             initial={reduceMotion ? false : { opacity: 0, y: 6 }}
             animate={reduceMotion ? undefined : { opacity: 1, y: 0 }}
-            transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
-            className="pointer-events-none absolute left-[4%] top-[52%] hidden text-[0.62rem] uppercase tracking-[0.45em] text-muted/35 lg:block"
-            style={{ transform: `translate3d(${heroShift.x * 0.05}px, ${heroShift.y * 0.05}px, 0)` }}
-          >
-            NODE: INDIA
-          </motion.div>
-          <motion.div
-            aria-hidden
-            initial={reduceMotion ? false : { opacity: 0, y: 6 }}
-            animate={reduceMotion ? undefined : { opacity: 1, y: 0 }}
             transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
             className="pointer-events-none absolute right-10 bottom-16 hidden text-[0.62rem] uppercase tracking-[0.45em] text-muted/30 lg:block"
             style={{ transform: `translate3d(${heroShift.x * 0.04}px, ${heroShift.y * 0.04}px, 0)` }}
