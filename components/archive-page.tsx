@@ -13,7 +13,7 @@ const archivedWork = [
     description: "Utility tooling and workflow automation preserved as an active line of work.",
     status: "Active",
     year: "2026",
-    accent: "#8b5cf6",
+    accent: "#3b82f6",
     word: "DISCORD",
     href: "/archives/discord-automation",
     shelfLabel: "Coding / Systems",
@@ -24,7 +24,7 @@ const archivedWork = [
     description: "A structured competitive system archived after its first complete pass.",
     status: "Archived",
     year: "2026",
-    accent: "#ef4444",
+    accent: "#eab308",
     word: "TOURNAMENT",
     href: "/archives/tournament-platform",
     shelfLabel: "Cricket / Competition",
@@ -46,7 +46,7 @@ const archivedWork = [
     description: "A long-running objective tracked as a live archive record.",
     status: "Active",
     year: "2026",
-    accent: "#a78bfa",
+    accent: "#38bdf8",
     word: "JEE 2027",
     href: "/now",
     shelfLabel: "Study / Mission",
@@ -57,7 +57,7 @@ const archivedWork = [
     description: "Conditioning, consistency, and body discipline stored as a living log.",
     status: "Active",
     year: "2026",
-    accent: "#22c55e",
+    accent: "#10b981",
     word: "FITNESS",
     href: "/identity",
     shelfLabel: "Health / Routine",
@@ -68,7 +68,7 @@ const archivedWork = [
     description: "Personal fragments, moments, and reminders kept inside the archive.",
     status: "Active",
     year: "2026",
-    accent: "#38bdf8",
+    accent: "#fb7185",
     word: "MEMORIES",
     href: "/timeline",
     shelfLabel: "Moments / Notes",
@@ -155,7 +155,7 @@ function ShelfSpine({
 }) {
   const reduceMotion = useReducedMotion();
   const archiveNumber = id.padStart(4, "0");
-  const spineTitle = getSpineTitle(title);
+  const spineTitleGroups = getSpineTitleGroups(title);
   const width = isActive
     ? "clamp(22rem, 60vw, 40rem)"
     : isNeighbor
@@ -170,7 +170,9 @@ function ShelfSpine({
       viewport={{ once: true, amount: 0.45 }}
       transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
       animate={{ width, opacity: isActive ? 1 : 0.72 }}
-      className="relative h-[28rem] flex-shrink-0 overflow-hidden rounded-[1.75rem] border border-white/8 bg-[linear-gradient(180deg,rgba(13,13,13,0.95),rgba(13,13,13,0.82))]"
+      whileHover={reduceMotion || isActive ? undefined : { y: -4, scale: 1.02 }}
+      whileFocus={reduceMotion || isActive ? undefined : { y: -4, scale: 1.02 }}
+      className="relative mt-2 h-[26.5rem] flex-shrink-0 overflow-hidden rounded-[1.75rem] border border-white/8 bg-[linear-gradient(180deg,rgba(13,13,13,0.95),rgba(13,13,13,0.82))]"
       style={{
         boxShadow: isActive
           ? `0 0 0 1px ${accent}20, 0 18px 60px rgba(0,0,0,0.22)`
@@ -192,7 +194,7 @@ function ShelfSpine({
 
       <div className="relative flex h-full flex-col p-4 sm:p-5">
         <div
-          className="relative flex h-full flex-1 flex-col justify-between overflow-hidden rounded-[1.1rem] bg-black/15 px-3 py-4"
+          className="relative flex h-full flex-1 flex-col justify-between px-3 py-4"
           style={{
             background: isActive
               ? "linear-gradient(180deg, rgba(13,13,13,0.92), rgba(13,13,13,0.66))"
@@ -201,9 +203,9 @@ function ShelfSpine({
         >
           <motion.p
             aria-hidden
-            animate={reduceMotion ? undefined : { opacity: isActive ? 0.022 : 0 }}
+            animate={reduceMotion ? undefined : { opacity: isActive ? 0.025 : 0 }}
             transition={reduceMotion ? undefined : { duration: 0.3 }}
-            className="pointer-events-none absolute inset-0 flex items-center justify-center select-none text-center text-[clamp(6rem,22vw,18rem)] font-light tracking-[-0.08em] text-white"
+            className="pointer-events-none absolute inset-0 flex items-center justify-center select-none text-center text-[clamp(14rem,55vw,34rem)] font-light tracking-[-0.08em] text-white translate-y-[0.35rem] -translate-x-[0.35rem]"
           >
             {archiveNumber}
           </motion.p>
@@ -216,31 +218,19 @@ function ShelfSpine({
           >
             {itemWordFromTitle(title)}
           </motion.p>
-
-          <motion.div
-            aria-hidden
-            animate={reduceMotion ? undefined : { opacity: isActive ? 0.95 : 0.8 }}
-            transition={reduceMotion ? undefined : { duration: 0.28 }}
-            className="pointer-events-none absolute inset-0 flex items-center justify-center"
-          >
-            <div className="flex select-none flex-col items-center justify-center gap-[0.12em] text-center text-[0.7rem] font-medium uppercase tracking-[0.55em] text-text/90">
-              {spineTitle.split("").map((character, index) => (
-                <span key={`${character}-${index}`} className="block leading-none">
-                  {character === " " ? "\u00a0" : character}
-                </span>
-              ))}
-            </div>
-          </motion.div>
-
           <div className="relative z-10 flex h-full flex-col justify-between gap-3">
             <div className="flex items-start justify-between gap-3">
               <div className="space-y-2">
                 <p className="text-[0.62rem] uppercase tracking-[0.45em] text-muted">{id}</p>
-                <p className="max-w-[7rem] text-[0.62rem] uppercase tracking-[0.35em] text-muted/80">
-                  {shelfLabel}
-                </p>
+                {isActive ? (<p className="max-w-[7rem] text-[0.62rem] uppercase tracking-[0.35em] text-muted/80">{shelfLabel}</p>) : null}
               </div>
-              <p className="text-[0.6rem] uppercase tracking-[0.4em] text-muted/75">{status}</p>
+              <p className={`text-[0.6rem] uppercase tracking-[0.4em] ${isActive ? "text-text/85" : "text-muted/75"}`}>
+                <span
+                  className="mr-2 inline-block h-1.5 w-1.5 rounded-full align-middle"
+                  style={{ backgroundColor: accent, boxShadow: `0 0 10px ${accent}80` }}
+                />
+                {status.toUpperCase()}
+              </p>
             </div>
 
             <motion.div
@@ -250,10 +240,10 @@ function ShelfSpine({
             >
               {isActive ? (
                 <>
-                  <motion.h3
+            <motion.h3
                     animate={reduceMotion ? undefined : { opacity: 1, y: 0 }}
                     transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
-                    className="text-3xl font-light tracking-wide text-text"
+                    className="text-[2.15rem] font-light tracking-wide text-text sm:text-[2.65rem]"
                   >
                     {title}
                   </motion.h3>
@@ -267,11 +257,18 @@ function ShelfSpine({
                 </>
               ) : (
                 <div className="flex h-full items-center justify-center">
-                  <div className="flex select-none flex-col items-center justify-center gap-[0.14em] text-center text-[0.72rem] font-medium uppercase tracking-[0.45em] text-text/90">
-                    {spineTitle.split("").map((character, index) => (
-                      <span key={`${character}-${index}`} className="block leading-none">
-                        {character === " " ? "\u00a0" : character}
-                      </span>
+                  <div className="flex select-none flex-col items-center justify-center gap-[0.82em] text-center font-medium uppercase tracking-[0.4em] text-text/90">
+                    {spineTitleGroups.map((group, groupIndex) => (
+                      <div key={`${group}-${groupIndex}`} className="flex flex-col items-center justify-center gap-[0.48em]">
+                        {group.split("").map((character, characterIndex) => (
+                          <span
+                            key={`${group}-${character}-${characterIndex}`}
+                            className="block text-[0.72rem] leading-none sm:text-[0.76rem]"
+                          >
+                            {character === " " ? "\u00a0" : character}
+                          </span>
+                        ))}
+                      </div>
                     ))}
                   </div>
                 </div>
@@ -303,8 +300,13 @@ function ShelfSpine({
                 </div>
                 <div>
                   <p>Source</p>
-                  <Link href={href} className="mt-1 inline-flex text-sm tracking-[0.25em] text-text transition hover:text-muted">
-                    Learn more →
+                  <Link
+                    href={href}
+                    className="group mt-1 inline-flex items-center gap-2 text-sm tracking-[0.25em] underline decoration-transparent decoration-1 underline-offset-4 transition hover:decoration-current hover:brightness-125"
+                    style={{ color: accent, textShadow: `0 0 10px ${accent}35` }}
+                  >
+                    <span>Learn more</span>
+                    <span className="transition-transform duration-200 group-hover:translate-x-1">?</span>
                   </Link>
                 </div>
               </div>
@@ -326,13 +328,8 @@ function itemWordFromTitle(title: string) {
   return "NOTES";
 }
 
-function getSpineTitle(title: string) {
-  if (title === "JEE 2027") {
-    return title;
-  }
-
-  const [firstWord] = title.split(" ");
-  return firstWord.toUpperCase();
+function getSpineTitleGroups(title: string) {
+  return title.split(" ").map((word) => word.toUpperCase());
 }
 
 function TimelineEntry({
@@ -491,7 +488,12 @@ export function ArchivePage() {
 
         <section className="relative border-t border-white/5 py-20 sm:py-28">
           <div className="space-y-6">
-            <p className="text-[0.72rem] uppercase tracking-[0.45em] text-muted">Archived Work</p>
+            <div className="space-y-2">
+              <p className="text-[0.72rem] uppercase tracking-[0.45em] text-muted">Archived Work</p>
+              <p className="text-[0.62rem] uppercase tracking-[0.4em] text-muted/70">
+                7 records ? last entry: 06 jun 2026 ? status: active
+              </p>
+            </div>
             <div className="space-y-4" onMouseLeave={() => setActiveIndex(null)}>
               <div className="relative overflow-hidden rounded-[2rem] border border-white/8 bg-surface/60 px-4 py-5 sm:px-6">
                 <AnimatePresence mode="wait">
@@ -522,7 +524,7 @@ export function ArchivePage() {
                   )}
                 </AnimatePresence>
 
-                <div className="relative flex gap-3 overflow-x-auto pb-2 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden lg:gap-4">
+                <div className="relative flex gap-3 overflow-x-auto pb-2 pl-1 pr-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden lg:gap-4">
                   {archivedWork.map((item, index) => {
                     const isActive = activeIndex === index;
                     const isNeighbor = activeIndex === null ? false : Math.abs(activeIndex - index) === 1;
@@ -571,4 +573,3 @@ export function ArchivePage() {
     </main>
   );
 }
-
