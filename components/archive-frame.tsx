@@ -16,12 +16,11 @@ export function ArchiveFrame({
     | "/identity"
     | "/timeline"
     | "/activity"
-    | "/gallery"
-    | "/library"
-    | "/records"
-    | "/birthdays"
-    | "/contact"
-    | "/dashboard";
+  | "/gallery"
+  | "/library"
+  | "/records"
+  | "/birthdays"
+  | "/dashboard";
   timestamp?: string;
   children: ReactNode;
 }) {

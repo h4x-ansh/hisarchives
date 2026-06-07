@@ -329,6 +329,10 @@ function itemWordFromTitle(title: string) {
 }
 
 function getSpineTitleGroups(title: string) {
+  if (title === "Tournament Platform") {
+    return ["TOURNAMENT"];
+  }
+
   return title.split(" ").map((word) => word.toUpperCase());
 }
 

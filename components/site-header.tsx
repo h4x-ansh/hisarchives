@@ -8,12 +8,10 @@ import {
   Activity,
   BookOpen,
   Calendar,
-  CalendarDays,
   FileText,
   FolderArchive,
   House,
   Images,
-  Mail,
   Menu,
   User,
   X,
@@ -29,8 +27,7 @@ const archiveNavItems = [
   { href: "/gallery", label: "Gallery", description: "Visual archive", icon: Images },
   { href: "/library", label: "Library", description: "Collected resources", icon: BookOpen },
   { href: "/records", label: "Records", description: "Collected documents and notes", icon: FileText },
-  { href: "/birthdays", label: "Important Dates", description: "Marked dates and milestones", icon: CalendarDays },
-  { href: "/contact", label: "Contact", description: "Transmission channels", icon: Mail },
+  { href: "/birthdays", label: "Important Dates", description: "Marked dates and milestones", icon: Calendar },
 ] as const;
 
 export function SiteHeader({
@@ -45,11 +42,10 @@ export function SiteHeader({
     | "/timeline"
     | "/activity"
     | "/gallery"
-    | "/library"
-    | "/records"
-    | "/birthdays"
-    | "/contact"
-    | "/dashboard";
+  | "/library"
+  | "/records"
+  | "/birthdays"
+  | "/dashboard";
   timestamp?: string;
 }) {
   const pathname = usePathname();
