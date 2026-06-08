@@ -7,7 +7,6 @@ import { AnimatePresence, motion } from "framer-motion";
 import {
   Activity,
   Calendar,
-  FileText,
   FolderArchive,
   Images,
   House,
@@ -24,9 +23,6 @@ const archiveNavItems = [
   { href: "/timeline", label: "Timeline", description: "Chronological record of events", icon: Calendar },
   { href: "/activity", label: "Journal", description: "Daily logs and movement", icon: Activity },
   { href: "/gallery", label: "Curated", description: "Visual archive", icon: Images },
-  { href: "/records", label: "Records", description: "Collected documents and notes", icon: FileText },
-  { href: "/birthdays", label: "Important Dates", description: "Marked dates and milestones", icon: Calendar },
-  { href: "/dashboard", label: "Dashboard", description: "Private control room", icon: Activity },
 ] as const;
 
 export function SiteHeader({
@@ -41,9 +37,7 @@ export function SiteHeader({
     | "/timeline"
     | "/activity"
     | "/gallery"
-    | "/records"
-    | "/birthdays"
-    | "/dashboard";
+    ;
   timestamp?: string;
 }) {
   const pathname = usePathname();
@@ -162,7 +156,6 @@ export function SiteHeader({
                   key={item.href}
                   href={item.href}
                   aria-current={isActive ? "page" : undefined}
-                  title={item.label}
                   className={`group/item relative flex items-center gap-3 rounded-[1rem] px-2.5 py-1.75 transition-all ${
                     isActive ? "bg-white/[0.08] text-text shadow-[0_0_24px_rgba(139,92,246,0.07)] scale-[1.01]" : "bg-transparent text-text hover:bg-white/[0.03]"
                   }`}

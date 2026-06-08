@@ -81,7 +81,7 @@ const archivedWork = [
     year: "2026",
     accent: "#f59e0b",
     word: "NOTES",
-    href: "/records",
+    href: "/activity",
     shelfLabel: "Reference / Drafts",
   },
 ];

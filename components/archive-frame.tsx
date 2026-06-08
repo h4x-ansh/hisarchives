@@ -14,12 +14,9 @@ export function ArchiveFrame({
     | "/archives"
     | "/now"
     | "/identity"
-    | "/timeline"
-    | "/activity"
-  | "/gallery"
-  | "/records"
-  | "/birthdays"
-  | "/dashboard";
+  | "/timeline"
+  | "/activity"
+  | "/gallery";
   timestamp?: string;
   children: ReactNode;
 }) {
