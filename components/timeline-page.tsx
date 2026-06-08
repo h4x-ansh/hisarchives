@@ -99,8 +99,8 @@ const milestones = [
 function MuseumVisual({ kind, imageText }: { kind: string; imageText: string }) {
   return (
     <div className="relative h-full w-full overflow-hidden rounded-[1.2rem] bg-[linear-gradient(180deg,#f8f2e2,#e8dbc0)]">
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(33,40,66,0.14),transparent_30%),radial-gradient(circle_at_bottom_left,rgba(58,67,103,0.08),transparent_25%)]" />
-      <div className="absolute inset-0 opacity-[0.14] bg-[linear-gradient(rgba(33,40,66,0.04)_1px,transparent_1px),linear-gradient(90deg,rgba(33,40,66,0.04)_1px,transparent_1px)] bg-[size:18px_18px]" />
+      <div className="absolute inset-0 hidden md:block bg-[radial-gradient(circle_at_top_right,rgba(33,40,66,0.14),transparent_30%),radial-gradient(circle_at_bottom_left,rgba(58,67,103,0.08),transparent_25%)]" />
+      <div className="absolute inset-0 hidden md:block opacity-[0.14] bg-[linear-gradient(rgba(33,40,66,0.04)_1px,transparent_1px),linear-gradient(90deg,rgba(33,40,66,0.04)_1px,transparent_1px)] bg-[size:18px_18px]" />
       <div className="relative flex h-full flex-col justify-between p-4 text-[#212842]">
         <div className="flex items-start justify-between text-[0.62rem] uppercase tracking-[0.45em] text-[#6f675b]">
           <span>{kind}</span>
@@ -182,7 +182,29 @@ function MuseumVisual({ kind, imageText }: { kind: string; imageText: string }) 
   );
 }
 
-function TimelineHero({ entry }: { entry: (typeof milestones)[number] }) {
+function TimelineRuler() {
+  return (
+    <div className="flex items-center gap-2 overflow-hidden sm:hidden">
+      <span className="shrink-0 text-[0.62rem] uppercase tracking-[0.4em] text-[#E7DECC]">2025</span>
+      <div className="flex min-w-0 flex-1 items-center gap-1">
+        <span className="h-px min-w-0 flex-1 bg-gradient-to-r from-transparent via-[#3A4367]/45 to-transparent" />
+        {Array.from({ length: 4 }).map((_, index) => (
+          <span key={index} className="h-1.5 w-1.5 shrink-0 rounded-full bg-[#3A4367]" />
+        ))}
+        <span className="h-px min-w-0 flex-1 bg-gradient-to-r from-transparent via-[#3A4367]/45 to-transparent" />
+      </div>
+      <span className="shrink-0 text-[0.62rem] uppercase tracking-[0.4em] text-[#E7DECC]">2031</span>
+    </div>
+  );
+}
+
+function TimelineHero({
+  entry,
+  isTouchDevice,
+}: {
+  entry: (typeof milestones)[number];
+  isTouchDevice: boolean;
+}) {
   const reduceMotion = useReducedMotion();
 
   return (
@@ -227,8 +249,8 @@ function TimelineHero({ entry }: { entry: (typeof milestones)[number] }) {
         </div>
 
         <motion.div
-          animate={reduceMotion ? undefined : { y: [0, -6, 0] }}
-          transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+          animate={reduceMotion || isTouchDevice ? undefined : { y: [0, -6, 0] }}
+          transition={{ duration: 8, repeat: reduceMotion || isTouchDevice ? 0 : Infinity, ease: "easeInOut" }}
           className="relative mx-auto h-[12.25rem] w-full max-w-[12.5rem] overflow-hidden rounded-[1.65rem] bg-[#f5ebd6] shadow-[0_20px_60px_rgba(0,0,0,0.18)] sm:h-[18rem] sm:max-w-[18rem]"
         >
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_20%,rgba(255,255,255,0.84),transparent_30%),radial-gradient(circle_at_50%_68%,rgba(33,40,66,0.12),transparent_34%)]" />
@@ -265,7 +287,7 @@ function MuseumCard({
       ? "clamp(13rem, 82vw, 15rem)"
       : "clamp(6rem, 20vw, 7rem)"
     : active
-      ? "clamp(22rem, 60vw, 40rem)"
+      ? "clamp(19rem, 46vw, 36rem)"
       : "clamp(3.35rem, 4.2vw, 4.1rem)";
 
   const cardHeight = isTouchDevice
@@ -278,12 +300,12 @@ function MuseumCard({
     <motion.button
       type="button"
       onClick={onActivate}
-      whileHover={reduceMotion ? undefined : { y: -5, scale: 1.02 }}
-      whileTap={reduceMotion ? undefined : { scale: 0.99 }}
-      className={`group relative block rounded-[1.55rem] border border-white/12 bg-[linear-gradient(180deg,rgba(255,247,232,0.16),rgba(255,247,232,0.08))] p-3 text-left shadow-[0_12px_40px_rgba(0,0,0,0.18)] transition-shadow duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#3A4367]/45 focus-visible:ring-offset-2 focus-visible:ring-offset-transparent ${
+      whileHover={reduceMotion || isTouchDevice ? undefined : { y: -5, scale: 1.02 }}
+      whileTap={reduceMotion || isTouchDevice ? undefined : { scale: 0.99 }}
+      className={`group relative block rounded-[1.55rem] border border-white/12 p-3 text-left shadow-[0_12px_40px_rgba(0,0,0,0.18)] transition-shadow duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#3A4367]/45 focus-visible:ring-offset-2 focus-visible:ring-offset-transparent ${
         isTouchDevice
-          ? "h-[14rem] w-[6.1rem] sm:h-[22rem] sm:w-[13.5rem]"
-          : "h-[17rem] w-[10.25rem] sm:h-[21rem] sm:w-[13rem]"
+          ? "h-[14rem] w-[6.1rem] bg-[#eadfc9] sm:h-[22rem] sm:w-[13.5rem]"
+          : "h-[17rem] w-[10.25rem] bg-[linear-gradient(180deg,rgba(255,247,232,0.16),rgba(255,247,232,0.08))] sm:h-[21rem] sm:w-[13rem]"
       }`}
       style={{
         width: cardWidth,
@@ -294,11 +316,15 @@ function MuseumCard({
       <div
         className="absolute inset-0 rounded-[1.55rem] opacity-0 transition-opacity duration-300 group-hover:opacity-100"
         style={{
-          background: `radial-gradient(circle at top, ${entry.accent}22 0%, transparent 45%)`,
+          background: isTouchDevice ? "none" : `radial-gradient(circle at top, ${entry.accent}22 0%, transparent 45%)`,
         }}
       />
 
-      <div className="relative flex h-full flex-col overflow-hidden rounded-[1.15rem] bg-[linear-gradient(180deg,rgba(255,247,232,0.42),rgba(255,247,232,0.18))] p-4">
+      <div
+        className={`relative flex h-full flex-col overflow-hidden rounded-[1.15rem] p-4 ${
+          isTouchDevice ? "bg-[#f1e3cb]" : "bg-[linear-gradient(180deg,rgba(255,247,232,0.42),rgba(255,247,232,0.18))]"
+        }`}
+      >
         <div className="flex items-start justify-between gap-3">
           <p className="text-[0.66rem] uppercase tracking-[0.46em] text-[#c5b8a0]">{entry.year}</p>
           <span
@@ -312,17 +338,33 @@ function MuseumCard({
           </span>
         </div>
 
-        <div className="mt-4 flex-1">
-          <div className="h-[6.5rem] rounded-[1rem] bg-[linear-gradient(180deg,rgba(255,255,255,0.45),rgba(246,238,224,0.25))] p-2.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.22)] sm:h-[8rem]">
-            <MuseumVisual kind={entry.kind} imageText={entry.imageText} />
-          </div>
-        </div>
+        {active ? (
+          <>
+            <div className="mt-4 flex-1">
+              <div
+                className={`h-[6.5rem] rounded-[1rem] p-2.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.22)] sm:h-[8rem] ${
+                  isTouchDevice ? "bg-[#efe4cf]" : "bg-[linear-gradient(180deg,rgba(255,255,255,0.45),rgba(246,238,224,0.25))]"
+                }`}
+              >
+                <MuseumVisual kind={entry.kind} imageText={entry.imageText} />
+              </div>
+            </div>
 
-        <div className="mt-4 space-y-2">
-          <p className="text-xl leading-none tracking-[-0.04em] text-[#fbf6eb]">{entry.title}</p>
-          <p className="text-[0.62rem] uppercase tracking-[0.42em] text-[#c5b8a0]">Archive label</p>
-          <p className="text-sm leading-6 text-[#e4dac8]">{entry.label}</p>
-        </div>
+            <div className="mt-4 space-y-2">
+              <p className="text-xl leading-none tracking-[-0.04em] text-[#fbf6eb]">{entry.title}</p>
+              <p className="text-[0.62rem] uppercase tracking-[0.42em] text-[#c5b8a0]">Archive label</p>
+              <p className="text-sm leading-6 text-[#e4dac8]">{entry.label}</p>
+            </div>
+          </>
+        ) : (
+          <div className="flex flex-1 flex-col items-center justify-center gap-3 py-3 text-center">
+            <span className="h-2 w-2 rounded-full" style={{ backgroundColor: entry.accent, boxShadow: `0 0 0 8px ${entry.accent}18` }} />
+            <p className="text-[0.58rem] uppercase tracking-[0.44em] text-[#c5b8a0]">Spine</p>
+            <p className="max-w-[4.8rem] text-[0.72rem] leading-tight tracking-[0.18em] text-[#f8f2e7]">
+              {entry.title.split(" ")[0]}
+            </p>
+          </div>
+        )}
       </div>
     </motion.button>
   );
@@ -394,9 +436,10 @@ export function TimelinePage() {
                 <p className="text-[0.66rem] uppercase tracking-[0.5em]" style={{ color: palette.muted }}>
                   Milestones
                 </p>
-                <p className="mt-2 text-base uppercase tracking-[0.35em] text-[#E7DECC] sm:text-lg">
+                <p className="mt-2 hidden text-base uppercase tracking-[0.35em] text-[#E7DECC] sm:block sm:text-lg">
                   2025 ─────●─────●─────●─────●─────●─────●───── 2031
                 </p>
+                <TimelineRuler />
               </div>
               <p className="hidden text-[0.66rem] uppercase tracking-[0.35em] text-white/55 sm:block">Selected marker glows</p>
             </div>
@@ -451,7 +494,7 @@ export function TimelinePage() {
           </div>
 
         <div className="mt-3 rounded-[3rem] border border-white/10 bg-[linear-gradient(180deg,rgba(255,247,232,0.05),rgba(255,247,232,0.02))] px-5 py-5 shadow-[0_24px_90px_rgba(0,0,0,0.2)] backdrop-blur-sm sm:mt-5 sm:px-6 sm:py-6 xl:px-8 xl:py-7">
-          <TimelineHero entry={selectedEntry} />
+          <TimelineHero entry={selectedEntry} isTouchDevice={isTouchDevice} />
         </div>
         </section>
       </div>

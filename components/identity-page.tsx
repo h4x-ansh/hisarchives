@@ -35,7 +35,7 @@ export function IdentityPage() {
   const reduceMotion = useReducedMotion();
 
   return (
-    <ArchiveFrame activePath="/identity">
+    <ArchiveFrame activePath="/me">
       <section className="border-t border-white/5 py-10 sm:py-14">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="relative rounded-[2.5rem] bg-[linear-gradient(180deg,#111226_0%,#19152f_100%)] px-4 py-5 shadow-[0_30px_120px_rgba(0,0,0,0.35)] sm:px-6 sm:py-6 lg:px-8 lg:py-8">

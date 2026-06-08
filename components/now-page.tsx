@@ -214,6 +214,15 @@ export function NowPage() {
             <p className="max-w-3xl text-base leading-8 text-amber-50/72 sm:text-lg">
               Ansh&apos;s personal workstation at night — warm, focused, and built for the next move.
             </p>
+            <div className="flex items-center gap-3 text-[0.68rem] uppercase tracking-[0.4em] text-amber-100/60">
+              <Link href="/" className="transition hover:text-[#f8efe6]">
+                Home
+              </Link>
+              <span className="text-amber-100/30">/</span>
+              <Link href="/archives" className="transition hover:text-[#f8efe6]">
+                Archives
+              </Link>
+            </div>
             <div className="flex flex-wrap gap-3 pt-1">
               {[
                 ["Current time", "21:42"],
@@ -229,17 +238,7 @@ export function NowPage() {
             </div>
           </div>
 
-          <div className="hidden lg:flex lg:justify-end">
-            <div className="flex items-center gap-3 text-[0.68rem] uppercase tracking-[0.4em] text-amber-100/60">
-              <Link href="/" className="transition hover:text-[#f8efe6]">
-                Home
-              </Link>
-              <span className="text-amber-100/30">/</span>
-              <Link href="/archives" className="transition hover:text-[#f8efe6]">
-                Archives
-              </Link>
-            </div>
-          </div>
+          <div className="hidden lg:flex lg:justify-end" />
         </header>
 
         <section className="mt-4 grid gap-4 sm:mt-7 sm:gap-5 xl:grid-cols-[minmax(0,1.45fr)_minmax(22rem,0.7fr)] xl:items-start">

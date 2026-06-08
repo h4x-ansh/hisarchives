@@ -59,7 +59,7 @@ const archivedWork = [
     year: "2026",
     accent: "#10b981",
     word: "FITNESS",
-    href: "/identity",
+    href: "/me",
     shelfLabel: "Health / Routine",
   },
   {
@@ -182,7 +182,6 @@ function ShelfSpine({
       onFocus={onActivate}
       onClick={onActivate}
     >
-      <Link href={href} className="absolute inset-0 z-10" aria-label={title} />
       <div
         aria-hidden
         className="pointer-events-none absolute inset-0"
@@ -401,13 +400,6 @@ export function ArchivePage() {
   const [showLoader, setShowLoader] = useState(false);
   const [loaderStep, setLoaderStep] = useState(0);
   const activeItem = activeIndex === null ? null : archivedWork[activeIndex];
-
-  useEffect(() => {
-    const isTouchDevice = window.matchMedia("(hover: none)").matches || window.matchMedia("(pointer: coarse)").matches;
-    if (isTouchDevice) {
-      setActiveIndex(0);
-    }
-  }, []);
 
   useEffect(() => {
     const seen = window.sessionStorage.getItem("hisarchives-archives-visited");

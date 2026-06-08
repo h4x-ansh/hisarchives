@@ -127,6 +127,7 @@ export function Homepage() {
   const [storyIndex, setStoryIndex] = useState(0);
   const [heroShift, setHeroShift] = useState({ x: 0, y: 0 });
   const [heroProgress, setHeroProgress] = useState(0);
+  const [isMobileHero, setIsMobileHero] = useState(false);
   const heroRef = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
@@ -154,6 +155,21 @@ export function Homepage() {
       lenis.destroy();
     };
   }, [reduceMotion]);
+
+  useEffect(() => {
+    const query = window.matchMedia("(max-width: 767px)");
+
+    const updateMobileHero = () => {
+      setIsMobileHero(query.matches);
+    };
+
+    updateMobileHero();
+    query.addEventListener("change", updateMobileHero);
+
+    return () => {
+      query.removeEventListener("change", updateMobileHero);
+    };
+  }, []);
 
   useEffect(() => {
     if (reduceMotion) {
@@ -271,7 +287,7 @@ export function Homepage() {
           >
             EST. 2007
           </motion.div>
-            <div className="relative grid min-h-[calc(100vh-6rem)] gap-8 py-10 lg:grid-cols-[1.1fr_0.9fr] lg:items-center lg:py-0">
+            <div className="relative grid min-h-[calc(100vh-6rem)] gap-8 py-10 md:max-xl:gap-4 md:max-xl:py-6 lg:grid-cols-[1.1fr_0.9fr] lg:items-center lg:py-0">
             <div
               className="relative z-10 flex flex-col justify-center text-left"
               style={{
@@ -282,12 +298,12 @@ export function Homepage() {
                 initial={reduceMotion ? false : { opacity: 0, y: 20 }}
                 animate={reduceMotion ? undefined : { opacity: 1, y: 0 }}
                 transition={{ duration: 0.42, ease: [0.22, 1, 0.36, 1] }}
-                className="space-y-6 lg:max-w-2xl"
+                className="space-y-6 md:max-xl:space-y-4 lg:max-w-2xl"
               >
                 <p className="text-[0.72rem] uppercase tracking-[0.5em] text-muted">
                   a living archive
                 </p>
-                <h1 className="text-balance text-6xl font-light tracking-[0.15em] sm:text-8xl lg:text-[8.75rem]">
+                <h1 className="text-balance text-6xl font-light leading-[0.9] tracking-[0.15em] sm:text-[clamp(3.5rem,6vw,5.5rem)] sm:leading-[0.92] md:max-xl:text-[clamp(3.35rem,5.1vw,5.3rem)] md:max-xl:leading-[0.9] md:max-xl:tracking-[0.1em] lg:text-[clamp(4.75rem,5vw,6.75rem)] lg:leading-[0.9] xl:text-[8.75rem]">
                   THE ARCHIVES
                 </h1>
                 <p className="max-w-xs text-sm uppercase leading-8 tracking-[0.35em] text-muted sm:max-w-none sm:text-base">
@@ -301,7 +317,7 @@ export function Homepage() {
                 </p>
               </motion.div>
 
-              <div className="mt-10 flex w-full max-w-2xl flex-col gap-3 text-left sm:mt-12">
+              <div className="mt-10 flex w-full max-w-2xl flex-col gap-3 text-left md:max-xl:mt-6 sm:mt-12">
                 <p className="text-[0.68rem] uppercase tracking-[0.55em] text-muted">Live record feed</p>
                 <AnimatePresence mode="wait">
                   <motion.div
@@ -323,7 +339,7 @@ export function Homepage() {
               </div>
             </div>
 
-            <div className="relative flex min-h-[28rem] items-end justify-center overflow-visible lg:min-h-[48rem] lg:justify-end">
+            <div className="relative flex min-h-[22rem] items-end justify-center overflow-visible lg:min-h-[48rem] lg:justify-end">
               <motion.div
                 aria-hidden
                 animate={reduceMotion ? undefined : { opacity: [0.12, 0.18, 0.12] }}
@@ -360,10 +376,10 @@ export function Homepage() {
                 initial={reduceMotion ? false : { opacity: 0, y: 16 }}
                 animate={reduceMotion ? undefined : { opacity: 1, y: 0 }}
                 transition={{ duration: 0.42, ease: [0.22, 1, 0.36, 1] }}
-                className="relative z-10 w-[min(92vw,54rem)] translate-y-6 sm:w-[min(82vw,60rem)] lg:absolute lg:bottom-[-7rem] lg:right-[-18rem] lg:w-[min(64vw,78rem)]"
+                className="relative z-10 w-[min(112vw,70rem)] sm:w-[min(82vw,60rem)] lg:absolute lg:bottom-[-7rem] lg:right-[-18rem] lg:w-[min(64vw,78rem)]"
                 style={{
                   opacity: Math.max(0.3, 1 - heroProgress * 0.7),
-                  transform: `translate3d(${heroShift.x * 0.14 + 18}px, ${heroShift.y * 0.14 + 12}px, 0)`,
+                  transform: `translate3d(${heroShift.x * 0.14 + (isMobileHero ? 0 : 18)}px, ${heroShift.y * 0.14 + (isMobileHero ? -12 : 12)}px, 0) scale(${isMobileHero ? 2.01 : 1})`,
                 }}
               >
                 <motion.div
@@ -377,7 +393,7 @@ export function Homepage() {
                     width={1200}
                     height={1400}
                     priority
-                    sizes="(min-width: 1024px) 36rem, 88vw"
+                    sizes="(min-width: 1024px) 36rem, 96vw"
                     className="h-auto w-full select-none object-contain drop-shadow-[0_28px_80px_rgba(0,0,0,0.42)] [mask-image:linear-gradient(to_bottom,rgba(0,0,0,1)_72%,rgba(0,0,0,0.92)_84%,transparent_100%)]"
                   />
                 </motion.div>

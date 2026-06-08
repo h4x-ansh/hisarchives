@@ -19,7 +19,7 @@ const archiveNavItems = [
   { href: "/", label: "Home", description: "Landing archive", icon: House },
   { href: "/archives", label: "Archives", description: "Stored projects and records", icon: FolderArchive },
   { href: "/now", label: "Now", description: "Current status and focus", icon: Activity },
-  { href: "/identity", label: "Identity", description: "Personal metadata", icon: User },
+  { href: "/me", label: "Identity", description: "Personal metadata", icon: User },
   { href: "/timeline", label: "Timeline", description: "Chronological record of events", icon: Calendar },
   { href: "/activity", label: "Journal", description: "Daily logs and movement", icon: Activity },
   { href: "/gallery", label: "Curated", description: "Visual archive", icon: Images },
@@ -33,7 +33,7 @@ export function SiteHeader({
     | "/"
     | "/archives"
     | "/now"
-    | "/identity"
+    | "/me"
     | "/timeline"
     | "/activity"
     | "/gallery"
@@ -54,7 +54,7 @@ export function SiteHeader({
         aria-label="Open archive navigation"
         aria-expanded={mobileOpen}
         onClick={() => setMobileOpen(true)}
-        className="fixed left-4 top-4 z-50 inline-flex h-11 w-11 items-center justify-center rounded-[1rem] bg-black/35 text-text shadow-[0_16px_40px_rgba(0,0,0,0.24)] backdrop-blur-2xl transition-transform hover:scale-[1.03] lg:hidden"
+        className="fixed left-4 top-4 z-50 inline-flex h-11 w-11 items-center justify-center rounded-[1rem] bg-black/35 text-text shadow-[0_16px_40px_rgba(0,0,0,0.24)] backdrop-blur-2xl transition-transform hover:scale-[1.03] xl:hidden"
       >
         <Menu className="h-4.5 w-4.5" />
       </button>
@@ -65,7 +65,7 @@ export function SiteHeader({
             <motion.button
               type="button"
               aria-label="Close archive navigation"
-              className="fixed inset-0 z-40 bg-black/50 backdrop-blur-[2px] lg:hidden"
+              className="fixed inset-0 z-40 bg-black/50 backdrop-blur-[2px] xl:hidden"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
@@ -77,7 +77,7 @@ export function SiteHeader({
               animate={{ x: 0 }}
               exit={{ x: "-100%" }}
               transition={{ type: "spring", stiffness: 300, damping: 34 }}
-              className="fixed inset-y-0 left-0 z-50 w-[min(86vw,20rem)] bg-black/22 shadow-[0_24px_80px_rgba(0,0,0,0.3)] backdrop-blur-3xl lg:hidden"
+              className="fixed inset-y-0 left-0 z-50 w-[min(86vw,20rem)] bg-black/22 shadow-[0_24px_80px_rgba(0,0,0,0.3)] backdrop-blur-3xl xl:hidden"
             >
               <div className="flex items-center justify-between px-5 py-4">
                 <div>
@@ -130,7 +130,7 @@ export function SiteHeader({
         ) : null}
       </AnimatePresence>
 
-      <aside className="group fixed left-5 top-5 bottom-5 z-30 hidden w-[72px] flex-col rounded-[1.5rem] bg-black/18 shadow-[0_16px_40px_rgba(0,0,0,0.18)] backdrop-blur-3xl transition-[width] duration-300 lg:flex lg:hover:w-[18rem] lg:focus-within:w-[18rem]">
+      <aside className="group fixed left-5 top-5 bottom-5 z-30 hidden w-[72px] flex-col rounded-[1.5rem] bg-black/18 shadow-[0_16px_40px_rgba(0,0,0,0.18)] backdrop-blur-3xl transition-[width] duration-300 xl:flex xl:hover:w-[18rem] xl:focus-within:w-[18rem]">
         <div className="flex h-18 items-center px-2.5">
           <Link
             href="/"
@@ -139,7 +139,7 @@ export function SiteHeader({
           >
             <House className="h-4 w-4" />
           </Link>
-          <div className="ml-3 min-w-0 overflow-hidden whitespace-nowrap opacity-0 transition-opacity duration-200 lg:group-hover:opacity-100 lg:group-focus-within:opacity-100">
+          <div className="ml-3 min-w-0 overflow-hidden whitespace-nowrap opacity-0 transition-opacity duration-200 xl:group-hover:opacity-100 xl:group-focus-within:opacity-100">
             <p className="text-[0.68rem] uppercase tracking-[0.45em] text-muted">HisArchives</p>
             <p className="mt-1 text-sm uppercase tracking-[0.3em] text-text">Archive Index</p>
           </div>
@@ -168,7 +168,7 @@ export function SiteHeader({
                   <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-black/20 text-text transition-transform duration-200 group-hover/item:scale-[1.03]">
                     <Icon className={`h-3.5 w-3.5 ${isActive ? "text-text" : "text-text/85"}`} />
                   </span>
-                  <span className="min-w-0 overflow-hidden whitespace-nowrap opacity-0 transition-opacity duration-200 lg:group-hover:opacity-100 lg:group-focus-within:opacity-100">
+                  <span className="min-w-0 overflow-hidden whitespace-nowrap opacity-0 transition-opacity duration-200 xl:group-hover:opacity-100 xl:group-focus-within:opacity-100">
                     <span className={`block text-sm font-light tracking-wide ${isActive ? "text-text" : "text-text/92"}`}>
                       {item.label}
                     </span>
@@ -182,7 +182,7 @@ export function SiteHeader({
           <div className="px-1 pb-1">
             <div className="rounded-[1rem] bg-white/[0.03] px-3 py-2 shadow-[0_0_0_1px_rgba(255,255,255,0.03)]">
               <p className="text-[0.68rem] uppercase tracking-[0.45em] text-muted">◎</p>
-              <p className="mt-2 overflow-hidden whitespace-nowrap text-[0.68rem] uppercase tracking-[0.3em] text-text opacity-0 transition-opacity duration-200 lg:group-hover:opacity-100 lg:group-focus-within:opacity-100">
+              <p className="mt-2 overflow-hidden whitespace-nowrap text-[0.68rem] uppercase tracking-[0.3em] text-text opacity-0 transition-opacity duration-200 xl:group-hover:opacity-100 xl:group-focus-within:opacity-100">
                 {timestamp ?? "Archive State"}
               </p>
             </div>
