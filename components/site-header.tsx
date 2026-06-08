@@ -6,12 +6,11 @@ import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   Activity,
-  BookOpen,
   Calendar,
   FileText,
   FolderArchive,
-  House,
   Images,
+  House,
   Menu,
   User,
   X,
@@ -23,11 +22,11 @@ const archiveNavItems = [
   { href: "/now", label: "Now", description: "Current status and focus", icon: Activity },
   { href: "/identity", label: "Identity", description: "Personal metadata", icon: User },
   { href: "/timeline", label: "Timeline", description: "Chronological record of events", icon: Calendar },
-  { href: "/activity", label: "Activity", description: "Daily logs and movement", icon: Activity },
-  { href: "/gallery", label: "Gallery", description: "Visual archive", icon: Images },
-  { href: "/library", label: "Library", description: "Collected resources", icon: BookOpen },
+  { href: "/activity", label: "Journal", description: "Daily logs and movement", icon: Activity },
+  { href: "/gallery", label: "Curated", description: "Visual archive", icon: Images },
   { href: "/records", label: "Records", description: "Collected documents and notes", icon: FileText },
   { href: "/birthdays", label: "Important Dates", description: "Marked dates and milestones", icon: Calendar },
+  { href: "/dashboard", label: "Dashboard", description: "Private control room", icon: Activity },
 ] as const;
 
 export function SiteHeader({
@@ -42,10 +41,9 @@ export function SiteHeader({
     | "/timeline"
     | "/activity"
     | "/gallery"
-  | "/library"
-  | "/records"
-  | "/birthdays"
-  | "/dashboard";
+    | "/records"
+    | "/birthdays"
+    | "/dashboard";
   timestamp?: string;
 }) {
   const pathname = usePathname();

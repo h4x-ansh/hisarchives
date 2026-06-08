@@ -17,7 +17,6 @@ export function ArchiveFrame({
     | "/timeline"
     | "/activity"
   | "/gallery"
-  | "/library"
   | "/records"
   | "/birthdays"
   | "/dashboard";
