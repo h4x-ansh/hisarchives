@@ -45,15 +45,15 @@ export function ArchiveHero({
   const reduceMotion = useReducedMotion();
 
   return (
-    <section className="flex min-h-[52vh] items-end py-18 sm:py-24">
+    <section className="flex min-h-[18vh] items-end py-6 sm:min-h-[52vh] sm:py-24">
       <motion.div
-        initial={reduceMotion ? false : { opacity: 0, y: 20 }}
+        initial={false}
         animate={reduceMotion ? undefined : { opacity: 1, y: 0 }}
         transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
         className="max-w-4xl space-y-6"
       >
         <p className="text-[0.72rem] uppercase tracking-[0.5em] text-muted">{eyebrow}</p>
-        <h1 className="text-balance text-6xl font-light tracking-[0.15em] sm:text-8xl lg:text-[8rem]">
+        <h1 className="text-balance text-[clamp(3rem,12vw,4.5rem)] font-light tracking-[0.15em] sm:text-8xl lg:text-[8rem]">
           {title}
         </h1>
         <p className="max-w-2xl text-base leading-8 text-muted sm:text-lg">{subtitle}</p>

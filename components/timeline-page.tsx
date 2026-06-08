@@ -2,7 +2,7 @@
 
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import type { WheelEvent as ReactWheelEvent } from "react";
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 const palette = {
   background: "#212842",
@@ -193,7 +193,7 @@ function TimelineHero({ entry }: { entry: (typeof milestones)[number] }) {
         animate={reduceMotion ? undefined : { opacity: 1, y: 0 }}
         exit={reduceMotion ? undefined : { opacity: 0, y: -12 }}
         transition={{ duration: 0.38, ease: [0.22, 1, 0.36, 1] }}
-        className="grid gap-6 xl:grid-cols-[minmax(0,1.15fr)_minmax(18rem,0.78fr)] xl:items-start"
+        className="grid gap-4 sm:gap-6 xl:grid-cols-[minmax(0,1.15fr)_minmax(18rem,0.78fr)] xl:items-start"
       >
         <div className="space-y-4">
           <p className="text-[0.68rem] uppercase tracking-[0.5em] text-[#c5b8a0]">Selected record</p>
@@ -229,7 +229,7 @@ function TimelineHero({ entry }: { entry: (typeof milestones)[number] }) {
         <motion.div
           animate={reduceMotion ? undefined : { y: [0, -6, 0] }}
           transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
-          className="relative mx-auto h-[18rem] w-full max-w-[18rem] overflow-hidden rounded-[1.65rem] bg-[#f5ebd6] shadow-[0_20px_60px_rgba(0,0,0,0.18)]"
+          className="relative mx-auto h-[12.25rem] w-full max-w-[12.5rem] overflow-hidden rounded-[1.65rem] bg-[#f5ebd6] shadow-[0_20px_60px_rgba(0,0,0,0.18)] sm:h-[18rem] sm:max-w-[18rem]"
         >
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_20%,rgba(255,255,255,0.84),transparent_30%),radial-gradient(circle_at_50%_68%,rgba(33,40,66,0.12),transparent_34%)]" />
           <div className="absolute inset-0 opacity-[0.08] bg-[linear-gradient(rgba(33,40,66,0.07)_1px,transparent_1px),linear-gradient(90deg,rgba(33,40,66,0.07)_1px,transparent_1px)] bg-[size:18px_18px]" />
@@ -251,12 +251,28 @@ function MuseumCard({
   entry,
   active,
   onActivate,
+  isTouchDevice,
 }: {
   entry: (typeof milestones)[number];
   active: boolean;
   onActivate: () => void;
+  isTouchDevice: boolean;
 }) {
   const reduceMotion = useReducedMotion();
+
+  const cardWidth = isTouchDevice
+    ? active
+      ? "clamp(13rem, 82vw, 15rem)"
+      : "clamp(6rem, 20vw, 7rem)"
+    : active
+      ? "clamp(22rem, 60vw, 40rem)"
+      : "clamp(3.35rem, 4.2vw, 4.1rem)";
+
+  const cardHeight = isTouchDevice
+    ? active
+      ? "14.75rem"
+      : "14rem"
+    : "26.5rem";
 
   return (
     <motion.button
@@ -265,9 +281,13 @@ function MuseumCard({
       whileHover={reduceMotion ? undefined : { y: -5, scale: 1.02 }}
       whileTap={reduceMotion ? undefined : { scale: 0.99 }}
       className={`group relative block rounded-[1.55rem] border border-white/12 bg-[linear-gradient(180deg,rgba(255,247,232,0.16),rgba(255,247,232,0.08))] p-3 text-left shadow-[0_12px_40px_rgba(0,0,0,0.18)] transition-shadow duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#3A4367]/45 focus-visible:ring-offset-2 focus-visible:ring-offset-transparent ${
-        "featured" in entry && entry.featured ? "h-[21rem] w-[13rem] sm:h-[22rem] sm:w-[13.5rem]" : "h-[20rem] w-[12.5rem] sm:h-[21rem] sm:w-[13rem]"
+        isTouchDevice
+          ? "h-[14rem] w-[6.1rem] sm:h-[22rem] sm:w-[13.5rem]"
+          : "h-[17rem] w-[10.25rem] sm:h-[21rem] sm:w-[13rem]"
       }`}
       style={{
+        width: cardWidth,
+        height: cardHeight,
         boxShadow: active ? "0 18px 54px rgba(0,0,0,0.28)" : "0 12px 40px rgba(0,0,0,0.18)",
       }}
     >
@@ -293,7 +313,7 @@ function MuseumCard({
         </div>
 
         <div className="mt-4 flex-1">
-          <div className="h-[8rem] rounded-[1rem] bg-[linear-gradient(180deg,rgba(255,255,255,0.45),rgba(246,238,224,0.25))] p-2.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.22)]">
+          <div className="h-[6.5rem] rounded-[1rem] bg-[linear-gradient(180deg,rgba(255,255,255,0.45),rgba(246,238,224,0.25))] p-2.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.22)] sm:h-[8rem]">
             <MuseumVisual kind={entry.kind} imageText={entry.imageText} />
           </div>
         </div>
@@ -312,9 +332,27 @@ export function TimelinePage() {
   const reduceMotion = useReducedMotion();
   const railRef = useRef<HTMLDivElement | null>(null);
   const [selectedIndex, setSelectedIndex] = useState(1);
+  const [isTouchDevice, setIsTouchDevice] = useState(false);
   const selectedEntry = milestones[selectedIndex];
 
   const orderedMilestones = useMemo(() => milestones, []);
+
+  useEffect(() => {
+    const touchQuery = window.matchMedia("(hover: none)");
+    const pointerQuery = window.matchMedia("(pointer: coarse)");
+    const updateTouchState = () => {
+      setIsTouchDevice(touchQuery.matches || pointerQuery.matches);
+    };
+
+    updateTouchState();
+    touchQuery.addEventListener("change", updateTouchState);
+    pointerQuery.addEventListener("change", updateTouchState);
+
+    return () => {
+      touchQuery.removeEventListener("change", updateTouchState);
+      pointerQuery.removeEventListener("change", updateTouchState);
+    };
+  }, []);
 
   function handleWheel(event: ReactWheelEvent<HTMLDivElement>) {
     const rail = railRef.current;
@@ -349,7 +387,7 @@ export function TimelinePage() {
           </div>
         </header>
 
-        <section className="mt-5">
+        <section className="mt-4 sm:mt-5">
           <div className="rounded-[3rem] border border-white/10 bg-[linear-gradient(180deg,rgba(255,247,232,0.06),rgba(255,247,232,0.025))] px-4 py-4 shadow-[0_24px_90px_rgba(0,0,0,0.2)] backdrop-blur-sm sm:px-5 sm:py-5">
             <div className="mb-4 flex items-center justify-between gap-4">
               <div>
@@ -370,7 +408,7 @@ export function TimelinePage() {
               <div
                 ref={railRef}
                 onWheel={handleWheel}
-                className="relative flex gap-4 overflow-x-auto pb-2 pt-4 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
+                className="relative flex gap-4 overflow-x-auto pb-2 pt-3 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
                 style={{ touchAction: "pan-x" }}
               >
                 {orderedMilestones.map((entry, index) => {
@@ -403,7 +441,7 @@ export function TimelinePage() {
                       </div>
                       <div className="relative">
                         {active ? <div className="absolute -top-2 left-1/2 h-3 w-3 -translate-x-1/2 rounded-full bg-[#3A4367] shadow-[0_0_0_10px_rgba(58,67,103,0.1)]" /> : null}
-                        <MuseumCard entry={entry} active={active} onActivate={() => setSelectedIndex(index)} />
+                        <MuseumCard entry={entry} active={active} onActivate={() => setSelectedIndex(index)} isTouchDevice={isTouchDevice} />
                       </div>
                     </motion.div>
                   );
@@ -412,7 +450,7 @@ export function TimelinePage() {
             </div>
           </div>
 
-        <div className="mt-5 rounded-[3rem] border border-white/10 bg-[linear-gradient(180deg,rgba(255,247,232,0.05),rgba(255,247,232,0.02))] px-5 py-5 shadow-[0_24px_90px_rgba(0,0,0,0.2)] backdrop-blur-sm sm:px-6 sm:py-6 xl:px-8 xl:py-7">
+        <div className="mt-3 rounded-[3rem] border border-white/10 bg-[linear-gradient(180deg,rgba(255,247,232,0.05),rgba(255,247,232,0.02))] px-5 py-5 shadow-[0_24px_90px_rgba(0,0,0,0.2)] backdrop-blur-sm sm:mt-5 sm:px-6 sm:py-6 xl:px-8 xl:py-7">
           <TimelineHero entry={selectedEntry} />
         </div>
         </section>

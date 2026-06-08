@@ -61,16 +61,16 @@ function FocusChip({ title, detail, hint }: (typeof focusCards)[number]) {
     <motion.div
       whileHover={reduceMotion ? undefined : { y: -4, scale: 1.015 }}
       transition={{ duration: 0.18 }}
-      className="group relative overflow-hidden rounded-[1.5rem] border border-[#d28a41]/15 bg-[linear-gradient(180deg,rgba(255,255,255,0.045),rgba(0,0,0,0.04))] p-4"
+      className="group relative overflow-hidden rounded-[1.5rem] border border-[#d28a41]/15 bg-[linear-gradient(180deg,rgba(255,255,255,0.045),rgba(0,0,0,0.04))] p-3 sm:p-4"
     >
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,177,98,0.16),transparent_32%)] opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
-      <div className="relative space-y-2">
+      <div className="relative space-y-1.5 sm:space-y-2">
         <div className="flex items-center justify-between gap-3">
-          <p className="text-[1rem] font-light tracking-wide text-[#f8efe6]">{title}</p>
+          <p className="text-[0.95rem] font-light tracking-wide text-[#f8efe6] sm:text-[1rem]">{title}</p>
           <span className="h-2.5 w-2.5 rounded-full bg-amber-300/80 shadow-[0_0_16px_rgba(251,191,36,0.7)]" />
         </div>
         <p className="text-[0.66rem] uppercase tracking-[0.38em] text-amber-100/60">{detail}</p>
-        <p className="text-sm leading-6 text-amber-50/70">{hint}</p>
+        <p className="text-[0.82rem] leading-6 text-amber-50/70 sm:text-sm">{hint}</p>
       </div>
     </motion.div>
   );
@@ -85,7 +85,7 @@ function StatRing() {
       initial={reduceMotion ? false : { opacity: 0, y: 18 }}
       animate={reduceMotion ? undefined : { opacity: 1, y: 0 }}
       transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-      className="relative overflow-hidden rounded-[2rem] border border-[#d28a41]/18 bg-[linear-gradient(180deg,rgba(56,34,22,0.72),rgba(18,10,7,0.94))] p-5"
+      className="relative overflow-hidden rounded-[2rem] border border-[#d28a41]/18 bg-[linear-gradient(180deg,rgba(56,34,22,0.72),rgba(18,10,7,0.94))] p-4 sm:p-5"
     >
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(255,177,98,0.16),transparent_30%),radial-gradient(circle_at_bottom_right,rgba(255,255,255,0.04),transparent_28%)]" />
       <div className="relative space-y-5">
@@ -99,9 +99,9 @@ function StatRing() {
           </div>
         </div>
 
-        <div className="grid gap-5 md:grid-cols-[minmax(0,1fr)_12rem]">
+        <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_12rem] sm:gap-5">
           <div className="flex items-center justify-center">
-            <div className="relative flex aspect-square w-full max-w-[23rem] items-center justify-center">
+            <div className="relative flex aspect-square w-full max-w-[18rem] items-center justify-center sm:max-w-[23rem]">
               <div
                 className="absolute inset-0 rounded-full"
                 style={{
@@ -112,15 +112,15 @@ function StatRing() {
               <div className="absolute inset-[1.1rem] rounded-full bg-[#1f130d] shadow-[inset_0_0_0_1px_rgba(255,255,255,0.04)]" />
               <div className="relative text-center">
                 <p className="text-[0.66rem] uppercase tracking-[0.45em] text-amber-100/55">Discipline Index</p>
-                <p className="mt-4 text-6xl font-light text-[#f8efe6]">{ring}</p>
-                <p className="mt-3 text-sm uppercase tracking-[0.35em] text-amber-100/70">Active</p>
+                <p className="mt-3 text-5xl font-light text-[#f8efe6] sm:mt-4 sm:text-6xl">{ring}</p>
+                <p className="mt-2 text-[0.72rem] uppercase tracking-[0.35em] text-amber-100/70 sm:mt-3 sm:text-sm">Active</p>
               </div>
             </div>
           </div>
 
-          <div className="space-y-3">
+          <div className="space-y-2.5 sm:space-y-3">
             {metrics.map((item) => (
-              <div key={item.label} className="rounded-[1.4rem] border border-white/6 bg-white/[0.03] px-4 py-4">
+              <div key={item.label} className="rounded-[1.4rem] border border-white/6 bg-white/[0.03] px-4 py-3 sm:py-4">
                 <div className="flex items-center justify-between gap-4 text-[0.66rem] uppercase tracking-[0.35em] text-amber-100/60">
                   <span>{item.label}</span>
                   <span>{item.value}</span>
@@ -141,20 +141,20 @@ function StatusRail() {
   const reduceMotion = useReducedMotion();
 
   return (
-    <motion.aside
+      <motion.aside
       initial={reduceMotion ? false : { opacity: 0, y: 18 }}
       animate={reduceMotion ? undefined : { opacity: 1, y: 0 }}
       transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
-      className="rounded-[2rem] border border-[#d28a41]/18 bg-[linear-gradient(180deg,rgba(54,33,22,0.66),rgba(18,10,7,0.94))] p-5 shadow-[0_26px_90px_rgba(0,0,0,0.3)]"
+      className="rounded-[2rem] border border-[#d28a41]/18 bg-[linear-gradient(180deg,rgba(54,33,22,0.66),rgba(18,10,7,0.94))] p-4 shadow-[0_26px_90px_rgba(0,0,0,0.3)] sm:p-5"
     >
-      <div className="space-y-4">
+        <div className="space-y-3 sm:space-y-4">
         <div>
           <p className="text-[0.66rem] uppercase tracking-[0.45em] text-amber-100/55">Active Status</p>
           <h2 className="mt-2 text-2xl font-light tracking-wide text-[#f8efe6]">Node rail</h2>
         </div>
-        <div className="space-y-3">
+        <div className="space-y-2.5 sm:space-y-3">
           {statusNodes.map((node) => (
-            <div key={node.code} className="flex items-center gap-3 rounded-[1.2rem] bg-white/[0.04] px-4 py-3 transition hover:bg-white/[0.06]">
+            <div key={node.code} className="flex items-center gap-3 rounded-[1.2rem] bg-white/[0.04] px-4 py-2.5 transition hover:bg-white/[0.06] sm:py-3">
               <span className={`h-3 w-3 rounded-full ${node.tone} shadow-[0_0_16px_rgba(251,191,36,0.45)]`} />
               <div className="min-w-0 flex-1">
                 <p className="text-sm uppercase tracking-[0.35em] text-[#f8efe6]">{node.code}</p>
@@ -164,12 +164,12 @@ function StatusRail() {
           ))}
         </div>
 
-        <div className="rounded-[1.4rem] border border-white/6 bg-black/18 p-4">
+        <div className="rounded-[1.4rem] border border-white/6 bg-black/18 p-3 sm:p-4">
           <div className="flex items-center justify-between text-[0.66rem] uppercase tracking-[0.35em] text-amber-100/55">
             <span>Session</span>
             <span>Tonight</span>
           </div>
-          <div className="mt-3 space-y-2 text-sm text-[#f8efe6]">
+          <div className="mt-2.5 space-y-2 text-[0.88rem] text-[#f8efe6] sm:mt-3 sm:text-sm">
             <div className="flex items-center gap-2 text-amber-100/70"><Clock3 className="h-4 w-4" /> 9:42 PM</div>
             <div className="flex items-center gap-2 text-amber-100/70"><MapPin className="h-4 w-4" /> India</div>
             <div className="flex items-center gap-2 text-amber-100/70"><Activity className="h-4 w-4" /> Focus mode on</div>
@@ -242,18 +242,18 @@ export function NowPage() {
           </div>
         </header>
 
-        <section className="mt-7 grid gap-5 xl:grid-cols-[minmax(0,1.45fr)_minmax(22rem,0.7fr)] xl:items-start">
-          <WorkPanel className="relative overflow-visible p-5 sm:p-7 xl:p-8">
+        <section className="mt-4 grid gap-4 sm:mt-7 sm:gap-5 xl:grid-cols-[minmax(0,1.45fr)_minmax(22rem,0.7fr)] xl:items-start">
+          <WorkPanel className="relative overflow-visible p-4 sm:p-7 xl:p-8">
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_72%_12%,rgba(255,178,92,0.2),transparent_26%),radial-gradient(circle_at_15%_18%,rgba(255,255,255,0.05),transparent_16%),radial-gradient(circle_at_70%_72%,rgba(255,124,58,0.12),transparent_20%)]" />
-            <div className="relative grid gap-6 xl:grid-cols-[minmax(0,1.1fr)_minmax(24rem,1fr)] xl:items-stretch">
-              <div className="space-y-6">
-                <div className="grid gap-4 sm:grid-cols-[minmax(0,1fr)_15rem]">
-                  <div className="space-y-4">
+            <div className="relative grid gap-5 xl:grid-cols-[minmax(0,1.1fr)_minmax(24rem,1fr)] xl:items-stretch">
+              <div className="space-y-5 sm:space-y-6">
+                <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_15rem] sm:gap-4">
+                  <div className="space-y-3 sm:space-y-4">
                     <div className="inline-flex items-center gap-2 rounded-full border border-[#d28a41]/16 bg-white/[0.04] px-4 py-2 text-[0.66rem] uppercase tracking-[0.35em] text-amber-100/70">
                       <Sparkles className="h-3.5 w-3.5 text-amber-300" />
                       Current Focus
                     </div>
-                    <label className="flex items-center gap-3 rounded-[1.5rem] border border-[#d28a41]/16 bg-[#1a110c]/78 px-4 py-4 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.02)] transition focus-within:border-amber-300/35 hover:bg-[#1c130d]/88">
+                    <label className="flex items-center gap-3 rounded-[1.5rem] border border-[#d28a41]/16 bg-[#1a110c]/78 px-4 py-3.5 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.02)] transition focus-within:border-amber-300/35 hover:bg-[#1c130d]/88 sm:py-4">
                       <Search className="h-4 w-4 text-amber-200/65" />
                       <input
                         type="text"
@@ -263,27 +263,27 @@ export function NowPage() {
                     </label>
                   </div>
 
-                  <div className="rounded-[2rem] border border-[#d28a41]/16 bg-[linear-gradient(180deg,rgba(255,255,255,0.04),rgba(0,0,0,0.06))] p-4">
+                  <div className="rounded-[2rem] border border-[#d28a41]/16 bg-[linear-gradient(180deg,rgba(255,255,255,0.04),rgba(0,0,0,0.06))] p-3.5 sm:p-4">
                     <p className="text-[0.66rem] uppercase tracking-[0.45em] text-amber-100/55">Current Mission</p>
-                    <p className="mt-3 text-3xl font-light text-[#f8efe6]">JEE 2027</p>
-                    <p className="mt-3 text-sm leading-7 text-amber-50/70">
+                    <p className="mt-2.5 text-2xl font-light text-[#f8efe6] sm:mt-3 sm:text-3xl">JEE 2027</p>
+                    <p className="mt-2.5 text-[0.88rem] leading-6 text-amber-50/70 sm:mt-3 sm:text-sm sm:leading-7">
                       The anchor for the session. Everything else supports this track.
                     </p>
                   </div>
                 </div>
 
-                <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-2">
+                <div className="grid gap-2.5 sm:grid-cols-2 sm:gap-3 xl:grid-cols-2">
                   {focusCards.map((card) => (
                     <FocusChip key={card.title} {...card} />
                   ))}
                 </div>
               </div>
 
-              <div className="relative min-h-[42rem] xl:min-h-[46rem]">
+              <div className="relative min-h-[28rem] sm:min-h-[42rem] xl:min-h-[46rem]">
                 <div className="absolute inset-0 overflow-visible">
                   <motion.div
                     aria-hidden
-                    className="absolute left-1/2 top-[-1rem] h-[36rem] w-[36rem] -translate-x-1/2 rounded-full bg-[radial-gradient(circle,rgba(255,180,92,0.42)_0%,rgba(255,145,60,0.2)_32%,transparent_70%)] blur-3xl xl:h-[42rem] xl:w-[42rem]"
+                    className="absolute left-1/2 top-[-1rem] h-[24rem] w-[24rem] -translate-x-1/2 rounded-full bg-[radial-gradient(circle,rgba(255,180,92,0.42)_0%,rgba(255,145,60,0.2)_32%,transparent_70%)] blur-3xl sm:h-[36rem] sm:w-[36rem] xl:h-[42rem] xl:w-[42rem]"
                     animate={reduceMotion ? undefined : { opacity: [0.58, 0.9, 0.58], scale: [1, 1.05, 1] }}
                     transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
                   />
@@ -297,14 +297,14 @@ export function NowPage() {
                       alt="Ansh cutout portrait"
                       fill
                       priority
-                      sizes="(max-width: 1280px) 80vw, 30rem"
+                      sizes="(max-width: 1280px) 74vw, 30rem"
                       className="object-contain object-bottom drop-shadow-[0_32px_48px_rgba(0,0,0,0.5)]"
                     />
                   </motion.div>
-                  <div className="absolute inset-x-[16%] bottom-[6%] h-40 rounded-full bg-amber-300/16 blur-3xl" />
-                  <div className="absolute inset-x-[18%] top-[14%] h-28 rounded-full bg-white/10 blur-3xl" />
-                  <div className="absolute left-[10%] top-[14%] text-6xl font-light tracking-[-0.06em] text-[#f8efe6]/4">0007</div>
-                  <div className="absolute right-[8%] top-[28%] text-5xl font-light tracking-[-0.06em] text-[#f8efe6]/4">JEE 2027</div>
+                  <div className="absolute inset-x-[16%] bottom-[6%] h-32 rounded-full bg-amber-300/16 blur-3xl sm:h-40" />
+                  <div className="absolute inset-x-[18%] top-[14%] h-[5.5rem] rounded-full bg-white/10 blur-3xl sm:h-28" />
+                  <div className="absolute left-[10%] top-[14%] text-4xl font-light tracking-[-0.06em] text-[#f8efe6]/4 sm:text-6xl">0007</div>
+                  <div className="absolute right-[8%] top-[28%] text-3xl font-light tracking-[-0.06em] text-[#f8efe6]/4 sm:text-5xl">JEE 2027</div>
                   <div className="absolute inset-x-[14%] top-[44%] h-[1px] bg-white/[0.08]" />
                 </div>
 
@@ -322,12 +322,12 @@ export function NowPage() {
           </div>
         </section>
 
-        <section className="mt-5 grid gap-5 xl:grid-cols-[minmax(0,1.2fr)_minmax(18rem,0.8fr)]">
-          <WorkPanel className="p-5 sm:p-6">
+        <section className="mt-4 grid gap-4 sm:mt-5 sm:gap-5 xl:grid-cols-[minmax(0,1.2fr)_minmax(18rem,0.8fr)]">
+          <WorkPanel className="p-4 sm:p-6">
             <div className="flex items-center justify-between gap-4">
               <div>
                 <p className="text-[0.66rem] uppercase tracking-[0.45em] text-amber-100/55">Recent Activity</p>
-                <h2 className="mt-2 text-2xl font-light tracking-wide text-[#f8efe6]">Live archive log</h2>
+                <h2 className="mt-1.5 text-2xl font-light tracking-wide text-[#f8efe6] sm:mt-2">Live archive log</h2>
               </div>
               <div className="flex items-center gap-2 rounded-full border border-[#d28a41]/16 bg-white/[0.04] px-3 py-1 text-[0.62rem] uppercase tracking-[0.35em] text-amber-100/65">
                 <span className="h-2 w-2 rounded-full bg-amber-300 shadow-[0_0_12px_rgba(251,191,36,0.85)] animate-pulse" />
@@ -335,7 +335,7 @@ export function NowPage() {
               </div>
             </div>
 
-            <div className="mt-5 space-y-3">
+            <div className="mt-4 space-y-3 sm:mt-5">
               {liveLog.map((entry, index) => (
                 <motion.div
                   key={`${entry.time}-${entry.text}`}
@@ -359,39 +359,39 @@ export function NowPage() {
             </div>
           </WorkPanel>
 
-          <WorkPanel className="p-5 sm:p-6">
-            <div className="space-y-5">
+          <WorkPanel className="p-4 sm:p-6">
+            <div className="space-y-4 sm:space-y-5">
               <div>
                 <p className="text-[0.66rem] uppercase tracking-[0.45em] text-amber-100/55">Session Notes</p>
-                <h2 className="mt-2 text-2xl font-light tracking-wide text-[#f8efe6]">Desk temperature</h2>
+                <h2 className="mt-1.5 text-2xl font-light tracking-wide text-[#f8efe6] sm:mt-2">Desk temperature</h2>
               </div>
 
-              <div className="rounded-[1.5rem] border border-[#d28a41]/16 bg-[#1f130d]/72 p-4">
+              <div className="rounded-[1.5rem] border border-[#d28a41]/16 bg-[#1f130d]/72 p-3.5 sm:p-4">
                 <div className="flex items-center justify-between text-[0.66rem] uppercase tracking-[0.4em] text-amber-100/55">
                   <span>Current state</span>
                   <span>Warm</span>
                 </div>
-                <div className="mt-3 h-2 rounded-full bg-white/8">
+                <div className="mt-2.5 h-2 rounded-full bg-white/8 sm:mt-3">
                   <div className="h-full w-[82%] rounded-full bg-gradient-to-r from-amber-300 via-orange-300 to-amber-500" />
                 </div>
-                <p className="mt-4 text-sm leading-7 text-amber-100/70">Late-night workstation energy with contrast, glow, and enough negative space for the cuts to breathe.</p>
+                <p className="mt-3 text-[0.88rem] leading-6 text-amber-100/70 sm:mt-4 sm:text-sm sm:leading-7">Late-night workstation energy with contrast, glow, and enough negative space for the cuts to breathe.</p>
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-2 gap-2.5 sm:gap-3">
                 {[
                   ["Focus", "Strong"],
                   ["Session", "Active"],
                   ["Mood", "Calm"],
                   ["Mode", "Work"],
                 ].map(([label, value]) => (
-                  <div key={label} className="rounded-[1.2rem] border border-white/6 bg-white/[0.04] px-4 py-4">
+                  <div key={label} className="rounded-[1.2rem] border border-white/6 bg-white/[0.04] px-4 py-3.5 sm:py-4">
                     <p className="text-[0.62rem] uppercase tracking-[0.35em] text-amber-100/55">{label}</p>
-                    <p className="mt-2 text-lg font-light text-[#f8efe6]">{value}</p>
+                    <p className="mt-2 text-base font-light text-[#f8efe6] sm:text-lg">{value}</p>
                   </div>
                 ))}
               </div>
 
-              <div className="rounded-[1.5rem] border border-[#d28a41]/16 bg-black/18 px-4 py-4 text-[0.66rem] uppercase tracking-[0.45em] text-amber-100/65">
+              <div className="rounded-[1.5rem] border border-[#d28a41]/16 bg-black/18 px-4 py-3.5 text-[0.66rem] uppercase tracking-[0.45em] text-amber-100/65 sm:py-4">
                 Session active • Focus mode on • Local time 21:42 • Archive connection stable
               </div>
             </div>

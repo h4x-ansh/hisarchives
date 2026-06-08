@@ -113,7 +113,7 @@ function Section({
   children: ReactNode;
 }) {
   return (
-    <section className="border-t border-white/5 py-20 sm:py-28">
+    <section className="border-t border-white/5 py-14 sm:py-28">
       <div className="space-y-6">
         <p className="text-[0.72rem] uppercase tracking-[0.45em] text-muted">{eyebrow}</p>
         <div className="space-y-3">
@@ -403,6 +403,13 @@ export function ArchivePage() {
   const activeItem = activeIndex === null ? null : archivedWork[activeIndex];
 
   useEffect(() => {
+    const isTouchDevice = window.matchMedia("(hover: none)").matches || window.matchMedia("(pointer: coarse)").matches;
+    if (isTouchDevice) {
+      setActiveIndex(0);
+    }
+  }, []);
+
+  useEffect(() => {
     const seen = window.sessionStorage.getItem("hisarchives-archives-visited");
 
     if (!seen) {
@@ -473,15 +480,15 @@ export function ArchivePage() {
       <div className="relative mx-auto flex w-full max-w-7xl flex-col px-5 pb-24 pt-5 sm:px-8 lg:px-12">
         <SiteHeader activePath="/archives" />
 
-        <section className="flex min-h-[52vh] items-end py-18 sm:py-24">
+        <section className="flex min-h-[20vh] items-end py-6 sm:min-h-[52vh] sm:py-24">
           <motion.div
-            initial={reduceMotion ? false : { opacity: 0, y: 20 }}
+            initial={false}
             animate={reduceMotion ? undefined : { opacity: 1, y: 0 }}
             transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
             className="max-w-4xl space-y-6"
           >
             <p className="text-[0.72rem] uppercase tracking-[0.5em] text-muted">Archives</p>
-            <h1 className="text-balance text-6xl font-light tracking-[0.15em] sm:text-8xl lg:text-[8rem]">
+            <h1 className="text-balance text-[clamp(3rem,12vw,4.5rem)] font-light tracking-[0.15em] sm:text-8xl lg:text-[8rem]">
               ARCHIVES
             </h1>
             <p className="max-w-2xl text-base leading-8 text-muted sm:text-lg">
@@ -490,12 +497,12 @@ export function ArchivePage() {
           </motion.div>
         </section>
 
-        <section className="relative border-t border-white/5 py-20 sm:py-28">
+        <section className="relative border-t border-white/5 py-14 sm:py-28">
           <div className="space-y-6">
             <div className="space-y-2">
               <p className="text-[0.72rem] uppercase tracking-[0.45em] text-muted">Archived Work</p>
               <p className="text-[0.62rem] uppercase tracking-[0.4em] text-muted/70">
-                7 records ? last entry: 06 jun 2026 ? status: active
+                7 records | last entry: 06 jun 2026 | status: active
               </p>
             </div>
             <div className="space-y-4" onMouseLeave={() => setActiveIndex(null)}>

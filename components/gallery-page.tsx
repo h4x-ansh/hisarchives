@@ -352,7 +352,7 @@ function GalleryCard({ item, index }: { item: CuratedItem; index: number }) {
 
   return (
     <motion.article
-      initial={{ opacity: 0, y: 16 }}
+      initial={false}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: 12 }}
       transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1], delay: index * 0.02 }}
@@ -365,7 +365,7 @@ function GalleryCard({ item, index }: { item: CuratedItem; index: number }) {
           ref={imageRef}
           src={source}
           alt={item.title}
-          loading="lazy"
+          loading={index < 12 ? "eager" : "lazy"}
           decoding="async"
           onLoad={() => setLoaded(true)}
           onError={() => {
@@ -385,13 +385,13 @@ function GalleryCard({ item, index }: { item: CuratedItem; index: number }) {
           style={{ background: item.accent }}
         />
         <div className="absolute inset-x-0 bottom-0 h-28 bg-[linear-gradient(180deg,transparent,rgba(0,0,0,0.84))]" />
-        <div className="absolute inset-x-4 bottom-4 space-y-1.5 text-white">
+        <div className="absolute inset-x-3 bottom-3 space-y-1 text-white sm:inset-x-4 sm:bottom-4 sm:space-y-1.5">
           <p className="text-[0.56rem] uppercase tracking-[0.52em] text-white/62">{item.category}</p>
-          <h3 className="text-[1.3rem] font-medium leading-[1.05] tracking-[-0.04em] text-white">
+          <h3 className="text-[1.05rem] font-medium leading-[1.05] tracking-[-0.04em] text-white sm:text-[1.3rem]">
             {item.title}
           </h3>
           <div className="space-y-1 overflow-hidden">
-            <p className="max-h-0 max-w-[82%] overflow-hidden text-[0.9rem] leading-6 text-white/76 opacity-0 transition-all duration-300 group-hover:max-h-24 group-hover:opacity-100">
+            <p className="max-h-0 max-w-[82%] overflow-hidden text-[0.8rem] leading-5 text-white/76 opacity-0 transition-all duration-300 group-hover:max-h-24 group-hover:opacity-100 sm:text-[0.9rem] sm:leading-6">
               {item.category === "Songs"
                 ? "A quiet reminder to build slowly and keep moving."
                 : item.category === "Anime"
@@ -447,11 +447,11 @@ export function GalleryPage() {
 
   return (
     <ArchiveFrame activePath="/gallery" timestamp="curated">
-      <section className="space-y-8 pt-2">
-        <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
+      <section className="space-y-5 pt-2 sm:space-y-8">
+        <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
           <div className="space-y-3">
             <p className="text-[0.62rem] uppercase tracking-[0.56em] text-white/42">Curated</p>
-            <h1 className="text-[clamp(2.9rem,4.8vw,5rem)] font-light tracking-[-0.08em] text-white">
+            <h1 className="text-[clamp(2.3rem,12vw,5rem)] font-light tracking-[-0.08em] text-white">
               Favorite Things
             </h1>
             <p className="max-w-2xl text-sm leading-7 text-white/64 sm:text-[0.98rem]">
@@ -463,7 +463,7 @@ export function GalleryPage() {
           </div>
         </div>
 
-        <div className="flex flex-wrap gap-2.5">
+        <div className="flex flex-wrap gap-2">
           {filterOptions.map((filter) => (
             <FilterPill
               key={filter}
@@ -477,11 +477,11 @@ export function GalleryPage() {
         <AnimatePresence mode="wait">
           <motion.div
             key={activeFilter}
-            initial={reduceMotion ? false : { opacity: 0, y: 14 }}
+            initial={false}
             animate={reduceMotion ? undefined : { opacity: 1, y: 0 }}
             exit={reduceMotion ? undefined : { opacity: 0, y: 10 }}
             transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
-            className="grid gap-5 sm:grid-cols-2 xl:grid-cols-4"
+            className="grid grid-cols-2 gap-3 sm:grid-cols-2 sm:gap-5 xl:grid-cols-4"
           >
             {filteredItems.map((item, index) => (
               <GalleryCard key={item.id} item={item} index={index} />
