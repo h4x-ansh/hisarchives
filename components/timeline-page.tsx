@@ -1,6 +1,7 @@
 ﻿"use client";
 
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import Link from "next/link";
 import type { WheelEvent as ReactWheelEvent } from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
 
@@ -420,13 +421,6 @@ export function TimelinePage() {
             </p>
             <h1 className="text-2xl font-light tracking-[0.22em] text-[#F0E7D5] sm:text-3xl">TIMELINE</h1>
           </div>
-          <div className="flex flex-wrap items-center gap-3 text-[0.64rem] uppercase tracking-[0.35em]" style={{ color: palette.muted }}>
-            <span>Home</span>
-            <span className="text-white/20">/</span>
-            <span>Archives</span>
-            <span className="text-white/20">/</span>
-            <span>Now</span>
-          </div>
         </header>
 
         <section className="mt-4 sm:mt-5">
@@ -441,7 +435,19 @@ export function TimelinePage() {
                 </p>
                 <TimelineRuler />
               </div>
-              <p className="hidden text-[0.66rem] uppercase tracking-[0.35em] text-white/55 sm:block">Selected marker glows</p>
+              <div className="hidden items-center gap-3 text-[0.64rem] uppercase tracking-[0.35em] text-[#c5b8a0] sm:flex">
+                <Link href="/" className="transition-colors hover:text-[#fbf6eb]">
+                  Home
+                </Link>
+                <span className="text-white/20">/</span>
+                <Link href="/archives" className="transition-colors hover:text-[#fbf6eb]">
+                  Archives
+                </Link>
+                <span className="text-white/20">/</span>
+                <Link href="/now" className="transition-colors hover:text-[#fbf6eb]">
+                  Now
+                </Link>
+              </div>
             </div>
 
             <div className="relative rounded-[2.2rem] border border-white/10 bg-[linear-gradient(180deg,rgba(255,247,232,0.05),rgba(255,247,232,0.02))] px-4 py-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] sm:px-5 sm:py-5">

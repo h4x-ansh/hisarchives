@@ -45,6 +45,22 @@ export function IdentityPage() {
               <div className="absolute right-24 top-8 h-72 w-72 rounded-full bg-purple-400/10 blur-3xl" />
             </div>
 
+            <div className="relative z-10 flex justify-end pb-4">
+              <div className="flex items-center gap-3 text-[0.64rem] uppercase tracking-[0.35em] text-white/65">
+                <Link href="/" className="transition-colors hover:text-white">
+                  Home
+                </Link>
+                <span className="text-white/20">/</span>
+                <Link href="/archives" className="transition-colors hover:text-white">
+                  Archives
+                </Link>
+                <span className="text-white/20">/</span>
+                <Link href="/now" className="transition-colors hover:text-white">
+                  Now
+                </Link>
+              </div>
+            </div>
+
             <div className="relative grid gap-10 lg:grid-cols-[minmax(0,1.1fr)_minmax(20rem,0.85fr)] lg:items-center">
               <div className="space-y-8">
                 <div className="inline-flex rounded-[1.5rem] bg-[linear-gradient(90deg,#8f63ff_0%,#8d5cff_42%,#5d4bff_100%)] px-7 py-4 shadow-[0_12px_40px_rgba(112,78,255,0.25)] sm:px-10 sm:py-5">
