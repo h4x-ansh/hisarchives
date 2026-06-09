@@ -89,6 +89,11 @@ export async function listJournalEntries(options?: { includeDrafts?: boolean }) 
   return normalizeEntryRows(data as JournalEntryRecord[]).map(rowToEntry);
 }
 
+export function listSeedJournalEntries(options?: { includeDrafts?: boolean }) {
+  const rows = options?.includeDrafts ? seedJournalEntries : seedJournalEntries.filter((entry) => entry.published);
+  return normalizeEntryRows(rows).map(rowToEntry);
+}
+
 export async function seedJournalEntriesIfEmpty() {
   const supabase = getSupabaseAdminClient();
   const { count, error } = await supabase.from("journal_entries").select("id", { count: "exact", head: true });

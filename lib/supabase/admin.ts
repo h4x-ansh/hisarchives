@@ -3,6 +3,10 @@ import type { Database } from "./database.types";
 
 let cachedAdminClient: ReturnType<typeof createClient<Database>> | null = null;
 
+export function hasSupabaseAdminEnv() {
+  return Boolean(process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY);
+}
+
 export function getSupabaseAdminClient() {
   if (cachedAdminClient) {
     return cachedAdminClient;
