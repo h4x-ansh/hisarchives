@@ -2,8 +2,8 @@
 
 import Link from "next/link";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
-import { ChevronLeft, ChevronRight, Edit3, ImageUp, Lock, Plus, Trash2, X } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { ChevronLeft, ChevronRight, ImageUp, X } from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 type JournalEntry = {
   id: string;
@@ -15,6 +15,9 @@ type JournalEntry = {
   tags: string[];
   content: string;
   readingTime: string;
+  published: boolean;
+  createdAt: string;
+  updatedAt: string;
 };
 
 type JournalDraft = {
@@ -26,59 +29,9 @@ type JournalDraft = {
   photo: string;
 };
 
-const STORAGE_KEY = "hisarchives-journal-entries";
-const OWNER_KEY = "hisarchives-journal-owner";
-
-const seedEntries: JournalEntry[] = [
-  {
-    id: "2026-06-07",
-    date: "07 Jun 2026",
-    title: "Quiet Revision, Late Evening",
-    photo: "",
-    caption: "Desk lamp, ruled pages, and a clean hour of focus.",
-    mood: "Focused",
-    tags: ["JEE 2027", "Revision", "Evening"],
-    content:
-      "The room stayed quiet and the notes felt readable again. I went back through the weak chapters without rushing, and the day started to feel usable. The archive only moves when the work is steady, and tonight was steady enough.",
-    readingTime: "3 min read",
-  },
-  {
-    id: "2026-06-06",
-    date: "06 Jun 2026",
-    title: "HisArchives Stayed Open",
-    photo: "",
-    caption: "Built in the gaps between study and life.",
-    mood: "Reflective",
-    tags: ["HisArchives", "Writing", "Progress"],
-    content:
-      "The archive is becoming the place where the day is left behind. I fixed a few rough edges, reworked some structure, and kept the page honest. It still feels like a personal record rather than a product, which is the right direction.",
-    readingTime: "2 min read",
-  },
-  {
-    id: "2026-06-05",
-    date: "05 Jun 2026",
-    title: "Fitness, Without Drama",
-    photo: "",
-    caption: "Nothing dramatic. Just another clean session.",
-    mood: "Calm",
-    tags: ["Fitness", "Discipline", "Routine"],
-    content:
-      "The body record is simple when it is real: move, recover, repeat. The day did not need a perfect session, only a complete one. That consistency is starting to feel more permanent than motivation ever did.",
-    readingTime: "2 min read",
-  },
-  {
-    id: "2026-06-04",
-    date: "04 Jun 2026",
-    title: "Domain Day",
-    photo: "",
-    caption: "The archive got its own name and stopped borrowing one.",
-    mood: "Grateful",
-    tags: ["Domain", "Launch", "Memory"],
-    content:
-      "The archive crossed into a more permanent state today. The site has a name now, and that name feels like it belongs to a longer timeline. I want the pages to read like a life being kept rather than a site being posted.",
-    readingTime: "2 min read",
-  },
-];
+const LEGACY_STORAGE_KEY = "hisarchives-journal-entries";
+const LEGACY_MIGRATED_KEY = "hisarchives-journal-migrated";
+const ENABLE_LEGACY_IMPORT = false;
 
 const moodThemes: Record<string, { accent: string; glow: string; paper: string }> = {
   Focused: { accent: "#9A7B4F", glow: "rgba(154,123,79,0.22)", paper: "linear-gradient(180deg,#f6e8d3,#dfc39e)" },
@@ -110,13 +63,15 @@ function createDraft(entry?: JournalEntry): JournalDraft {
   };
 }
 
-function buildEntryFromDraft(draft: JournalDraft, existingId?: string): JournalEntry {
+function buildEntryFromDraft(draft: JournalDraft, existingId?: string, published = true): JournalEntry {
   const date = new Date();
   const readableDate = new Intl.DateTimeFormat("en-GB", {
     day: "2-digit",
     month: "short",
     year: "numeric",
   }).format(date);
+
+  const timestamp = date.toISOString();
 
   return {
     id: existingId ?? String(date.getTime()),
@@ -128,6 +83,9 @@ function buildEntryFromDraft(draft: JournalDraft, existingId?: string): JournalE
     tags: normalizeTags(draft.tags),
     content: draft.content.trim(),
     readingTime: estimateReadingTime(draft.content),
+    published,
+    createdAt: timestamp,
+    updatedAt: timestamp,
   };
 }
 
@@ -252,40 +210,40 @@ function NotebookPage({ entry, side }: { entry: JournalEntry; side: "left" | "ri
 
 function ComposerModal({
   open,
-  initialDraft,
   onClose,
   onPublish,
+  onSaveDraft,
+  onUploadPhoto,
 }: {
   open: boolean;
-  initialDraft: JournalDraft;
   onClose: () => void;
   onPublish: (draft: JournalDraft) => void;
+  onSaveDraft: (draft: JournalDraft) => void;
+  onUploadPhoto: (file: File) => Promise<string>;
 }) {
-  const [draft, setDraft] = useState(initialDraft);
+  const [draft, setDraft] = useState<JournalDraft>(() => createDraft());
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
+  const lastFocusedFieldRef = useRef<string | null>(null);
+
+  console.log("Composer rerender");
 
   useEffect(() => {
-    setDraft(initialDraft);
-  }, [initialDraft, open]);
+    console.log("Composer mounted");
+    return () => {
+      console.log("Composer unmounted");
+    };
+  }, []);
 
-  return (
-    <AnimatePresence>
-      {open ? (
-        <motion.div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/35 px-4 py-6 backdrop-blur-sm"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.2 }}
-          onMouseDown={onClose}
-        >
-          <motion.div
-            initial={{ y: 24, opacity: 0, scale: 0.98 }}
-            animate={{ y: 0, opacity: 1, scale: 1 }}
-            exit={{ y: 18, opacity: 0, scale: 0.98 }}
-            transition={{ duration: 0.32, ease: [0.22, 1, 0.36, 1] }}
-            className="relative w-full max-w-4xl overflow-hidden rounded-[2rem] border border-black/8 bg-[#fbf6ec] shadow-[0_40px_120px_rgba(40,30,20,0.28)]"
-            onMouseDown={(event) => event.stopPropagation()}
-          >
+  return open ? (
+    <div
+      className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/35 px-4 py-6 backdrop-blur-sm"
+      onClick={onClose}
+    >
+      <div
+        className="relative w-full max-w-4xl overflow-hidden rounded-[2rem] border border-black/8 bg-[#fbf6ec] shadow-[0_40px_120px_rgba(40,30,20,0.28)]"
+        onMouseDown={(event) => event.stopPropagation()}
+        onClick={(event) => event.stopPropagation()}
+      >
             <div className="absolute inset-0 opacity-[0.12] bg-[linear-gradient(rgba(54,40,24,0.06)_1px,transparent_1px)] bg-[length:100%_28px]" />
             <div className="grid gap-0 lg:grid-cols-[1.05fr_0.95fr]">
               <div className="border-b border-black/5 p-6 lg:border-b-0 lg:border-r">
@@ -307,9 +265,28 @@ function ComposerModal({
                 <div className="mt-6 space-y-4">
                   <label className="block">
                     <span className="text-[0.62rem] uppercase tracking-[0.42em] text-[#8a7f72]">Title</span>
-                    <input
+                      <input
+                      autoFocus
                       value={draft.title}
                       onChange={(event) => setDraft((current) => ({ ...current, title: event.target.value }))}
+                      onKeyDown={(event) => {
+                        if (event.key === "Enter") {
+                          console.log("title input Enter keydown", {
+                            activeElement: document.activeElement?.tagName,
+                            insideForm: Boolean(event.currentTarget.form),
+                          });
+                        }
+                      }}
+                      onFocus={() => {
+                        lastFocusedFieldRef.current = "title";
+                        console.log("focus title", { activeElement: document.activeElement?.tagName });
+                      }}
+                      onBlur={() =>
+                        console.log("blur title", {
+                          nextActiveElement: document.activeElement?.tagName,
+                          lastFocusedField: lastFocusedFieldRef.current,
+                        })
+                      }
                       className="mt-2 w-full rounded-[1rem] border border-black/8 bg-white/65 px-4 py-3 text-[#2a2622] outline-none transition focus:border-[#9A7B4F]/40"
                       placeholder="Write the entry title"
                     />
@@ -320,6 +297,11 @@ function ComposerModal({
                     <input
                       value={draft.caption}
                       onChange={(event) => setDraft((current) => ({ ...current, caption: event.target.value }))}
+                      onFocus={() => {
+                        lastFocusedFieldRef.current = "caption";
+                        console.log("focus caption", { activeElement: document.activeElement?.tagName });
+                      }}
+                      onBlur={() => console.log("blur caption", { nextActiveElement: document.activeElement?.tagName })}
                       className="mt-2 w-full rounded-[1rem] border border-black/8 bg-white/65 px-4 py-3 text-[#2a2622] outline-none transition focus:border-[#9A7B4F]/40"
                       placeholder="Short caption for the left page"
                     />
@@ -330,6 +312,11 @@ function ComposerModal({
                     <textarea
                       value={draft.content}
                       onChange={(event) => setDraft((current) => ({ ...current, content: event.target.value }))}
+                      onFocus={() => {
+                        lastFocusedFieldRef.current = "content";
+                        console.log("focus content", { activeElement: document.activeElement?.tagName });
+                      }}
+                      onBlur={() => console.log("blur content", { nextActiveElement: document.activeElement?.tagName })}
                       rows={7}
                       className="mt-2 w-full rounded-[1rem] border border-black/8 bg-white/65 px-4 py-3 text-[#2a2622] outline-none transition focus:border-[#9A7B4F]/40"
                       placeholder="Write the entry like a diary page..."
@@ -345,6 +332,11 @@ function ComposerModal({
                     <select
                       value={draft.mood}
                       onChange={(event) => setDraft((current) => ({ ...current, mood: event.target.value }))}
+                      onFocus={() => {
+                        lastFocusedFieldRef.current = "mood";
+                        console.log("focus mood", { activeElement: document.activeElement?.tagName });
+                      }}
+                      onBlur={() => console.log("blur mood", { nextActiveElement: document.activeElement?.tagName })}
                       className="mt-2 w-full rounded-[1rem] border border-black/8 bg-white/65 px-4 py-3 text-[#2a2622] outline-none transition focus:border-[#9A7B4F]/40"
                     >
                       <option>Reflective</option>
@@ -359,6 +351,11 @@ function ComposerModal({
                     <input
                       value={draft.tags}
                       onChange={(event) => setDraft((current) => ({ ...current, tags: event.target.value }))}
+                      onFocus={() => {
+                        lastFocusedFieldRef.current = "tags";
+                        console.log("focus tags", { activeElement: document.activeElement?.tagName });
+                      }}
+                      onBlur={() => console.log("blur tags", { nextActiveElement: document.activeElement?.tagName })}
                       className="mt-2 w-full rounded-[1rem] border border-black/8 bg-white/65 px-4 py-3 text-[#2a2622] outline-none transition focus:border-[#9A7B4F]/40"
                       placeholder="JEE 2027, Study, Evening"
                     />
@@ -373,18 +370,25 @@ function ComposerModal({
                         onChange={async (event) => {
                           const file = event.target.files?.[0];
                           if (!file) return;
-                          const reader = new FileReader();
-                          reader.onload = () => {
-                            setDraft((current) => ({ ...current, photo: String(reader.result ?? "") }));
-                          };
-                          reader.readAsDataURL(file);
+                          setUploadingPhoto(true);
+                          try {
+                            const url = await onUploadPhoto(file);
+                            setDraft((current) => ({ ...current, photo: url }));
+                          } finally {
+                            setUploadingPhoto(false);
+                          }
                         }}
+                        onFocus={() => {
+                          lastFocusedFieldRef.current = "file";
+                          console.log("focus file", { activeElement: document.activeElement?.tagName });
+                        }}
+                        onBlur={() => console.log("blur file", { nextActiveElement: document.activeElement?.tagName })}
                         className="hidden"
                         id="journal-photo-upload"
                       />
                       <label htmlFor="journal-photo-upload" className="inline-flex cursor-pointer items-center gap-2 text-sm text-[#4a443c]">
                         <ImageUp className="h-4 w-4" />
-                        Upload photo
+                        {uploadingPhoto ? "Uploading..." : "Upload photo"}
                       </label>
                       <div className="ml-auto text-[0.62rem] uppercase tracking-[0.36em] text-[#8a7f72]">Optional</div>
                     </div>
@@ -409,6 +413,13 @@ function ComposerModal({
                     </button>
                     <button
                       type="button"
+                      onClick={() => onSaveDraft(draft)}
+                      className="rounded-full border border-black/8 bg-white/60 px-4 py-2 text-sm text-[#4a443c] transition hover:bg-white"
+                    >
+                      Save Draft
+                    </button>
+                    <button
+                      type="button"
                       onClick={() => onPublish(draft)}
                       className="rounded-full bg-[#24211e] px-5 py-2 text-sm text-[#fbf6ec] transition hover:bg-[#312d28]"
                     >
@@ -418,65 +429,137 @@ function ComposerModal({
                 </div>
               </div>
             </div>
-          </motion.div>
-        </motion.div>
-      ) : null}
-    </AnimatePresence>
-  );
+      </div>
+    </div>
+  ) : null;
 }
 
-export function ActivityPage() {
+export function ActivityPage({
+  initialEntries,
+  isOwner,
+}: {
+  initialEntries: JournalEntry[];
+  isOwner: boolean;
+}) {
   const reduceMotion = useReducedMotion();
-  const [entries, setEntries] = useState(seedEntries);
+  const [entries, setEntries] = useState(initialEntries);
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [direction, setDirection] = useState(1);
-  const [ownerMode, setOwnerMode] = useState(false);
-  const [composerOpen, setComposerOpen] = useState(false);
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [loaded, setLoaded] = useState(false);
-  const [draft, setDraft] = useState<JournalDraft>(createDraft());
+  const [composerOpen, setComposerOpenState] = useState(false);
+  const [editingId, setEditingIdState] = useState<string | null>(null);
   const [photoPreview, setPhotoPreview] = useState("");
+  const [isMigrating, setIsMigrating] = useState(false);
+  const migrationAttemptedRef = useRef(false);
+  const previousComposerOpenRef = useRef<boolean>(false);
+  const previousEditingIdRef = useRef<string | null>(null);
+  const previousStateRef = useRef<{
+    ownerMode: boolean;
+    isMigrating: boolean;
+    entriesLength: number;
+    selectedIndex: number;
+    composerOpen: boolean;
+    editingId: string | null;
+    photoPreview: string;
+    initialEntriesRef: JournalEntry[];
+    isOwner: boolean;
+  } | null>(null);
+  const selectedEntryRef = useRef<JournalEntry | null>(null);
+
+  const ownerMode = isOwner;
+  console.log("ActivityPage rerender");
+  console.log("Session state updates", { ownerMode, isMigrating, entries: entries.length, selectedIndex, composerOpen });
+
+  function setComposerOpen(nextValue: boolean, source: string) {
+    console.log("setComposerOpen invoke", { source, from: composerOpen, to: nextValue });
+    console.trace("setComposerOpen");
+    setComposerOpenState((current) => {
+      console.log("setComposerOpen commit", { source, from: current, to: nextValue });
+      return nextValue;
+    });
+  }
+
+  function setEditingId(nextValue: string | null, source: string) {
+    console.log("setEditingId invoke", { source, from: editingId, to: nextValue, applied: false });
+    console.trace("setEditingId");
+    setEditingIdState((current) => {
+      console.log("setEditingId commit", { source, from: current, to: null, requested: nextValue, applied: false });
+      return null;
+    });
+  }
 
   useEffect(() => {
-    try {
-      const storedEntries = localStorage.getItem(STORAGE_KEY);
-      const storedOwner = localStorage.getItem(OWNER_KEY);
-      if (storedEntries) {
-        const parsed = JSON.parse(storedEntries) as JournalEntry[];
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          setEntries(parsed);
-        }
-      }
-      setOwnerMode(storedOwner === "1");
-    } catch {
-      // ignore malformed storage
-    } finally {
-      setLoaded(true);
+    if (previousComposerOpenRef.current !== composerOpen) {
+      console.log("composerOpen transition", `${String(previousComposerOpenRef.current)} -> ${String(composerOpen)}`);
+      previousComposerOpenRef.current = composerOpen;
     }
-  }, []);
+  }, [composerOpen]);
 
   useEffect(() => {
-    if (!loaded) return;
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
-  }, [entries, loaded]);
+    if (previousEditingIdRef.current !== editingId) {
+      console.log("editingId transition", `${String(previousEditingIdRef.current)} -> ${String(editingId)}`);
+      previousEditingIdRef.current = editingId;
+    }
+  }, [editingId]);
 
   useEffect(() => {
-    if (!loaded) return;
-    localStorage.setItem(OWNER_KEY, ownerMode ? "1" : "0");
-  }, [ownerMode, loaded]);
+    const previousState = previousStateRef.current;
+    const nextState = {
+      ownerMode,
+      isMigrating,
+      entriesLength: entries.length,
+      selectedIndex,
+      composerOpen,
+      editingId,
+      photoPreview,
+      initialEntriesRef: initialEntries,
+      isOwner,
+    };
+
+    if (!previousState) {
+      console.log("ActivityPage state change", { reason: "initial mount", nextState });
+      previousStateRef.current = nextState;
+      return;
+    }
+
+    const changes: Record<string, unknown> = {};
+
+    if (previousState.ownerMode !== nextState.ownerMode) changes.ownerMode = { from: previousState.ownerMode, to: nextState.ownerMode };
+    if (previousState.isMigrating !== nextState.isMigrating) changes.isMigrating = { from: previousState.isMigrating, to: nextState.isMigrating };
+    if (previousState.entriesLength !== nextState.entriesLength) changes.entriesLength = { from: previousState.entriesLength, to: nextState.entriesLength };
+    if (previousState.selectedIndex !== nextState.selectedIndex) changes.selectedIndex = { from: previousState.selectedIndex, to: nextState.selectedIndex };
+    if (previousState.composerOpen !== nextState.composerOpen) changes.composerOpen = { from: previousState.composerOpen, to: nextState.composerOpen };
+    if (previousState.editingId !== nextState.editingId) changes.editingId = { from: previousState.editingId, to: nextState.editingId };
+    if (previousState.photoPreview !== nextState.photoPreview) changes.photoPreview = {
+      from: Boolean(previousState.photoPreview),
+      to: Boolean(nextState.photoPreview),
+    };
+    if (previousState.isOwner !== nextState.isOwner) changes.isOwner = { from: previousState.isOwner, to: nextState.isOwner };
+    if (previousState.initialEntriesRef !== nextState.initialEntriesRef) changes.initialEntriesRef = { changed: true };
+
+    if (Object.keys(changes).length > 0) {
+      console.log("ActivityPage state change", changes);
+    }
+
+    previousStateRef.current = nextState;
+  });
 
   useEffect(() => {
+    console.log("ActivityPage entries update", initialEntries.length);
+    if (composerOpen) {
+      console.log("ActivityPage entries sync frozen", { reason: "composer open" });
+      return;
+    }
+    setEntries(initialEntries);
+  }, [composerOpen, initialEntries]);
+
+  useEffect(() => {
+    console.log("ActivityPage owner mode update", ownerMode);
     function handleKeyDown(event: KeyboardEvent) {
-      if ((event.metaKey || event.altKey) && event.shiftKey && event.key.toLowerCase() === "o") {
-        event.preventDefault();
-        setOwnerMode((current) => !current);
-      }
       if (ownerMode && (event.metaKey || event.altKey) && event.shiftKey && event.key.toLowerCase() === "n") {
         event.preventDefault();
-        setEditingId(null);
-        setDraft(createDraft());
+        setEditingId(null, "keydown:new-entry");
         setPhotoPreview("");
-        setComposerOpen(true);
+        setComposerOpen(true, "keydown:new-entry");
       }
     }
 
@@ -484,21 +567,148 @@ export function ActivityPage() {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [ownerMode]);
 
+  useEffect(() => {
+    console.log("ActivityPage migration update", { isMigrating, ownerMode, composerOpen });
+    if (!ENABLE_LEGACY_IMPORT) {
+      console.log("Journal import disabled", { reason: "temporary kill switch enabled" });
+      return;
+    }
+
+    if (!ownerMode || typeof window === "undefined") {
+      console.log("Journal import skipped", { reason: "owner mode off or window unavailable", ownerMode });
+      return;
+    }
+
+    if (composerOpen) {
+      console.log("Journal import skipped", { reason: "composer is open" });
+      return;
+    }
+
+    if (migrationAttemptedRef.current) {
+      console.log("Journal import skipped", { reason: "already attempted this mount" });
+      return;
+    }
+
+    const migrateLegacyEntries = async () => {
+      migrationAttemptedRef.current = true;
+      const alreadyMigrated = window.localStorage.getItem(LEGACY_MIGRATED_KEY);
+      if (alreadyMigrated === "1") {
+        console.log("Journal import skipped", { reason: "migration already completed" });
+        return;
+      }
+
+      const legacy = window.localStorage.getItem(LEGACY_STORAGE_KEY);
+      if (!legacy) {
+        console.log("Journal import skipped", { reason: "no legacy entries found" });
+        return;
+      }
+
+      try {
+        console.log("Journal import trigger", { source: "ActivityPage migration effect" });
+        const parsed = JSON.parse(legacy) as JournalEntry[];
+        if (!Array.isArray(parsed) || parsed.length === 0) {
+          console.log("Journal import skipped", { reason: "legacy payload empty or invalid" });
+          return;
+        }
+
+        setIsMigrating(true);
+        const response = await fetch("/api/journal/import", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ entries: parsed }),
+        });
+
+        if (!response.ok) {
+          console.log("Journal import failure", { status: response.status, statusText: response.statusText });
+          return;
+        }
+
+        const payload = (await response.json()) as { imported?: JournalEntry[]; importedCount?: number };
+        if (Array.isArray(payload.imported) && payload.imported.length > 0) {
+          console.log("Journal import success", { importedCount: payload.imported.length });
+          setEntries(payload.imported);
+          setSelectedIndex(0);
+          window.localStorage.removeItem(LEGACY_STORAGE_KEY);
+          window.localStorage.setItem(LEGACY_MIGRATED_KEY, "1");
+          return;
+        }
+
+        console.log("Journal import success", {
+          importedCount: payload.importedCount ?? 0,
+          note: "response returned no imported entry array",
+        });
+        window.localStorage.setItem(LEGACY_MIGRATED_KEY, "1");
+      } catch {
+        console.log("Journal import failure", { error: "exception during import" });
+        // ignore migration errors and keep the server-loaded data
+      } finally {
+        setIsMigrating(false);
+      }
+    };
+
+    void migrateLegacyEntries();
+  }, [composerOpen, ownerMode]);
+
   const sortedEntries = useMemo(
     () =>
       [...entries].sort((left, right) => {
-        const leftTime = Date.parse(left.id) || Date.parse(left.date);
-        const rightTime = Date.parse(right.id) || Date.parse(right.date);
+        const leftTime = Date.parse(left.createdAt) || Date.parse(left.date);
+        const rightTime = Date.parse(right.createdAt) || Date.parse(right.date);
         return rightTime - leftTime;
       }),
     [entries],
   );
 
   const selectedEntry = useMemo(() => sortedEntries[selectedIndex] ?? sortedEntries[0], [sortedEntries, selectedIndex]);
+  selectedEntryRef.current = selectedEntry ?? null;
 
   useEffect(() => {
+    if (composerOpen) {
+      console.log("ActivityPage selected index clamp frozen", { reason: "composer open" });
+      return;
+    }
     setSelectedIndex((current) => Math.min(current, Math.max(sortedEntries.length - 1, 0)));
-  }, [sortedEntries.length]);
+  }, [composerOpen, sortedEntries.length]);
+
+  useEffect(() => {
+    console.log("ActivityPage owner action listener update", { composerOpen, selectedEntryId: selectedEntryRef.current?.id ?? "none" });
+
+    if (composerOpen) {
+      console.log("ActivityPage owner action sync frozen", { reason: "composer open" });
+      return;
+    }
+
+    function handleOwnerAction(event: Event) {
+      const customEvent = event as CustomEvent<{ path?: string; label?: string }>;
+
+      if (customEvent.detail?.path !== "/activity") {
+        return;
+      }
+
+      switch (customEvent.detail?.label) {
+        case "New Entry":
+          setEditingId(null, "owner-action:new-entry");
+          setPhotoPreview("");
+          setComposerOpen(true, "owner-action:new-entry");
+          break;
+        case "Edit":
+          if (selectedEntryRef.current) {
+            openComposer(selectedEntryRef.current);
+          }
+          break;
+        case "Delete":
+          if (selectedEntryRef.current) {
+            deleteEntry(selectedEntryRef.current.id);
+          }
+          break;
+        default:
+          break;
+      }
+    }
+
+    window.addEventListener("hisarchives:owner-action", handleOwnerAction);
+    return () => window.removeEventListener("hisarchives:owner-action", handleOwnerAction);
+  }, [composerOpen]);
 
   function selectEntry(index: number) {
     setDirection(index > selectedIndex ? 1 : -1);
@@ -516,42 +726,82 @@ export function ActivityPage() {
   }
 
   function openComposer(entry?: JournalEntry) {
-    setEditingId(entry?.id ?? null);
-    setDraft(createDraft(entry));
+    setEditingId(entry?.id ?? null, "openComposer");
     setPhotoPreview(entry?.photo ?? "");
-    setComposerOpen(true);
+    setComposerOpen(true, "openComposer");
   }
 
   function closeComposer() {
-    setComposerOpen(false);
+    setComposerOpen(false, "closeComposer");
   }
 
-  function publishDraft(nextDraft: JournalDraft) {
-    const nextEntry = buildEntryFromDraft(
-      {
-        ...nextDraft,
-        photo: photoPreview || nextDraft.photo,
-      },
-      editingId ?? undefined,
-    );
+  async function uploadPhoto(file: File) {
+    const formData = new FormData();
+    formData.append("file", file);
 
+    const response = await fetch("/api/journal/upload", {
+      method: "POST",
+      body: formData,
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to upload photo.");
+    }
+
+    const payload = (await response.json()) as { url?: string };
+    if (!payload.url) {
+      throw new Error("Upload returned no URL.");
+    }
+
+    setPhotoPreview(payload.url);
+    return payload.url;
+  }
+
+  async function persistEntry(nextDraft: JournalDraft, published: boolean) {
+    const payload = {
+      title: nextDraft.title.trim() || "Untitled Entry",
+      content: nextDraft.content.trim(),
+      photo_url: photoPreview || nextDraft.photo || null,
+      photo_caption: nextDraft.caption.trim() || null,
+      tags: normalizeTags(nextDraft.tags),
+      mood: nextDraft.mood,
+      entry_date: editingId ? selectedEntry?.createdAt?.slice(0, 10) ?? new Date().toISOString().slice(0, 10) : new Date().toISOString().slice(0, 10),
+      published,
+    };
+
+    const response = await fetch(editingId ? `/api/journal/${editingId}` : "/api/journal", {
+      method: editingId ? "PUT" : "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to save journal entry.");
+    }
+
+    const result = (await response.json()) as { entry: JournalEntry };
     setEntries((current) => {
       if (editingId) {
-        return current.map((entry) => (entry.id === editingId ? nextEntry : entry));
+        return current.map((entry) => (entry.id === editingId ? result.entry : entry));
       }
-      return [nextEntry, ...current];
+
+      return [result.entry, ...current];
     });
 
     setSelectedIndex(0);
-    setEditingId(null);
-    setDraft(createDraft());
+    setEditingId(null, "persistEntry");
     setPhotoPreview("");
-    setComposerOpen(false);
+    setComposerOpen(false, "persistEntry");
   }
 
   function deleteEntry(id: string) {
-    setEntries((current) => current.filter((entry) => entry.id !== id));
-    setSelectedIndex(0);
+    void (async () => {
+      const response = await fetch(`/api/journal/${id}`, { method: "DELETE" });
+      if (!response.ok) return;
+
+      setEntries((current) => current.filter((entry) => entry.id !== id));
+      setSelectedIndex(0);
+    })();
   }
 
   return (
@@ -579,27 +829,6 @@ export function ActivityPage() {
             <Link href="/now" className="transition hover:text-[#24211e]">
               Now
             </Link>
-
-            {ownerMode ? (
-              <>
-                <span className="text-[#c2b5a0]">/</span>
-                <span className="inline-flex items-center gap-2 rounded-full bg-white/55 px-3 py-2 text-[#49443d] shadow-[0_10px_20px_rgba(60,45,30,0.06)]">
-                  <Lock className="h-3.5 w-3.5" />
-                  Owner mode
-                </span>
-              </>
-            ) : null}
-
-            {ownerMode ? (
-              <button
-                type="button"
-                onClick={() => openComposer()}
-                className="inline-flex items-center gap-2 rounded-full bg-[#24211e] px-4 py-2 text-[#fbf6ec] shadow-[0_12px_26px_rgba(36,33,30,0.18)] transition hover:bg-[#322d28]"
-              >
-                <Plus className="h-4 w-4" />
-                New Entry
-              </button>
-            ) : null}
           </div>
         </header>
 
@@ -635,30 +864,10 @@ export function ActivityPage() {
                     exit={reduceMotion ? undefined : { opacity: 0, x: direction > 0 ? 14 : -14 }}
                     transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
                   >
-                    {selectedEntry ? <NotebookPage entry={selectedEntry} side="right" /> : null}
+            {selectedEntry ? <NotebookPage entry={selectedEntry} side="right" /> : null}
                   </motion.div>
                 </AnimatePresence>
 
-                {ownerMode && selectedEntry ? (
-                  <div className="absolute right-5 top-5 z-20 flex flex-wrap gap-2">
-                    <button
-                      type="button"
-                      onClick={() => openComposer(selectedEntry)}
-                      className="inline-flex items-center gap-2 rounded-full bg-white/75 px-4 py-2 text-[0.64rem] uppercase tracking-[0.32em] text-[#4d4740] shadow-[0_12px_24px_rgba(60,45,30,0.08)] backdrop-blur-sm transition hover:bg-white"
-                    >
-                      <Edit3 className="h-3.5 w-3.5" />
-                      Edit Entry
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => deleteEntry(selectedEntry.id)}
-                      className="inline-flex items-center gap-2 rounded-full bg-white/75 px-4 py-2 text-[0.64rem] uppercase tracking-[0.32em] text-[#7a443f] shadow-[0_12px_24px_rgba(60,45,30,0.08)] backdrop-blur-sm transition hover:bg-white"
-                    >
-                      <Trash2 className="h-3.5 w-3.5" />
-                      Delete Entry
-                    </button>
-                  </div>
-                ) : null}
               </div>
             </div>
 
@@ -693,9 +902,10 @@ export function ActivityPage() {
 
       <ComposerModal
         open={composerOpen}
-        initialDraft={draft}
         onClose={closeComposer}
-        onPublish={(nextDraft) => publishDraft(nextDraft)}
+        onUploadPhoto={uploadPhoto}
+        onSaveDraft={(nextDraft) => void persistEntry(nextDraft, false)}
+        onPublish={(nextDraft) => void persistEntry(nextDraft, true)}
       />
     </main>
   );

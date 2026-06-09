@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 export function SiteFooter() {
   const pathname = usePathname();
 
-  if (pathname === "/gallery") {
+  if (pathname === "/gallery" || pathname.startsWith("/test")) {
     return null;
   }
 

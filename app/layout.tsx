@@ -1,7 +1,11 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
+import { Suspense } from "react";
 import { Geist, Instrument_Serif } from "next/font/google";
 import "./globals.css";
+import { auth } from "@/auth";
+import { AuthToast } from "@/components/auth-toast";
+import { OwnerToolbar } from "@/components/owner-toolbar";
 import { SiteFooter } from "@/components/site-footer";
 
 const geist = Geist({
@@ -44,15 +48,27 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: ReactNode;
 }>) {
+  let session: { user?: { isOwner?: boolean } } | null = null;
+
+  try {
+    session = (await auth()) as { user?: { isOwner?: boolean } } | null;
+  } catch {
+    session = null;
+  }
+
   return (
     <html lang="en" className={`${geist.variable} ${instrumentSerif.variable}`}>
       <body>
         {children}
+        <Suspense fallback={null}>
+          <AuthToast />
+        </Suspense>
+        <OwnerToolbar isOwner={Boolean(session?.user?.isOwner)} />
         <SiteFooter />
       </body>
     </html>
