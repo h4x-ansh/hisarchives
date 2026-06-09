@@ -28,7 +28,7 @@ export function TestAuthCard({ email, isOwner }: { email: string | null; isOwner
             </div>
             <button
               type="button"
-              onClick={() => signOut({ callbackUrl: "/" })}
+              onClick={() => signOut({ callbackUrl: "/test" })}
               className="w-full rounded-full border border-white/10 bg-white/[0.05] px-4 py-3 text-sm text-text transition-colors hover:bg-white/[0.08]"
             >
               Logout

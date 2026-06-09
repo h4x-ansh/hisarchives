@@ -9,7 +9,7 @@ export function TestVerifyClient() {
 
   useEffect(() => {
     void signOut({ redirect: false }).then(() => {
-      router.replace("/?auth=denied");
+      router.replace("/test");
     });
   }, [router]);
 

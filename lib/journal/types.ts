@@ -13,16 +13,6 @@ export type JournalEntry = {
   updatedAt: string;
 };
 
-export type JournalDraft = {
-  title: string;
-  caption: string;
-  content: string;
-  mood: string;
-  tags: string;
-  photoUrl: string;
-  published: boolean;
-};
-
 export type JournalEntryRecord = {
   id: string;
   title: string;
@@ -35,15 +25,4 @@ export type JournalEntryRecord = {
   published: boolean;
   created_at: string;
   updated_at: string;
-};
-
-export type JournalEntryInput = {
-  title: string;
-  content: string;
-  photo_url?: string | null;
-  photo_caption?: string | null;
-  tags?: string[];
-  mood: string;
-  entry_date: string;
-  published: boolean;
 };
