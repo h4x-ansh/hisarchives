@@ -2,6 +2,7 @@
 
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import Link from "next/link";
+import { SiteHeader } from "@/components/site-header";
 import type { ReactNode, WheelEvent as ReactWheelEvent } from "react";
 import { useEffect, useRef, useState } from "react";
 import { seedTimelineEntries } from "@/lib/timeline/seed";
@@ -346,11 +347,12 @@ export function TimelinePage({ initialEntries = [] }: { initialEntries?: Timelin
 
   return (
     <main className="relative min-h-screen overflow-hidden text-[#F0E7D5]" style={{ background: palette.background }}>
+      <SiteHeader activePath="/timeline" />
       <div aria-hidden className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(59,67,103,0.18),transparent_25%),radial-gradient(circle_at_bottom_left,rgba(240,231,213,0.05),transparent_22%)]" />
       <div aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.09] mix-blend-screen bg-[linear-gradient(rgba(255,247,232,0.045)_1px,transparent_1px),linear-gradient(90deg,rgba(255,247,232,0.045)_1px,transparent_1px)] bg-[size:44px_44px]" />
       <div aria-hidden className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,transparent_0,transparent_58%,rgba(18,20,38,0.06)_100%)]" />
 
-      <div className="relative mx-auto w-full max-w-[96rem] px-5 pb-10 pt-5 sm:px-8 lg:px-10 xl:px-12">
+      <div className="relative mx-auto w-full max-w-[96rem] px-5 pb-10 pt-5 sm:px-8 lg:px-10 xl:pl-[6.75rem] xl:pr-12">
         <header className="flex flex-wrap items-center justify-between gap-4 border-b border-white/10 pb-4">
           <div className="space-y-2">
             <p className="text-[0.66rem] uppercase tracking-[0.5em]" style={{ color: palette.muted }}>

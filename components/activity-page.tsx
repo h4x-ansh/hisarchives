@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { SiteHeader } from "@/components/site-header";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useMemo, useState } from "react";
@@ -161,11 +162,12 @@ export function ActivityPage({ initialEntries }: { initialEntries: JournalEntry[
 
   return (
     <main className="fixed inset-0 overflow-hidden bg-[#f4ecdf] text-[#2a2622]">
+      <SiteHeader activePath="/activity" />
       <div aria-hidden className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.65),transparent_24%),radial-gradient(circle_at_bottom_right,rgba(137,108,75,0.08),transparent_25%)]" />
       <div aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.08] bg-[linear-gradient(rgba(78,61,40,0.08)_1px,transparent_1px),linear-gradient(90deg,rgba(78,61,40,0.08)_1px,transparent_1px)] bg-[size:46px_46px]" />
       <div aria-hidden className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,transparent_0,transparent_62%,rgba(61,45,26,0.06)_100%)]" />
 
-      <div className="relative mx-auto flex h-full w-full max-w-[96rem] flex-col px-4 py-3 sm:px-6 lg:px-8">
+      <div className="relative mx-auto flex h-full w-full max-w-[96rem] flex-col px-4 py-3 sm:px-6 lg:px-8 xl:pl-[6.75rem]">
         <header className="flex flex-wrap items-center justify-between gap-4 pb-3">
           <div className="space-y-2">
             <p className="text-[0.64rem] uppercase tracking-[0.5em] text-[#8a7f72]">Personal notebook</p>

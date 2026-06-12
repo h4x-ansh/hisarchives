@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { SiteHeader } from "@/components/site-header";
 import { useState, useEffect, useCallback, useRef } from "react";
 import type { ReactNode } from "react";
 import {
@@ -124,7 +125,9 @@ function SaveIndicator({ state, onRetry }: { state: SaveState; onRetry: () => vo
 // ─── Layout ───────────────────────────────────────────────────────────────────
 
 function TrackerLayout({ active, children, isOwner }: { active: Section; children: ReactNode; isOwner: boolean }) {
-  const { isMobile, isTablet } = useBreakpoint();
+  const { isMobile, isTablet, w } = useBreakpoint();
+  const isXL = w >= 1280;
+  const sidebarOffset = isXL ? 108 : 0;
 
   const tabs: { href: string; label: string; section: Section; icon: typeof Clock }[] = [
     { href: "/now", label: "Study", section: "overview", icon: Clock },
@@ -134,14 +137,15 @@ function TrackerLayout({ active, children, isOwner }: { active: Section; childre
     { href: "/now/projects", label: "Projects", section: "projects", icon: Code2 },
   ];
 
-  const contentPad = isMobile ? "12px 12px 48px" : isTablet ? "16px 16px 48px" : "24px 24px 48px";
+  const basePad = isMobile ? 12 : isTablet ? 16 : 24;
 
   return (
     <div style={{ background: BG, minHeight: "100vh", fontFamily: "Inter, system-ui, sans-serif" }}>
+      <SiteHeader activePath="/now" />
       <style>{`.tracker-tabs::-webkit-scrollbar{display:none}`}</style>
       {/* Top nav */}
       <nav style={{ background: "#07060f", borderBottom: `1px solid ${BORDER}`, position: "sticky", top: 0, zIndex: 50 }}>
-        <div style={{ maxWidth: 1400, margin: "0 auto", padding: isMobile ? "0 8px" : "0 24px", display: "flex", alignItems: "center", height: 52, gap: 0 }}>
+        <div style={{ maxWidth: 1400, margin: "0 auto", paddingLeft: isMobile ? 8 : sidebarOffset || 24, paddingRight: isMobile ? 8 : 24, display: "flex", alignItems: "center", height: 52, gap: 0 }}>
           {/* Logo — icon only on mobile */}
           <div style={{ display: "flex", alignItems: "center", gap: 8, marginRight: isMobile ? 4 : 24, flexShrink: 0 }}>
             <div style={{ width: 28, height: 28, background: PURPLE, borderRadius: 7, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
@@ -205,7 +209,7 @@ function TrackerLayout({ active, children, isOwner }: { active: Section; childre
       )}
 
       {/* Content */}
-      <div style={{ maxWidth: 1400, margin: "0 auto", padding: contentPad }}>
+      <div style={{ maxWidth: 1400, margin: "0 auto", paddingTop: basePad, paddingRight: basePad, paddingBottom: 48, paddingLeft: sidebarOffset || basePad }}>
         {children}
       </div>
     </div>
