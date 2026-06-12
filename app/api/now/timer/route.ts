@@ -25,8 +25,16 @@ export async function POST(req: Request) {
   if (!isOwner) return new Response("Forbidden", { status: 403 });
   if (!hasSupabaseAdminEnv()) return new Response("No DB", { status: 503 });
 
-  const { minutes } = await req.json() as { minutes: number };
-  if (typeof minutes !== "number") return new Response("Bad Request", { status: 400 });
+  let body: unknown;
+  try { body = await req.json(); } catch { return new Response("Bad Request", { status: 400 }); }
+  const { minutes } = body as { minutes: unknown };
+  if (
+    typeof minutes !== "number" ||
+    !Number.isFinite(minutes) ||
+    !Number.isInteger(minutes) ||
+    minutes < 0 ||
+    minutes > 1440
+  ) return new Response("Bad Request", { status: 400 });
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const db = getSupabaseAdminClient() as any;

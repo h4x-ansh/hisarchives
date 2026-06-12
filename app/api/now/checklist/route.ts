@@ -30,9 +30,17 @@ export async function POST(req: Request) {
   if (!isOwner) return new Response("Forbidden", { status: 403 });
   if (!hasSupabaseAdminEnv()) return new Response("No DB", { status: 503 });
 
-  const body = await req.json() as { domain: string; item_name: string; checks: boolean[] };
-  const { domain, item_name, checks } = body;
-  if (!domain || !item_name || !Array.isArray(checks)) {
+  const VALID_DOMAINS = new Set(["jee", "health", "art", "projects"]);
+
+  let body: unknown;
+  try { body = await req.json(); } catch { return new Response("Bad Request", { status: 400 }); }
+  const { domain, item_name, checks } = body as { domain: unknown; item_name: unknown; checks: unknown };
+  if (
+    typeof domain !== "string" || !VALID_DOMAINS.has(domain) ||
+    typeof item_name !== "string" || item_name.length === 0 || item_name.length > 200 ||
+    !Array.isArray(checks) || checks.length !== 4 ||
+    !checks.every((c) => typeof c === "boolean")
+  ) {
     return new Response("Bad Request", { status: 400 });
   }
 

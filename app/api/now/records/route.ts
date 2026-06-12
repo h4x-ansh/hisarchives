@@ -26,9 +26,18 @@ export async function POST(req: Request) {
   if (!isOwner) return new Response("Forbidden", { status: 403 });
   if (!hasSupabaseAdminEnv()) return new Response("No DB", { status: 503 });
 
-  const body = await req.json() as { type: string; data: unknown };
-  const { type, data } = body;
-  if (!type || data === undefined) return new Response("Bad Request", { status: 400 });
+  const VALID_TYPES = new Set(["mocktest", "pr", "portfolio"]);
+  const MAX_PAYLOAD = 4096;
+
+  let body: unknown;
+  try { body = await req.json(); } catch { return new Response("Bad Request", { status: 400 }); }
+  const { type, data } = body as { type: unknown; data: unknown };
+  if (typeof type !== "string" || !VALID_TYPES.has(type) || data === undefined || data === null) {
+    return new Response("Bad Request", { status: 400 });
+  }
+  if (JSON.stringify(data).length > MAX_PAYLOAD) {
+    return new Response("Payload Too Large", { status: 413 });
+  }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const db = getSupabaseAdminClient() as any;
