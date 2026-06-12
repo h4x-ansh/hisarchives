@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import type { ReactNode } from "react";
 import {
   Activity,
@@ -68,6 +68,58 @@ type JeeTab = "chapters" | "analytics" | "mocktests";
 type HealthTab = "workouts" | "analytics" | "prs";
 type ArtTab = "skills" | "analytics" | "portfolio";
 type ProjectTab = "features" | "analytics";
+type SaveState = "idle" | "saving" | "saved" | "error";
+
+// ─── Save status hook ─────────────────────────────────────────────────────────
+
+function useSave() {
+  const [state, setState] = useState<SaveState>("idle");
+  const retryRef = useRef<(() => Promise<void>) | null>(null);
+
+  const run = useCallback(async (apiFn: () => Promise<Response>) => {
+    const attempt = async () => {
+      setState("saving");
+      try {
+        const r = await apiFn();
+        if (!r.ok) throw new Error(`HTTP ${r.status}`);
+        setState("saved");
+        setTimeout(() => setState("idle"), 2000);
+      } catch (err) {
+        console.error("[now tracker] save failed:", err);
+        setState("error");
+      }
+    };
+    retryRef.current = attempt;
+    await attempt();
+  }, []);
+
+  const retry = useCallback(() => { void retryRef.current?.(); }, []);
+
+  return { state, run, retry };
+}
+
+// ─── Save indicator ───────────────────────────────────────────────────────────
+
+function SaveIndicator({ state, onRetry }: { state: SaveState; onRetry: () => void }) {
+  if (state === "idle") return null;
+  return (
+    <span style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 12 }}>
+      {state === "saving" && <span style={{ color: PURPLE_DIM }}>Saving…</span>}
+      {state === "saved" && <span style={{ color: GREEN }}>✓ Saved</span>}
+      {state === "error" && (
+        <>
+          <span style={{ color: RED }}>⚠ Save failed</span>
+          <button
+            onClick={onRetry}
+            style={{ color: PURPLE, background: "none", border: "none", cursor: "pointer", fontSize: 12, padding: 0, textDecoration: "underline" }}
+          >
+            Retry
+          </button>
+        </>
+      )}
+    </span>
+  );
+}
 
 // ─── Layout ───────────────────────────────────────────────────────────────────
 
@@ -244,6 +296,7 @@ function CircularTimer({ timeLeft, total, label }: { timeLeft: number; total: nu
 // Timer persisted in Supabase via /api/now/timer. Resets server-side by date key.
 function useTimerData(isOwner: boolean) {
   const [minutes, setMinutes] = useState(0);
+  const { state: saveState, run: runSave, retry: retrySave } = useSave();
 
   useEffect(() => {
     fetch("/api/now/timer")
@@ -256,16 +309,18 @@ function useTimerData(isOwner: boolean) {
     if (!isOwner || mins <= 0) return;
     setMinutes((prev) => {
       const next = prev + mins;
-      fetch("/api/now/timer", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ minutes: next }),
-      }).catch(() => {});
+      void runSave(() =>
+        fetch("/api/now/timer", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ minutes: next }),
+        })
+      );
       return next;
     });
   };
 
-  return { minutes, addMinutes };
+  return { minutes, addMinutes, saveState, retrySave };
 }
 
 // ─── Pomodoro Card ────────────────────────────────────────────────────────────
@@ -622,6 +677,7 @@ function useChecklist(subjects: { label: string; items: CheckItem[] }[], domain:
       subjects.flatMap((s) => s.items).map((it) => [it.name, [...it.checks] as [boolean, boolean, boolean, boolean]]),
     ),
   );
+  const { state: saveState, run: runSave, retry: retrySave } = useSave();
 
   // Merge DB state over static defaults on mount
   useEffect(() => {
@@ -647,16 +703,18 @@ function useChecklist(subjects: { label: string; items: CheckItem[] }[], domain:
       const existing = prev[name] ?? [false, false, false, false];
       const arr = [...existing] as [boolean, boolean, boolean, boolean];
       arr[idx] = !arr[idx];
-      fetch("/api/now/checklist", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ domain, item_name: name, checks: arr }),
-      }).catch(() => {});
+      void runSave(() =>
+        fetch("/api/now/checklist", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ domain, item_name: name, checks: arr }),
+        })
+      );
       return { ...prev, [name]: arr };
     });
   };
 
-  return { state, toggle };
+  return { state, toggle, saveState, retrySave };
 }
 
 function ChapterRow({
@@ -744,7 +802,7 @@ function ChapterChecklist({
   const [activeSubject, setActiveSubject] = useState(0);
   const currentItems = subjects[activeSubject].items;
 
-  const { state, toggle } = useChecklist(subjects, domain, isOwner);
+  const { state, toggle, saveState, retrySave } = useChecklist(subjects, domain, isOwner);
 
   const allStateChecks = Object.values(state).flat();
   const totalDone = allStateChecks.filter(Boolean).length;
@@ -756,7 +814,12 @@ function ChapterChecklist({
       <div style={{ padding: isMobile ? 12 : 20 }}>
         <CardHeader icon={CheckSquare} title={title} />
         <p style={{ textAlign: "center", fontSize: isMobile ? 32 : 40, fontWeight: 700, color: TEAL, margin: "8px 0 4px" }}>{pct}%</p>
-        <p style={{ textAlign: "center", fontSize: 13, color: "#9ca3af", marginBottom: 16 }}>Overall Completion</p>
+        <p style={{ textAlign: "center", fontSize: 13, color: "#9ca3af", marginBottom: isOwner ? 4 : 16 }}>Overall Completion</p>
+        {isOwner && (
+          <div style={{ textAlign: "center", height: 24, marginBottom: 12 }}>
+            <SaveIndicator state={saveState} onRetry={retrySave} />
+          </div>
+        )}
 
         {/* Subject tabs — wrap on mobile */}
         <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
@@ -831,6 +894,7 @@ function MockTestsSection({ isOwner }: { isOwner: boolean }) {
   const { isMobile, isTablet } = useBreakpoint();
   const [tests, setTests] = useState<MockTest[]>(jeeAnalytics.mockTests);
   const [form, setForm] = useState({ name: "", date: "", physics: "", chemistry: "", maths: "" });
+  const { state: saveState, run: runSave, retry: retrySave } = useSave();
 
   useEffect(() => {
     fetch("/api/now/records?type=mocktest")
@@ -848,11 +912,13 @@ function MockTestsSection({ isOwner }: { isOwner: boolean }) {
     const record = { date: form.date, name: form.name, physics: p, chemistry: c, maths: m };
     setTests((prev) => [...prev, record]);
     setForm({ name: "", date: "", physics: "", chemistry: "", maths: "" });
-    fetch("/api/now/records", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ type: "mocktest", data: record }),
-    }).catch(() => {});
+    void runSave(() =>
+      fetch("/api/now/records", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ type: "mocktest", data: record }),
+      })
+    );
   };
 
   const inputStyle: React.CSSProperties = {
@@ -887,10 +953,13 @@ function MockTestsSection({ isOwner }: { isOwner: boolean }) {
           ))}
         </div>
         {isOwner ? (
-          <button onClick={addTest}
-            style={{ background: PURPLE, color: "white", border: "none", borderRadius: 8, padding: "9px 20px", fontSize: 13, fontWeight: 600, cursor: "pointer" }}>
-            + Add Test
-          </button>
+          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+            <button onClick={addTest}
+              style={{ background: PURPLE, color: "white", border: "none", borderRadius: 8, padding: "9px 20px", fontSize: 13, fontWeight: 600, cursor: "pointer" }}>
+              + Add Test
+            </button>
+            <SaveIndicator state={saveState} onRetry={retrySave} />
+          </div>
         ) : (
           <p style={{ fontSize: 12, color: "#6b7280" }}>Log in as owner to add tests.</p>
         )}
@@ -961,6 +1030,7 @@ function PRSection({ isOwner }: { isOwner: boolean }) {
   const { isMobile } = useBreakpoint();
   const [prs, setPRs] = useState(healthAnalytics.prs);
   const [form, setForm] = useState({ exercise: "", date: "", value: "" });
+  const { state: saveState, run: runSave, retry: retrySave } = useSave();
 
   useEffect(() => {
     fetch("/api/now/records?type=pr")
@@ -974,11 +1044,13 @@ function PRSection({ isOwner }: { isOwner: boolean }) {
     const record = { date: form.date || new Date().toISOString().slice(0, 10), exercise: form.exercise, value: form.value };
     setPRs((p) => [...p, record]);
     setForm({ exercise: "", date: "", value: "" });
-    fetch("/api/now/records", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ type: "pr", data: record }),
-    }).catch(() => {});
+    void runSave(() =>
+      fetch("/api/now/records", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ type: "pr", data: record }),
+      })
+    );
   };
 
   const inputStyle: React.CSSProperties = {
@@ -1003,9 +1075,12 @@ function PRSection({ isOwner }: { isOwner: boolean }) {
           ))}
         </div>
         {isOwner ? (
-          <button onClick={addPR} style={{ background: PURPLE, color: "white", border: "none", borderRadius: 8, padding: "9px 20px", fontSize: 13, fontWeight: 600, cursor: "pointer" }}>
-            + Add PR
-          </button>
+          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+            <button onClick={addPR} style={{ background: PURPLE, color: "white", border: "none", borderRadius: 8, padding: "9px 20px", fontSize: 13, fontWeight: 600, cursor: "pointer" }}>
+              + Add PR
+            </button>
+            <SaveIndicator state={saveState} onRetry={retrySave} />
+          </div>
         ) : (
           <p style={{ fontSize: 12, color: "#6b7280" }}>Log in as owner to add records.</p>
         )}
@@ -1032,6 +1107,7 @@ function PortfolioSection({ isOwner }: { isOwner: boolean }) {
   const { isMobile } = useBreakpoint();
   const [pieces, setPieces] = useState(artAnalytics.recentPieces);
   const [form, setForm] = useState({ name: "", date: "", medium: "" });
+  const { state: saveState, run: runSave, retry: retrySave } = useSave();
 
   useEffect(() => {
     fetch("/api/now/records?type=portfolio")
@@ -1045,11 +1121,13 @@ function PortfolioSection({ isOwner }: { isOwner: boolean }) {
     const record = { name: form.name, date: form.date || new Date().toISOString().slice(0, 10), medium: form.medium || "Mixed" };
     setPieces((p) => [...p, record]);
     setForm({ name: "", date: "", medium: "" });
-    fetch("/api/now/records", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ type: "portfolio", data: record }),
-    }).catch(() => {});
+    void runSave(() =>
+      fetch("/api/now/records", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ type: "portfolio", data: record }),
+      })
+    );
   };
 
   const inputStyle: React.CSSProperties = {
@@ -1074,9 +1152,12 @@ function PortfolioSection({ isOwner }: { isOwner: boolean }) {
           ))}
         </div>
         {isOwner ? (
-          <button onClick={addPiece} style={{ background: PURPLE, color: "white", border: "none", borderRadius: 8, padding: "9px 20px", fontSize: 13, fontWeight: 600, cursor: "pointer" }}>
-            + Add Piece
-          </button>
+          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+            <button onClick={addPiece} style={{ background: PURPLE, color: "white", border: "none", borderRadius: 8, padding: "9px 20px", fontSize: 13, fontWeight: 600, cursor: "pointer" }}>
+              + Add Piece
+            </button>
+            <SaveIndicator state={saveState} onRetry={retrySave} />
+          </div>
         ) : (
           <p style={{ fontSize: 12, color: "#6b7280" }}>Log in as owner to log pieces.</p>
         )}
@@ -1100,7 +1181,7 @@ function PortfolioSection({ isOwner }: { isOwner: boolean }) {
 // ─── Page: Study (Overview) ───────────────────────────────────────────────────
 
 export function NowPage({ isOwner }: { isOwner: boolean }) {
-  const { minutes, addMinutes } = useTimerData(isOwner);
+  const { minutes, addMinutes, saveState, retrySave } = useTimerData(isOwner);
   const { isMobile } = useBreakpoint();
   const cols = isMobile ? "1fr" : "1fr 1fr";
 
@@ -1114,6 +1195,11 @@ export function NowPage({ isOwner }: { isOwner: boolean }) {
         <TodayCard minutes={minutes} label="Study" goalHours={4} />
         <WeaknessCard chapter={jeeAnalytics.weakChapter} subject={jeeAnalytics.weakChapterSubject} score={jeeAnalytics.weakChapterScore} />
       </div>
+      {isOwner && saveState !== "idle" && (
+        <div style={{ textAlign: "center", marginTop: 12 }}>
+          <SaveIndicator state={saveState} onRetry={retrySave} />
+        </div>
+      )}
     </TrackerLayout>
   );
 }
