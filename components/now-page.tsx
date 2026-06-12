@@ -323,6 +323,38 @@ function useTimerData(isOwner: boolean) {
   return { minutes, addMinutes, saveState, retrySave };
 }
 
+// ─── Weak chapter detector ───────────────────────────────────────────────────
+
+function useWeakChapter() {
+  const [result, setResult] = useState<{ chapter: string; subject: string; score: string } | null>(null);
+
+  useEffect(() => {
+    fetch("/api/now/checklist?domain=jee")
+      .then((r) => r.json())
+      .then((dbMap: Record<string, boolean[]>) => {
+        const all = [
+          ...jeeChapters.physics.map((it) => ({ name: it.name, subject: "Physics", checks: [...it.checks] as boolean[] })),
+          ...jeeChapters.chemistry.map((it) => ({ name: it.name, subject: "Chemistry", checks: [...it.checks] as boolean[] })),
+          ...jeeChapters.maths.map((it) => ({ name: it.name, subject: "Maths", checks: [...it.checks] as boolean[] })),
+        ];
+        for (const ch of all) {
+          if (dbMap[ch.name]) ch.checks = dbMap[ch.name];
+        }
+        let weakName = all[0].name;
+        let weakSubject = all[0].subject;
+        let weakDone = all[0].checks.filter(Boolean).length;
+        for (const ch of all.slice(1)) {
+          const done = ch.checks.filter(Boolean).length;
+          if (done < weakDone) { weakDone = done; weakName = ch.name; weakSubject = ch.subject; }
+        }
+        setResult({ chapter: weakName, subject: weakSubject, score: `${Math.round((weakDone / 4) * 100)}%` });
+      })
+      .catch(() => {});
+  }, []);
+
+  return result;
+}
+
 // ─── Pomodoro Card ────────────────────────────────────────────────────────────
 
 const PRESETS = [
@@ -449,13 +481,15 @@ function PomodoroCard({ onAdd }: { onAdd: (mins: number) => void }) {
       <div style={{ display: "flex", justifyContent: "center", gap: 10, marginBottom: 12 }}>
         <button
           onClick={() => setRunning(true)}
-          style={{ background: GREEN, color: "white", border: "none", borderRadius: 8, padding: "8px 18px", fontSize: 13, fontWeight: 600, cursor: "pointer", display: "flex", alignItems: "center", gap: 6 }}
+          disabled={running}
+          style={{ background: GREEN, color: "white", border: "none", borderRadius: 8, padding: "8px 18px", fontSize: 13, fontWeight: 600, cursor: running ? "default" : "pointer", display: "flex", alignItems: "center", gap: 6, opacity: running ? 0.45 : 1 }}
         >
           ▶ Start
         </button>
         <button
           onClick={() => setRunning(false)}
-          style={{ background: "transparent", color: ORANGE, border: `1px solid ${ORANGE}`, borderRadius: 8, padding: "8px 14px", fontSize: 13, cursor: "pointer" }}
+          disabled={!running}
+          style={{ background: "transparent", color: ORANGE, border: `1px solid ${ORANGE}`, borderRadius: 8, padding: "8px 14px", fontSize: 13, cursor: !running ? "default" : "pointer", opacity: !running ? 0.45 : 1 }}
         >
           ⏸ Pause
         </button>
@@ -505,6 +539,7 @@ function StopwatchCard({ onAdd }: { onAdd: (mins: number) => void }) {
   const [elapsed, setElapsed] = useState(0);
   const [running, setRunning] = useState(false);
   const [logged, setLogged] = useState(0);
+  const [tooShort, setTooShort] = useState(false);
 
   useEffect(() => {
     if (!running) return;
@@ -514,8 +549,13 @@ function StopwatchCard({ onAdd }: { onAdd: (mins: number) => void }) {
 
   const logAndReset = () => {
     const mins = Math.floor(elapsed / 60);
-    if (mins > 0) onAdd(mins);
-    setLogged((l) => l + mins);
+    if (mins > 0) {
+      onAdd(mins);
+      setLogged((l) => l + mins);
+    } else if (elapsed > 0) {
+      setTooShort(true);
+      setTimeout(() => setTooShort(false), 3000);
+    }
     setRunning(false);
     setElapsed(0);
   };
@@ -531,19 +571,17 @@ function StopwatchCard({ onAdd }: { onAdd: (mins: number) => void }) {
         {hh} : {mm} : {ss}
       </p>
       <p style={{ textAlign: "center", fontSize: 12, color: "#6b7280", marginBottom: 8 }}>Elapsed time</p>
-      {logged > 0 && (
-        <p style={{ textAlign: "center", fontSize: 13, color: GREEN, marginBottom: 16 }}>
-          +{logged} min logged today
-        </p>
-      )}
-      {logged === 0 && <div style={{ marginBottom: 16 }} />}
+      <div style={{ height: 28, display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 8 }}>
+        {logged > 0 && <p style={{ fontSize: 13, color: GREEN, margin: 0 }}>+{logged} min logged today</p>}
+        {tooShort && <p style={{ fontSize: 13, color: ORANGE, margin: 0 }}>Under 1 min — not logged</p>}
+      </div>
       <div style={{ display: "flex", justifyContent: "center", gap: 10 }}>
-        <button onClick={() => setRunning(true)} style={{ background: "transparent", color: GREEN, border: `1px solid ${GREEN}`, borderRadius: 8, padding: "8px 16px", fontSize: 13, cursor: "pointer" }}>▶ Start</button>
-        <button onClick={() => setRunning(false)} style={{ background: "transparent", color: ORANGE, border: `1px solid ${ORANGE}`, borderRadius: 8, padding: "8px 16px", fontSize: 13, cursor: "pointer" }}>⏸ Pause</button>
+        <button onClick={() => setRunning(true)} disabled={running} style={{ background: "transparent", color: GREEN, border: `1px solid ${GREEN}`, borderRadius: 8, padding: "8px 16px", fontSize: 13, cursor: running ? "default" : "pointer", opacity: running ? 0.45 : 1 }}>▶ Start</button>
+        <button onClick={() => setRunning(false)} disabled={!running} style={{ background: "transparent", color: ORANGE, border: `1px solid ${ORANGE}`, borderRadius: 8, padding: "8px 16px", fontSize: 13, cursor: !running ? "default" : "pointer", opacity: !running ? 0.45 : 1 }}>⏸ Pause</button>
         <button onClick={logAndReset} style={{ background: GREEN, color: "white", border: "none", borderRadius: 8, padding: "8px 14px", fontSize: 13, cursor: "pointer" }}>✓ Log & Reset</button>
       </div>
       <p style={{ textAlign: "center", fontSize: 12, color: "#4b5563", marginTop: 10 }}>
-        "Log & Reset" saves elapsed time to Today's total
+        &quot;Log &amp; Reset&quot; saves elapsed time to Today&apos;s total
       </p>
     </Card>
   );
@@ -551,7 +589,10 @@ function StopwatchCard({ onAdd }: { onAdd: (mins: number) => void }) {
 
 // ─── Today's Study Card ───────────────────────────────────────────────────────
 
-function TodayCard({ minutes, label, goalHours }: { minutes: number; label: string; goalHours: number }) {
+function TodayCard({ minutes, label, goalHours, saveState, onRetry }: {
+  minutes: number; label: string; goalHours: number;
+  saveState?: SaveState; onRetry?: () => void;
+}) {
   const hours = minutes / 60;
   const pct = Math.min(100, Math.round((hours / goalHours) * 100));
   return (
@@ -572,6 +613,11 @@ function TodayCard({ minutes, label, goalHours }: { minutes: number; label: stri
         <span style={{ color: pct >= 100 ? GREEN : PURPLE_DIM }}>{pct}%</span>
         {pct >= 100 && <span style={{ color: GREEN }}> — Goal hit! </span>}
       </p>
+      {saveState && saveState !== "idle" && (
+        <div style={{ textAlign: "center", marginTop: 12 }}>
+          <SaveIndicator state={saveState} onRetry={onRetry ?? (() => {})} />
+        </div>
+      )}
     </Card>
   );
 }
@@ -596,10 +642,9 @@ function WeaknessCard({ chapter, subject, score }: { chapter: string; subject: s
 
 // ─── Bar Chart ────────────────────────────────────────────────────────────────
 
-function BarChart({ data, color = PURPLE }: { data: { day: string; hours: number }[]; color?: string }) {
+function BarChart({ data, legendLabel = "Hours" }: { data: { day: string; hours: number }[]; legendLabel?: string }) {
   const max = Math.max(...data.map((d) => d.hours), 1);
   const H = 160;
-  const W = 100;
   const levels = [0, 0.25, 0.5, 0.75, 1.0];
 
   return (
@@ -644,7 +689,7 @@ function BarChart({ data, color = PURPLE }: { data: { day: string; hours: number
       <div style={{ display: "flex", justifyContent: "center", gap: 8, marginTop: 8 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
           <div style={{ width: 24, height: 8, background: "rgba(139,92,246,0.75)", borderRadius: 2 }} />
-          <span style={{ fontSize: 11, color: "#9ca3af" }}>Hours Studied</span>
+          <span style={{ fontSize: 11, color: "#9ca3af" }}>{legendLabel}</span>
         </div>
       </div>
     </div>
@@ -872,16 +917,21 @@ function AnalyticsSection({
   title,
   stats,
   weeklyData,
+  legendLabel,
 }: {
   title: string;
   stats: { label: string; value: string; emoji?: string }[];
   weeklyData: { day: string; hours: number }[];
+  legendLabel?: string;
 }) {
   return (
     <Card>
       <CardHeader icon={BarChart2} title={title} />
       <StatsRow stats={stats} />
-      <BarChart data={weeklyData} />
+      <BarChart data={weeklyData} legendLabel={legendLabel} />
+      <p style={{ textAlign: "center", fontSize: 11, color: "#4b5563", marginTop: 10 }}>
+        Stats show manually tracked estimates
+      </p>
     </Card>
   );
 }
@@ -924,6 +974,7 @@ function MockTestsSection({ isOwner }: { isOwner: boolean }) {
   const inputStyle: React.CSSProperties = {
     background: CARD2, border: `1px solid ${BORDER}`, borderRadius: 6,
     color: "white", fontSize: 13, padding: "10px 12px", width: "100%", outline: "none",
+    opacity: isOwner ? 1 : 0.45, cursor: isOwner ? "text" : "not-allowed",
   };
   const labelStyle: React.CSSProperties = {
     fontSize: 11, fontWeight: 600, color: PURPLE_DIM, textTransform: "uppercase",
@@ -932,11 +983,11 @@ function MockTestsSection({ isOwner }: { isOwner: boolean }) {
 
   const formCols = isMobile ? "1fr 1fr" : isTablet ? "1fr 1fr 1fr" : "2fr 1.5fr 1fr 1fr 1fr";
   const formFields = [
-    { key: "name", label: "Test Name", placeholder: "e.g. JEE Mock #3", type: "text" },
-    { key: "date", label: "Date", placeholder: "", type: "date" },
-    { key: "physics", label: "Physics /100", placeholder: "0", type: "number" },
-    { key: "chemistry", label: "Chemistry /100", placeholder: "0", type: "number" },
-    { key: "maths", label: "Maths /100", placeholder: "0", type: "number" },
+    { key: "name", label: "Test Name", placeholder: "e.g. JEE Mock #3", type: "text", min: undefined, max: undefined },
+    { key: "date", label: "Date", placeholder: "", type: "date", min: undefined, max: undefined },
+    { key: "physics", label: "Physics /100", placeholder: "0", type: "number", min: "0", max: "100" },
+    { key: "chemistry", label: "Chemistry /100", placeholder: "0", type: "number", min: "0", max: "100" },
+    { key: "maths", label: "Maths /100", placeholder: "0", type: "number", min: "0", max: "100" },
   ];
 
   return (
@@ -944,11 +995,13 @@ function MockTestsSection({ isOwner }: { isOwner: boolean }) {
       <Card>
         <CardHeader icon={FileText} title="Add Mock Test Result" color={ORANGE} />
         <div style={{ display: "grid", gridTemplateColumns: formCols, gap: 10, marginBottom: 14 }}>
-          {formFields.map(({ key, label, placeholder, type }) => (
+          {formFields.map(({ key, label, placeholder, type, min, max }) => (
             <div key={key}>
               <label style={labelStyle}>{label}</label>
               <input type={type} placeholder={placeholder} value={form[key as keyof typeof form]}
-                onChange={(e) => setForm((f) => ({ ...f, [key]: e.target.value }))} style={inputStyle} />
+                min={min} max={max}
+                onChange={(e) => setForm((f) => ({ ...f, [key]: e.target.value }))}
+                disabled={!isOwner} style={inputStyle} />
             </div>
           ))}
         </div>
@@ -1056,6 +1109,7 @@ function PRSection({ isOwner }: { isOwner: boolean }) {
   const inputStyle: React.CSSProperties = {
     background: CARD2, border: `1px solid ${BORDER}`, borderRadius: 6,
     color: "white", fontSize: 13, padding: "10px 12px", width: "100%", outline: "none",
+    opacity: isOwner ? 1 : 0.45, cursor: isOwner ? "text" : "not-allowed",
   };
 
   return (
@@ -1065,12 +1119,12 @@ function PRSection({ isOwner }: { isOwner: boolean }) {
         <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr 1fr" : "2fr 1.5fr 1fr", gap: 10, marginBottom: 14 }}>
           {[
             { key: "exercise", label: "Exercise", placeholder: "e.g. Bench Press", type: "text" },
-            { key: "date", label: "Date", placeholder: "dd-mm-yyyy", type: "date" },
+            { key: "date", label: "Date", placeholder: "", type: "date" },
             { key: "value", label: "Weight / Reps", placeholder: "e.g. 65 kg", type: "text" },
           ].map(({ key, label, placeholder, type }) => (
             <div key={key}>
               <label style={{ fontSize: 11, fontWeight: 600, color: PURPLE_DIM, textTransform: "uppercase", letterSpacing: "0.08em", display: "block", marginBottom: 6 }}>{label}</label>
-              <input type={type} placeholder={placeholder} value={form[key as keyof typeof form]} onChange={(e) => setForm((f) => ({ ...f, [key]: e.target.value }))} style={inputStyle} />
+              <input type={type} placeholder={placeholder} value={form[key as keyof typeof form]} onChange={(e) => setForm((f) => ({ ...f, [key]: e.target.value }))} disabled={!isOwner} style={inputStyle} />
             </div>
           ))}
         </div>
@@ -1133,6 +1187,7 @@ function PortfolioSection({ isOwner }: { isOwner: boolean }) {
   const inputStyle: React.CSSProperties = {
     background: CARD2, border: `1px solid ${BORDER}`, borderRadius: 6,
     color: "white", fontSize: 13, padding: "10px 12px", width: "100%", outline: "none",
+    opacity: isOwner ? 1 : 0.45, cursor: isOwner ? "text" : "not-allowed",
   };
 
   return (
@@ -1142,12 +1197,12 @@ function PortfolioSection({ isOwner }: { isOwner: boolean }) {
         <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr 1fr" : "2fr 1.5fr 1fr", gap: 10, marginBottom: 14 }}>
           {[
             { key: "name", label: "Piece Title", placeholder: "e.g. Portrait Study #4", type: "text" },
-            { key: "date", label: "Date", placeholder: "dd-mm-yyyy", type: "date" },
+            { key: "date", label: "Date", placeholder: "", type: "date" },
             { key: "medium", label: "Medium", placeholder: "e.g. Digital", type: "text" },
           ].map(({ key, label, placeholder, type }) => (
             <div key={key}>
               <label style={{ fontSize: 11, fontWeight: 600, color: PURPLE_DIM, textTransform: "uppercase", letterSpacing: "0.08em", display: "block", marginBottom: 6 }}>{label}</label>
-              <input type={type} placeholder={placeholder} value={form[key as keyof typeof form]} onChange={(e) => setForm((f) => ({ ...f, [key]: e.target.value }))} style={inputStyle} />
+              <input type={type} placeholder={placeholder} value={form[key as keyof typeof form]} onChange={(e) => setForm((f) => ({ ...f, [key]: e.target.value }))} style={inputStyle} disabled={!isOwner} />
             </div>
           ))}
         </div>
@@ -1182,6 +1237,7 @@ function PortfolioSection({ isOwner }: { isOwner: boolean }) {
 
 export function NowPage({ isOwner }: { isOwner: boolean }) {
   const { minutes, addMinutes, saveState, retrySave } = useTimerData(isOwner);
+  const weak = useWeakChapter();
   const { isMobile } = useBreakpoint();
   const cols = isMobile ? "1fr" : "1fr 1fr";
 
@@ -1192,14 +1248,13 @@ export function NowPage({ isOwner }: { isOwner: boolean }) {
         <StopwatchCard onAdd={addMinutes} />
       </div>
       <div style={{ display: "grid", gridTemplateColumns: cols, gap: isMobile ? 12 : 16 }}>
-        <TodayCard minutes={minutes} label="Study" goalHours={4} />
-        <WeaknessCard chapter={jeeAnalytics.weakChapter} subject={jeeAnalytics.weakChapterSubject} score={jeeAnalytics.weakChapterScore} />
+        <TodayCard minutes={minutes} label="Study" goalHours={4} saveState={saveState} onRetry={retrySave} />
+        <WeaknessCard
+          chapter={weak?.chapter ?? "—"}
+          subject={weak?.subject ?? "Computing…"}
+          score={weak?.score ?? "—"}
+        />
       </div>
-      {isOwner && saveState !== "idle" && (
-        <div style={{ textAlign: "center", marginTop: 12 }}>
-          <SaveIndicator state={saveState} onRetry={retrySave} />
-        </div>
-      )}
     </TrackerLayout>
   );
 }
@@ -1229,7 +1284,7 @@ export function JEEPage({ isOwner }: { isOwner: boolean }) {
           subjects={[
             { label: "⚛ Physics (28)", items: jeeChapters.physics },
             { label: "⚗ Chemistry (30)", items: jeeChapters.chemistry },
-            { label: "√ Maths (30)", items: jeeChapters.maths },
+            { label: "π Maths (30)", items: jeeChapters.maths },
           ]}
           checkLabels={["Theory", "NCERT", "Mains PYQs", "Adv PYQs"]}
         />
@@ -1245,6 +1300,7 @@ export function JEEPage({ isOwner }: { isOwner: boolean }) {
             { label: "7-Day Avg", value: `${jeeAnalytics.sevenDayAvg}h` },
           ]}
           weeklyData={jeeAnalytics.weeklyData}
+          legendLabel="Hours Studied"
         />
       )}
 
@@ -1295,6 +1351,7 @@ export function HealthPage({ isOwner }: { isOwner: boolean }) {
             { label: "7-Day Avg", value: `${healthAnalytics.sevenDayAvg}h` },
           ]}
           weeklyData={healthAnalytics.weeklyData}
+          legendLabel="Hours Trained"
         />
       )}
 
@@ -1344,6 +1401,7 @@ export function ArtPage({ isOwner }: { isOwner: boolean }) {
             { label: "7-Day Avg", value: `${artAnalytics.sevenDayAvg}h` },
           ]}
           weeklyData={artAnalytics.weeklyData}
+          legendLabel="Hours Practiced"
         />
       )}
 
@@ -1392,6 +1450,7 @@ export function ProjectsPage({ isOwner }: { isOwner: boolean }) {
             { label: "7-Day Avg", value: `${projectsAnalytics.sevenDayAvg}h` },
           ]}
           weeklyData={projectsAnalytics.weeklyData}
+          legendLabel="Hours Coded"
         />
       )}
     </TrackerLayout>
