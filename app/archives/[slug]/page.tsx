@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { ArchiveDetailPage } from "@/components/archive-detail-page";
+import { hasSupabaseAdminEnv } from "@/lib/supabase/admin";
+import { archiveRowToRecord, getArchiveRecordBySlug } from "@/lib/archive/repository";
 
 const validSlugs = ["discord-automation", "tournament-platform", "hisarchives"] as const;
 
@@ -8,11 +10,24 @@ export function generateStaticParams() {
   return validSlugs.map((slug) => ({ slug }));
 }
 
-export function generateMetadata({ params }: { params: { slug: string } }): Metadata {
+export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
   const slug = params.slug;
 
   if (!validSlugs.includes(slug as (typeof validSlugs)[number])) {
-    return {};
+    if (!hasSupabaseAdminEnv()) {
+      return {};
+    }
+
+    const recordRow = await getArchiveRecordBySlug(slug);
+
+    if (!recordRow || recordRow.status !== "Published") {
+      return {};
+    }
+
+    return {
+      title: `${recordRow.title} | hisarchives.xyz`,
+      description: recordRow.short_summary,
+    };
   }
 
   const titleMap: Record<(typeof validSlugs)[number], string> = {
@@ -27,10 +42,20 @@ export function generateMetadata({ params }: { params: { slug: string } }): Meta
   };
 }
 
-export default function ArchiveDetailRoute({ params }: { params: { slug: string } }) {
-  if (!validSlugs.includes(params.slug as (typeof validSlugs)[number])) {
+export default async function ArchiveDetailRoute({ params }: { params: { slug: string } }) {
+  const slug = params.slug;
+
+  if (hasSupabaseAdminEnv()) {
+    const recordRow = await getArchiveRecordBySlug(slug);
+
+    if (recordRow?.status === "Published") {
+      return <ArchiveDetailPage record={archiveRowToRecord(recordRow)} />;
+    }
+  }
+
+  if (!validSlugs.includes(slug as (typeof validSlugs)[number])) {
     notFound();
   }
 
-  return <ArchiveDetailPage slug={params.slug as (typeof validSlugs)[number]} />;
+  return <ArchiveDetailPage slug={slug as (typeof validSlugs)[number]} />;
 }

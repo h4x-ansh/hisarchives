@@ -63,6 +63,17 @@ export async function listJournalEntries(options?: { includeDrafts?: boolean }) 
   return normalizeEntryRows(data as JournalEntryRecord[]).map(rowToEntry);
 }
 
+export async function getJournalEntryRecordById(id: string) {
+  const supabase = getSupabaseAdminClient();
+  const { data, error } = await supabase.from("journal_entries").select("*").eq("id", id).maybeSingle();
+
+  if (error) {
+    throw new Error(`Failed to load journal entry: ${error.message}`);
+  }
+
+  return (data as JournalEntryRecord | null) ?? null;
+}
+
 export function listSeedJournalEntries(options?: { includeDrafts?: boolean }) {
   const rows = options?.includeDrafts ? seedJournalEntries : seedJournalEntries.filter((entry) => entry.published);
   return normalizeEntryRows(rows).map(rowToEntry);

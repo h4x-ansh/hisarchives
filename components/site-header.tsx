@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
+import { formatRelativeDateTime } from "@/lib/date";
 import {
   Activity,
   Calendar,
@@ -28,17 +29,20 @@ const archiveNavItems = [
 export function SiteHeader({
   activePath,
   timestamp,
+  timestampDate,
 }: {
   activePath:
     | "/"
     | "/archives"
     | "/now"
     | "/me"
+    | "/identity"
     | "/timeline"
     | "/activity"
     | "/gallery"
     ;
   timestamp?: string;
+  timestampDate?: string | Date | null;
 }) {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -122,7 +126,7 @@ export function SiteHeader({
                   })}
                 </div>
                 <div className="mt-3 rounded-[1rem] bg-white/[0.03] px-3 py-2 text-[0.68rem] uppercase tracking-[0.3em] text-muted shadow-[0_0_0_1px_rgba(255,255,255,0.03)]">
-                  {timestamp ?? "Archive State"}
+                  {timestampDate ? formatRelativeDateTime(timestampDate) : timestamp ?? "Archive State"}
                 </div>
               </nav>
             </motion.aside>
@@ -183,7 +187,7 @@ export function SiteHeader({
             <div className="rounded-[1rem] bg-white/[0.03] px-3 py-2 shadow-[0_0_0_1px_rgba(255,255,255,0.03)]">
               <p className="text-[0.68rem] uppercase tracking-[0.45em] text-muted">◎</p>
               <p className="mt-2 overflow-hidden whitespace-nowrap text-[0.68rem] uppercase tracking-[0.3em] text-text opacity-0 transition-opacity duration-200 xl:group-hover:opacity-100 xl:group-focus-within:opacity-100">
-                {timestamp ?? "Archive State"}
+                {timestampDate ? formatRelativeDateTime(timestampDate) : timestamp ?? "Archive State"}
               </p>
             </div>
           </div>

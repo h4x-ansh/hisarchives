@@ -1,16 +1,24 @@
-﻿"use client";
+"use client";
 
 import Link from "next/link";
 import Image from "next/image";
 import { motion, useReducedMotion } from "framer-motion";
 import { ArchiveFrame } from "@/components/archive-frame";
+import type { IdentityRecord } from "@/lib/identity/types";
 
-const communicationLinks = [
-  { label: "Email", value: "anuneet.og@gmail.com", href: "mailto:anuneet.og@gmail.com" },
-  { label: "GitHub", value: "@h4x-ansh", href: "https://github.com/h4x-ansh" },
-  { label: "Discord", value: "11.11arc", href: "https://discord.com/" },
-  { label: "Other", value: "Project mirror / Notes index", href: "https://example.com" },
-] as const;
+const fallbackIdentity = {
+  name: "Ansh",
+  shortTagline: "Building HisArchives as a living archive of projects, progress, and records.",
+  fullBio:
+    "Hi! I am building HisArchives as a living archive of projects, progress, and records. The work is ongoing, the system is active, and the record keeps growing.",
+  location: "India",
+  email: "anuneet.og@gmail.com",
+  github: "https://github.com/h4x-ansh",
+  discord: "11.11arc",
+  instagram: "",
+  linkedin: "",
+  website: "",
+} as const;
 
 const skillSet = ["JEE 2027", "HisArchives", "Fitness", "Projects"] as const;
 const interests = ["Technology", "Engineering", "Design", "Product Building", "Archives", "Self Improvement"] as const;
@@ -31,8 +39,65 @@ function Divider() {
   return <span className="mx-4 hidden h-9 w-px bg-white/30 sm:block" />;
 }
 
-export function IdentityPage() {
+function LinkCard({
+  label,
+  value,
+  href,
+}: {
+  label: string;
+  value: string;
+  href: string;
+}) {
+  if (!value || !href) {
+    return null;
+  }
+
+  const isLink = href.startsWith("http") || href.startsWith("mailto:") || href.startsWith("/");
+
+  if (!isLink) {
+    return (
+      <div className="flex items-center justify-between rounded-full bg-white/8 px-5 py-4 text-white/90 backdrop-blur-sm">
+        <div>
+          <p className="text-[0.68rem] uppercase tracking-[0.4em] text-white/55">{label}</p>
+          <p className="mt-2 text-sm font-medium sm:text-base">{value}</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <Link
+      href={href}
+      target={href.startsWith("http") ? "_blank" : undefined}
+      rel={href.startsWith("http") ? "noreferrer" : undefined}
+      className="flex items-center justify-between rounded-full bg-white/8 px-5 py-4 text-white/90 backdrop-blur-sm transition hover:bg-white/12"
+    >
+      <div>
+        <p className="text-[0.68rem] uppercase tracking-[0.4em] text-white/55">{label}</p>
+        <p className="mt-2 text-sm font-medium sm:text-base">{value}</p>
+      </div>
+      <span className="text-white/45">↗</span>
+    </Link>
+  );
+}
+
+export function IdentityPage({ record }: { record?: IdentityRecord | null } = {}) {
   const reduceMotion = useReducedMotion();
+  const identity = record ?? null;
+  const name = identity?.name || fallbackIdentity.name;
+  const shortTagline = identity?.shortTagline || fallbackIdentity.shortTagline;
+  const fullBio = identity?.fullBio || fallbackIdentity.fullBio;
+  const location = identity?.location || fallbackIdentity.location;
+  const email = identity?.email || fallbackIdentity.email;
+  const profilePhotoUrl = identity?.profilePhotoUrl || "";
+  const communicationLinks = [
+    { label: "Email", value: email, href: email.includes("@") ? `mailto:${email}` : email },
+    { label: "GitHub", value: identity?.github || fallbackIdentity.github, href: identity?.github || fallbackIdentity.github },
+    { label: "Discord", value: identity?.discord || fallbackIdentity.discord, href: identity?.discord || fallbackIdentity.discord },
+    { label: "Instagram", value: identity?.instagram || "", href: identity?.instagram || "" },
+    { label: "LinkedIn", value: identity?.linkedin || "", href: identity?.linkedin || "" },
+    { label: "Website", value: identity?.website || "", href: identity?.website || "" },
+  ].filter((link) => Boolean(link.value && link.href));
 
   return (
     <ArchiveFrame activePath="/me">
@@ -70,33 +135,17 @@ export function IdentityPage() {
                 </div>
 
                 <div className="max-w-2xl space-y-5 text-white/90">
-                  <p className="text-sm uppercase tracking-[0.45em] text-white/60">Ansh</p>
-                  <p className="text-base leading-8 text-white/85 sm:text-lg">
-                    Hi! I am building HisArchives as a living archive of projects, progress, and records.
-                    The work is ongoing, the system is active, and the record keeps growing.
-                  </p>
-                  <p className="text-base leading-8 text-white/75 sm:text-lg">
-                    Current directive: JEE 2027. Identity, discipline, and documentation are the core systems behind the archive.
-                  </p>
+                  <p className="text-sm uppercase tracking-[0.45em] text-white/60">{name}</p>
+                  <p className="text-base leading-8 text-white/85 sm:text-lg">{shortTagline}</p>
+                  <p className="text-base leading-8 text-white/75 sm:text-lg">{fullBio}</p>
+                  <p className="text-sm uppercase tracking-[0.4em] text-white/55">{location}</p>
                 </div>
 
                 <div className="space-y-4">
                   <SectionTitle title="COMMUNICATION TERMINAL" />
                   <div className="grid gap-3 sm:grid-cols-2">
                     {communicationLinks.map((link) => (
-                      <Link
-                        key={link.label}
-                        href={link.href}
-                        target={link.href.startsWith("http") ? "_blank" : undefined}
-                        rel={link.href.startsWith("http") ? "noreferrer" : undefined}
-                        className="flex items-center justify-between rounded-full bg-white/8 px-5 py-4 text-white/90 backdrop-blur-sm transition hover:bg-white/12"
-                      >
-                        <div>
-                          <p className="text-[0.68rem] uppercase tracking-[0.4em] text-white/55">{link.label}</p>
-                          <p className="mt-2 text-sm font-medium sm:text-base">{link.value}</p>
-                        </div>
-                        <span className="text-white/45">↗</span>
-                      </Link>
+                      <LinkCard key={link.label} label={link.label} value={link.value} href={link.href} />
                     ))}
                   </div>
                 </div>
@@ -117,14 +166,18 @@ export function IdentityPage() {
                     transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
                     className="absolute inset-0 overflow-hidden rounded-[2.6rem]"
                   >
-                    <Image
-                      src="/potrait-fotor-bg-remover-20260606231944.png"
-                      alt="Ansh portrait"
-                      fill
-                      priority
-                      sizes="(max-width: 1024px) 16rem, 20rem"
-                      className="object-contain object-center"
-                    />
+                    {profilePhotoUrl ? (
+                      <img src={profilePhotoUrl} alt={name} className="h-full w-full object-contain object-center" />
+                    ) : (
+                      <Image
+                        src="/potrait-fotor-bg-remover-20260606231944.png"
+                        alt="Ansh portrait"
+                        fill
+                        priority
+                        sizes="(max-width: 1024px) 16rem, 20rem"
+                        className="object-contain object-center"
+                      />
+                    )}
                   </motion.div>
                   <div className="absolute inset-0 rounded-[2.6rem] bg-[radial-gradient(circle_at_50%_25%,rgba(125,208,255,0.2),transparent_34%),radial-gradient(circle_at_50%_70%,rgba(167,126,255,0.16),transparent_40%)]" />
                   <div className="absolute inset-x-[12%] bottom-[10%] h-24 rounded-full bg-cyan-200/15 blur-3xl" />
@@ -165,7 +218,9 @@ export function IdentityPage() {
                   <h3 className="text-3xl font-extrabold italic tracking-tight text-white sm:text-4xl">Skill set</h3>
                   <div className="flex flex-wrap gap-3">
                     {skillSet.map((item) => (
-                      <span key={item} className="rounded-full border border-white/35 bg-white/10 px-4 py-2 text-sm text-white/95">{item}</span>
+                      <span key={item} className="rounded-full border border-white/35 bg-white/10 px-4 py-2 text-sm text-white/95">
+                        {item}
+                      </span>
                     ))}
                   </div>
                 </div>
@@ -174,7 +229,9 @@ export function IdentityPage() {
                   <h3 className="text-3xl font-extrabold italic tracking-tight text-white sm:text-4xl">Interest</h3>
                   <div className="flex flex-wrap gap-3">
                     {interests.map((item) => (
-                      <span key={item} className="rounded-full border border-white/20 bg-white/8 px-4 py-2 text-sm text-white/90">{item}</span>
+                      <span key={item} className="rounded-full border border-white/20 bg-white/8 px-4 py-2 text-sm text-white/90">
+                        {item}
+                      </span>
                     ))}
                   </div>
                 </div>

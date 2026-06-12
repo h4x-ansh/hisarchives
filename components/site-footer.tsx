@@ -4,6 +4,7 @@ import { usePathname } from "next/navigation";
 
 export function SiteFooter() {
   const pathname = usePathname();
+  const currentYear = new Date().getFullYear();
 
   if (pathname === "/gallery" || pathname.startsWith("/test")) {
     return null;
@@ -14,7 +15,7 @@ export function SiteFooter() {
       <div className="mx-auto w-full max-w-7xl space-y-2">
         <p>hisarchives.xyz</p>
         <p>A living archive.</p>
-        <p>Established 2026.</p>
+        <p>Established {currentYear}.</p>
       </div>
     </footer>
   );

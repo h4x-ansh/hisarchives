@@ -7,6 +7,7 @@ import Image from "next/image";
 import Lenis from "lenis";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { SiteHeader } from "@/components/site-header";
+import { formatExactDate, formatRelativeDate } from "@/lib/date";
 
 const objectives = [
   {
@@ -28,10 +29,10 @@ const objectives = [
 ];
 
 const livingRecords = [
-  { date: "22 OCT 2007", text: "Record initialized" },
-  { date: "04 JUN 2026", text: "hisarchives.xyz launched" },
-  { date: "06 JUN 2026", text: "Identity system updated" },
-  { date: "JEE 2027", text: "Mission archived" },
+  { eventDate: "2007-10-22", text: "Record initialized" },
+  { eventDate: "2026-06-04", text: "hisarchives.xyz launched" },
+  { eventDate: "2026-06-06", text: "Identity system updated" },
+  { eventDate: "2027-04-01", text: "Mission archived" },
 ] as const;
 
 const archiveQuotes = [
@@ -249,7 +250,7 @@ export function Homepage() {
       />
 
       <div className="relative mx-auto flex w-full max-w-7xl flex-col px-5 pb-24 pt-5 sm:px-8 lg:px-12">
-        <SiteHeader activePath="/" timestamp="last updated 05 jun 2026" />
+        <SiteHeader activePath="/" timestampDate="2026-06-05T00:00:00Z" />
 
         <section
           ref={heroRef}
@@ -321,7 +322,7 @@ export function Homepage() {
                 <p className="text-[0.68rem] uppercase tracking-[0.55em] text-muted">Live record feed</p>
                 <AnimatePresence mode="wait">
                   <motion.div
-                    key={`${livingRecords[statusIndex].date}-${livingRecords[statusIndex].text}`}
+                    key={`${livingRecords[statusIndex].eventDate}-${livingRecords[statusIndex].text}`}
                     initial={reduceMotion ? false : { opacity: 0, y: 6 }}
                     animate={reduceMotion ? undefined : { opacity: 1, y: 0 }}
                     exit={reduceMotion ? undefined : { opacity: 0, y: -6 }}
@@ -329,10 +330,13 @@ export function Homepage() {
                     className="flex flex-wrap items-center gap-x-3 gap-y-1"
                   >
                     <p className="text-sm uppercase tracking-[0.28em] text-muted">
-                      [{livingRecords[statusIndex].date}]
+                      [{formatExactDate(livingRecords[statusIndex].eventDate)}]
                     </p>
                     <p className="text-sm font-light tracking-wide text-text sm:text-base">
                       {livingRecords[statusIndex].text}
+                    </p>
+                    <p className="text-sm uppercase tracking-[0.28em] text-muted/80">
+                      {formatRelativeDate(livingRecords[statusIndex].eventDate)}
                     </p>
                   </motion.div>
                 </AnimatePresence>
@@ -430,7 +434,7 @@ export function Homepage() {
             <div className="space-y-5">
               <p className="text-[0.72rem] uppercase tracking-[0.45em] text-muted">Archive Entry #0001</p>
               <h2 className="text-[clamp(4.5rem,16vw,11rem)] font-light leading-none tracking-[-0.08em]">
-                2026
+                {formatExactDate("2026-06-04", "yyyy")}
               </h2>
             </div>
             <p className="max-w-md text-2xl font-light leading-tight text-muted sm:text-3xl">

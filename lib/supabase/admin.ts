@@ -34,3 +34,5 @@ export function getSupabaseAdminClient() {
 }
 
 export const journalBucketName = "journal-photos";
+export const curatedBucketName = "curated-images";
+export const identityBucketName = "identity-photos";

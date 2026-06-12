@@ -5,14 +5,18 @@ import { useEffect, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import Link from "next/link";
 import { SiteHeader } from "@/components/site-header";
+import type { ArchiveCard } from "@/lib/archive/types";
+import { formatExactDate } from "@/lib/date";
 
-const archivedWork = [
+const currentYear = String(new Date().getFullYear());
+
+const fallbackArchivedWork: ArchiveCard[] = [
   {
     id: "001",
     title: "Discord Automation",
     description: "Utility tooling and workflow automation preserved as an active line of work.",
     status: "Active",
-    year: "2026",
+    year: currentYear,
     accent: "#3b82f6",
     word: "DISCORD",
     href: "/archives/discord-automation",
@@ -23,7 +27,7 @@ const archivedWork = [
     title: "Tournament Platform",
     description: "A structured competitive system archived after its first complete pass.",
     status: "Archived",
-    year: "2026",
+    year: currentYear,
     accent: "#eab308",
     word: "TOURNAMENT",
     href: "/archives/tournament-platform",
@@ -34,7 +38,7 @@ const archivedWork = [
     title: "HisArchives",
     description: "The record itself, evolving in public while staying personal.",
     status: "Building",
-    year: "2026",
+    year: currentYear,
     accent: "#6d28d9",
     word: "HISARCHIVES",
     href: "/archives/hisarchives",
@@ -45,7 +49,7 @@ const archivedWork = [
     title: "JEE 2027",
     description: "A long-running objective tracked as a live archive record.",
     status: "Active",
-    year: "2026",
+    year: currentYear,
     accent: "#38bdf8",
     word: "JEE 2027",
     href: "/now",
@@ -56,7 +60,7 @@ const archivedWork = [
     title: "Fitness",
     description: "Conditioning, consistency, and body discipline stored as a living log.",
     status: "Active",
-    year: "2026",
+    year: currentYear,
     accent: "#10b981",
     word: "FITNESS",
     href: "/me",
@@ -67,7 +71,7 @@ const archivedWork = [
     title: "Memories",
     description: "Personal fragments, moments, and reminders kept inside the archive.",
     status: "Active",
-    year: "2026",
+    year: currentYear,
     accent: "#fb7185",
     word: "MEMORIES",
     href: "/timeline",
@@ -78,7 +82,7 @@ const archivedWork = [
     title: "Notes",
     description: "Quick records, references, and ideas that remain available later.",
     status: "Open",
-    year: "2026",
+    year: currentYear,
     accent: "#f59e0b",
     word: "NOTES",
     href: "/activity",
@@ -88,15 +92,15 @@ const archivedWork = [
 
 const archiveLogs = [
   {
-    date: "2026.06.04",
+    eventDate: "2026-06-04",
     text: "Purchased hisarchives.xyz",
   },
   {
-    date: "2026.06.04",
+    eventDate: "2026-06-04",
     text: "Built the first version of the archive",
   },
   {
-    date: "2026.06.04",
+    eventDate: "2026-06-04",
     text: "Started documenting the journey",
   },
 ];
@@ -352,7 +356,7 @@ function TimelineEntry({
       transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
       className="grid gap-4 border-b border-white/5 py-5 sm:grid-cols-[9rem_1fr]"
     >
-      <p className="text-sm uppercase tracking-[0.35em] text-muted">{date}</p>
+      <p className="text-sm uppercase tracking-[0.35em] text-muted">{formatExactDate(date)}</p>
       <p className="text-lg font-light leading-8 text-text sm:text-xl">{text}</p>
     </motion.div>
   );
@@ -394,11 +398,12 @@ function StatusCard() {
   );
 }
 
-export function ArchivePage() {
+export function ArchivePage({ initialItems = [] }: { initialItems?: ArchiveCard[] }) {
   const reduceMotion = useReducedMotion();
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
   const [showLoader, setShowLoader] = useState(false);
   const [loaderStep, setLoaderStep] = useState(0);
+  const archivedWork = initialItems.length ? initialItems : fallbackArchivedWork;
   const activeItem = activeIndex === null ? null : archivedWork[activeIndex];
 
   useEffect(() => {
@@ -494,7 +499,7 @@ export function ArchivePage() {
             <div className="space-y-2">
               <p className="text-[0.72rem] uppercase tracking-[0.45em] text-muted">Archived Work</p>
               <p className="text-[0.62rem] uppercase tracking-[0.4em] text-muted/70">
-                7 records | last entry: 06 jun 2026 | status: active
+                {archivedWork.length} records | last entry: {archivedWork[0]?.year ?? String(new Date().getFullYear())} | status: {archivedWork[0]?.status.toLowerCase() ?? "active"}
               </p>
             </div>
             <div className="space-y-4" onMouseLeave={() => setActiveIndex(null)}>
@@ -528,7 +533,7 @@ export function ArchivePage() {
                 </AnimatePresence>
 
                 <div className="relative flex gap-3 overflow-x-auto pb-2 pl-1 pr-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden lg:gap-4">
-                  {archivedWork.map((item, index) => {
+                      {archivedWork.map((item, index) => {
                     const isActive = activeIndex === index;
                     const isNeighbor = activeIndex === null ? false : Math.abs(activeIndex - index) === 1;
 
@@ -563,7 +568,7 @@ export function ArchivePage() {
         >
           <div className="rounded-[2rem] border border-white/8 bg-surface/70 px-6 py-3 backdrop-blur-sm sm:px-8">
             {archiveLogs.map((entry) => (
-              <TimelineEntry key={`${entry.date}-${entry.text}`} date={entry.date} text={entry.text} />
+              <TimelineEntry key={`${entry.eventDate}-${entry.text}`} date={entry.eventDate} text={entry.text} />
             ))}
           </div>
         </Section>

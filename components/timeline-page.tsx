@@ -1,9 +1,11 @@
-﻿"use client";
+"use client";
 
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import Link from "next/link";
-import type { WheelEvent as ReactWheelEvent } from "react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import type { ReactNode, WheelEvent as ReactWheelEvent } from "react";
+import { useEffect, useRef, useState } from "react";
+import { seedTimelineEntries } from "@/lib/timeline/seed";
+import type { TimelineEntry } from "@/lib/timeline/types";
 
 const palette = {
   background: "#212842",
@@ -14,179 +16,82 @@ const palette = {
   highlight: "#3A4367",
 } as const;
 
-const milestones = [
-  {
-    year: "2025",
-    title: "JEE Restart",
-    label: "Study chapter",
-    subtitle: "A return to fundamentals and a cleaner study rhythm.",
-    details:
-      "The year begins with a reset: build consistency, rebuild confidence, and let the archive support the exam track instead of distracting from it.",
-    imageText: "STUDY",
-    kind: "study",
-    accent: "#9A8A5A",
-    featured: true,
-  },
-  {
-    year: "2026",
-    title: "HisArchives Launch",
-    label: "Archive opening",
-    subtitle: "The archive gets a public home and a stable identity.",
-    details:
-      "hisarchives.xyz becomes the central record of progress: pages, logs, identity, and the first public version of the system.",
-    imageText: "SITE",
-    kind: "site",
-    accent: "#28325A",
-    featured: true,
-  },
-  {
-    year: "2026",
-    title: "Automation Systems",
-    label: "Build chapter",
-    subtitle: "Small systems start carrying real weight.",
-    details:
-      "Automation reduces friction and keeps the archive moving: cleaner updates, repeatable workflows, and fewer manual steps.",
-    imageText: "CODE",
-    kind: "system",
-    accent: "#4D6A8E",
-  },
-  {
-    year: "2026",
-    title: "Fitness Journey",
-    label: "Body record",
-    subtitle: "Consistency becomes a logged practice.",
-    details:
-      "Fitness is tracked as part of the record itself, not a side note — a discipline system with rhythm, repeatability, and visible progress.",
-    imageText: "FIT",
-    kind: "fitness",
-    accent: "#66785A",
-  },
-  {
-    year: "2027",
-    title: "JEE Attempt",
-    label: "Primary milestone",
-    subtitle: "The main academic attempt arrives.",
-    details:
-      "The archive points toward the first major attempt, shaped by every note, session, and revision recorded before it.",
-    imageText: "JEE",
-    kind: "exam",
-    accent: "#A08A44",
-    featured: true,
-  },
-  {
-    year: "2031",
-    title: "BTech Completion",
-    label: "Degree archive",
-    subtitle: "A longer arc for the record.",
-    details:
-      "The timeline extends forward into professional formation, keeping the museum wall open for the years beyond graduation.",
-    imageText: "BTECH",
-    kind: "degree",
-    accent: "#7A7F88",
-  },
-  {
-    year: "Future",
-    title: "Germany Mission",
-    label: "Long-range plan",
-    subtitle: "A future destination kept open in the archive.",
-    details:
-      "Germany remains an open record: a longer-term mission that can collect detail as the timeline advances.",
-    imageText: "FUTURE",
-    kind: "future",
-    accent: "#7B4C57",
-  },
-] as const;
+function formatDisplayDate(value: string) {
+  const parsedDate = new Date(`${value}T00:00:00Z`);
+  return new Intl.DateTimeFormat("en-GB", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  })
+    .format(parsedDate)
+    .replace(/,/g, "");
+}
 
-function MuseumVisual({ kind, imageText }: { kind: string; imageText: string }) {
+function Section({
+  eyebrow,
+  title,
+  subtitle,
+  children,
+}: {
+  eyebrow: string;
+  title: string;
+  subtitle?: string;
+  children: ReactNode;
+}) {
+  return (
+    <section className="border-t border-white/5 py-14 sm:py-28">
+      <div className="space-y-6">
+        <p className="text-[0.72rem] uppercase tracking-[0.45em] text-muted">{eyebrow}</p>
+        <div className="space-y-3">
+          <h2 className="text-balance text-3xl font-light sm:text-5xl">{title}</h2>
+          {subtitle ? <p className="max-w-2xl text-sm leading-7 text-muted">{subtitle}</p> : null}
+        </div>
+        {children}
+      </div>
+    </section>
+  );
+}
+
+function MuseumVisual({ entry }: { entry: TimelineEntry }) {
   return (
     <div className="relative h-full w-full overflow-hidden rounded-[1.2rem] bg-[linear-gradient(180deg,#f8f2e2,#e8dbc0)]">
       <div className="absolute inset-0 hidden md:block bg-[radial-gradient(circle_at_top_right,rgba(33,40,66,0.14),transparent_30%),radial-gradient(circle_at_bottom_left,rgba(58,67,103,0.08),transparent_25%)]" />
       <div className="absolute inset-0 hidden md:block opacity-[0.14] bg-[linear-gradient(rgba(33,40,66,0.04)_1px,transparent_1px),linear-gradient(90deg,rgba(33,40,66,0.04)_1px,transparent_1px)] bg-[size:18px_18px]" />
       <div className="relative flex h-full flex-col justify-between p-4 text-[#212842]">
         <div className="flex items-start justify-between text-[0.62rem] uppercase tracking-[0.45em] text-[#6f675b]">
-          <span>{kind}</span>
+          <span>{entry.category}</span>
           <span>archive visual</span>
         </div>
         <div className="flex flex-1 items-center justify-center">
-          {kind === "site" ? (
-            <div className="w-full max-w-[12rem] space-y-3 rounded-[1.1rem] bg-white/55 p-3 shadow-[0_14px_30px_rgba(33,40,66,0.08)]">
-              <div className="h-2 rounded-full bg-[#c3b79d]/70" />
-              <div className="grid grid-cols-3 gap-2">
-                <div className="h-14 rounded-lg bg-[#d8ccb1]/80" />
-                <div className="h-14 rounded-lg bg-[#f3ebdc]/90" />
-                <div className="h-14 rounded-lg bg-[#d8ccb1]/80" />
-              </div>
-              <div className="h-20 rounded-xl bg-[linear-gradient(180deg,rgba(33,40,66,0.12),rgba(33,40,66,0.04))]" />
-            </div>
-          ) : kind === "system" ? (
-            <div className="w-full max-w-[12rem] space-y-3">
-              <div className="h-24 rounded-[1.2rem] bg-white/40 p-4 shadow-[0_10px_24px_rgba(33,40,66,0.08)]">
-                <div className="space-y-2 text-[0.62rem] uppercase tracking-[0.45em] text-[#6f675b]">
-                  <div className="h-2 w-2 rounded-full bg-[#3A4367] shadow-[0_0_12px_rgba(58,67,103,0.55)]" />
-                  <div className="h-2 rounded-full bg-[#c3b79d]" />
-                  <div className="h-2 rounded-full bg-[#e3d7be]" />
-                  <div className="h-2 rounded-full bg-[#c3b79d]" />
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-2">
-                <div className="h-10 rounded-lg bg-[#d8ccb1]/90" />
-                <div className="h-10 rounded-lg bg-[#f3ebdc]/90" />
-              </div>
-            </div>
-          ) : kind === "fitness" ? (
-            <div className="relative h-32 w-32 rounded-full bg-[radial-gradient(circle,rgba(33,40,66,0.16)_0%,rgba(230,220,198,0.95)_50%,rgba(240,231,213,0.2)_100%)]">
-              <div className="absolute inset-4 rounded-full border border-[#b8ab8f]/60" />
-              <div className="absolute inset-8 rounded-full bg-[conic-gradient(from_180deg,rgba(33,40,66,0.9)_0_40%,rgba(58,67,103,0.45)_40_65%,rgba(33,40,66,0.2)_65_100%)]" />
-              <div className="absolute inset-12 rounded-full bg-[#f0e7d5]" />
-            </div>
-          ) : kind === "future" ? (
-            <div className="relative h-28 w-full max-w-[12rem] overflow-hidden rounded-[1.2rem] bg-white/35 shadow-[0_10px_22px_rgba(33,40,66,0.08)]">
-              <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(33,40,66,0.15),transparent_52%)]" />
-              <div className="absolute bottom-0 left-0 right-0 h-16 bg-[linear-gradient(180deg,transparent,rgba(81,70,56,0.15))]" />
-              <div className="absolute bottom-4 left-4 right-4 h-10 rounded-t-[1rem] bg-[#d8ccb1]/70" />
-              <div className="absolute bottom-8 left-8 h-12 w-3 rounded-t-full bg-[#8d8270]/70" />
-              <div className="absolute bottom-8 left-14 h-16 w-4 rounded-t-full bg-[#b5aa95]/80" />
-              <div className="absolute bottom-8 left-20 h-14 w-4 rounded-t-full bg-[#8d8270]/60" />
-            </div>
-          ) : kind === "exam" ? (
-            <div className="w-full max-w-[12rem] space-y-3 rounded-[1.2rem] bg-white/45 p-4 shadow-[0_12px_30px_rgba(33,40,66,0.08)]">
-              <div className="flex items-center justify-between text-[0.62rem] uppercase tracking-[0.45em] text-[#6f675b]">
-                <span>JEE</span>
-                <span>2027</span>
-              </div>
-              <div className="grid grid-cols-4 gap-1">
-                {Array.from({ length: 16 }).map((_, index) => (
-                  <span key={index} className="h-3 rounded-full bg-[#c3b79d]/80" />
-                ))}
-              </div>
-              <div className="h-16 rounded-[1rem] bg-[linear-gradient(180deg,rgba(33,40,66,0.15),rgba(33,40,66,0.03))]" />
-            </div>
+          {entry.coverImageUrl ? (
+            <img
+              src={entry.coverImageUrl}
+              alt={entry.title}
+              className="h-full w-full rounded-[1.1rem] object-cover shadow-[0_14px_30px_rgba(33,40,66,0.08)]"
+            />
           ) : (
-            <div className="flex flex-col items-center gap-3 text-center">
+            <div className="flex w-full flex-col items-center justify-center gap-3 rounded-[1.2rem] bg-white/45 px-4 py-5 text-center shadow-[0_12px_30px_rgba(33,40,66,0.08)]">
+              <p className="text-[0.62rem] uppercase tracking-[0.45em] text-[#6f675b]">{entry.year}</p>
               <div className="rounded-[1.35rem] bg-white/45 px-4 py-5 shadow-[0_12px_30px_rgba(33,40,66,0.08)]">
-                <p className="text-3xl font-light tracking-[0.2em] text-[#212842]">{imageText}</p>
+                <p className="text-3xl font-light tracking-[0.2em] text-[#212842]">{entry.word}</p>
               </div>
-              <div className="flex gap-2">
-                <span className="h-2 w-2 rounded-full bg-[#3A4367]" />
-                <span className="h-2 w-2 rounded-full bg-[#b8ab8f]" />
-                <span className="h-2 w-2 rounded-full bg-[#8d8270]" />
-              </div>
+              <p className="max-w-[12rem] text-sm leading-7 text-[#5f574c]">{entry.category}</p>
             </div>
           )}
         </div>
         <div className="flex items-end justify-between text-[0.62rem] uppercase tracking-[0.45em] text-[#6f675b]">
           <span>archival plate</span>
-          <span>{imageText}</span>
+          <span>{entry.title}</span>
         </div>
       </div>
     </div>
   );
 }
 
-function TimelineRuler() {
+function TimelineRuler({ startLabel, endLabel }: { startLabel: string; endLabel: string }) {
   return (
     <div className="flex items-center gap-2 overflow-hidden sm:hidden">
-      <span className="shrink-0 text-[0.62rem] uppercase tracking-[0.4em] text-[#E7DECC]">2025</span>
+      <span className="shrink-0 text-[0.62rem] uppercase tracking-[0.4em] text-[#E7DECC]">{startLabel}</span>
       <div className="flex min-w-0 flex-1 items-center gap-1">
         <span className="h-px min-w-0 flex-1 bg-gradient-to-r from-transparent via-[#3A4367]/45 to-transparent" />
         {Array.from({ length: 4 }).map((_, index) => (
@@ -194,7 +99,7 @@ function TimelineRuler() {
         ))}
         <span className="h-px min-w-0 flex-1 bg-gradient-to-r from-transparent via-[#3A4367]/45 to-transparent" />
       </div>
-      <span className="shrink-0 text-[0.62rem] uppercase tracking-[0.4em] text-[#E7DECC]">2031</span>
+      <span className="shrink-0 text-[0.62rem] uppercase tracking-[0.4em] text-[#E7DECC]">{endLabel}</span>
     </div>
   );
 }
@@ -203,7 +108,7 @@ function TimelineHero({
   entry,
   isTouchDevice,
 }: {
-  entry: (typeof milestones)[number];
+  entry: TimelineEntry;
   isTouchDevice: boolean;
 }) {
   const reduceMotion = useReducedMotion();
@@ -235,16 +140,16 @@ function TimelineHero({
           <h2 className="max-w-3xl text-[clamp(2.3rem,5vw,5rem)] font-light leading-[0.92] tracking-[-0.04em] text-[#fbf6eb]">
             {entry.title}
           </h2>
-          <p className="max-w-3xl text-lg leading-8 text-[#e4dac8] sm:text-xl sm:leading-9">{entry.details}</p>
+          <p className="max-w-3xl text-lg leading-8 text-[#e4dac8] sm:text-xl sm:leading-9">{entry.summary}</p>
           <div className="flex flex-wrap gap-3 pt-1">
             <span className="rounded-full border border-white/10 bg-white/8 px-4 py-2 text-[0.62rem] uppercase tracking-[0.38em] text-[#c5b8a0]">
-              Museum timeline
+              {entry.category}
             </span>
             <span className="rounded-full border border-white/10 bg-white/8 px-4 py-2 text-[0.62rem] uppercase tracking-[0.38em] text-[#c5b8a0]">
-              Personal museum
+              {formatDisplayDate(entry.date)}
             </span>
             <span className="rounded-full border border-white/10 bg-white/8 px-4 py-2 text-[0.62rem] uppercase tracking-[0.38em] text-[#c5b8a0]">
-              Curated milestones
+              {entry.status}
             </span>
           </div>
         </div>
@@ -257,12 +162,16 @@ function TimelineHero({
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_20%,rgba(255,255,255,0.84),transparent_30%),radial-gradient(circle_at_50%_68%,rgba(33,40,66,0.12),transparent_34%)]" />
           <div className="absolute inset-0 opacity-[0.08] bg-[linear-gradient(rgba(33,40,66,0.07)_1px,transparent_1px),linear-gradient(90deg,rgba(33,40,66,0.07)_1px,transparent_1px)] bg-[size:18px_18px]" />
           <div className="absolute inset-0 flex items-center justify-center p-4 text-center">
-            <div className="max-w-[11rem] rounded-[1.1rem] bg-white/55 px-4 py-4 shadow-[0_12px_34px_rgba(33,40,66,0.1)] backdrop-blur-sm">
-              <p className="text-[0.66rem] uppercase tracking-[0.4em] text-[#6f675b]">Related visual</p>
-              <p className="mt-3 text-sm leading-7 text-[#5f574c]">
-                Milestone-specific visual treatment for the selected record.
-              </p>
-            </div>
+            {entry.coverImageUrl ? (
+              <img src={entry.coverImageUrl} alt={entry.title} className="h-full w-full object-cover" />
+            ) : (
+              <div className="max-w-[11rem] rounded-[1.1rem] bg-white/55 px-4 py-4 shadow-[0_12px_34px_rgba(33,40,66,0.1)] backdrop-blur-sm">
+                <p className="text-[0.66rem] uppercase tracking-[0.4em] text-[#6f675b]">Related visual</p>
+                <p className="mt-3 text-sm leading-7 text-[#5f574c]">
+                  {entry.summary}
+                </p>
+              </div>
+            )}
           </div>
         </motion.div>
       </motion.div>
@@ -276,7 +185,7 @@ function MuseumCard({
   onActivate,
   isTouchDevice,
 }: {
-  entry: (typeof milestones)[number];
+  entry: TimelineEntry;
   active: boolean;
   onActivate: () => void;
   isTouchDevice: boolean;
@@ -291,11 +200,7 @@ function MuseumCard({
       ? "clamp(19rem, 46vw, 36rem)"
       : "clamp(3.35rem, 4.2vw, 4.1rem)";
 
-  const cardHeight = isTouchDevice
-    ? active
-      ? "14.75rem"
-      : "14rem"
-    : "26.5rem";
+  const cardHeight = isTouchDevice ? (active ? "14.75rem" : "14rem") : "26.5rem";
 
   return (
     <motion.button
@@ -347,22 +252,26 @@ function MuseumCard({
                   isTouchDevice ? "bg-[#efe4cf]" : "bg-[linear-gradient(180deg,rgba(255,255,255,0.45),rgba(246,238,224,0.25))]"
                 }`}
               >
-                <MuseumVisual kind={entry.kind} imageText={entry.imageText} />
+                <MuseumVisual entry={entry} />
               </div>
             </div>
 
             <div className="mt-4 space-y-2">
               <p className="text-xl leading-none tracking-[-0.04em] text-[#fbf6eb]">{entry.title}</p>
               <p className="text-[0.62rem] uppercase tracking-[0.42em] text-[#c5b8a0]">Archive label</p>
-              <p className="text-sm leading-6 text-[#e4dac8]">{entry.label}</p>
+              <p className="text-sm leading-6 text-[#e4dac8]">{entry.category}</p>
+              <p className="text-sm leading-6 text-[#e4dac8]">{entry.summary}</p>
             </div>
           </>
         ) : (
           <div className="flex flex-1 flex-col items-center justify-center gap-3 py-3 text-center">
-            <span className="h-2 w-2 rounded-full" style={{ backgroundColor: entry.accent, boxShadow: `0 0 0 8px ${entry.accent}18` }} />
+            <span
+              className="h-2 w-2 rounded-full"
+              style={{ backgroundColor: entry.accent, boxShadow: `0 0 0 8px ${entry.accent}18` }}
+            />
             <p className="text-[0.58rem] uppercase tracking-[0.44em] text-[#c5b8a0]">Spine</p>
             <p className="max-w-[4.8rem] text-[0.72rem] leading-tight tracking-[0.18em] text-[#f8f2e7]">
-              {entry.title.split(" ")[0]}
+              {entry.word}
             </p>
           </div>
         )}
@@ -371,14 +280,38 @@ function MuseumCard({
   );
 }
 
-export function TimelinePage() {
+function TimelineLogEntry({ entry }: { entry: TimelineEntry }) {
+  const reduceMotion = useReducedMotion();
+
+  return (
+    <motion.div
+      initial={reduceMotion ? false : { opacity: 0, y: 14 }}
+      whileInView={reduceMotion ? undefined : { opacity: 1, y: 0 }}
+      viewport={{ once: true, amount: 0.45 }}
+      transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+      className="grid gap-4 border-b border-white/5 py-5 sm:grid-cols-[9rem_1fr]"
+    >
+      <div className="space-y-2">
+        <p className="text-sm uppercase tracking-[0.35em] text-muted">{formatDisplayDate(entry.date)}</p>
+        <p className="text-[0.62rem] uppercase tracking-[0.35em] text-muted/70">{entry.category}</p>
+      </div>
+      <div className="space-y-2">
+        <p className="text-lg font-light leading-8 text-text sm:text-xl">{entry.title}</p>
+        <p className="text-sm leading-7 text-muted sm:text-base">{entry.summary}</p>
+      </div>
+    </motion.div>
+  );
+}
+
+export function TimelinePage({ initialEntries = [] }: { initialEntries?: TimelineEntry[] }) {
   const reduceMotion = useReducedMotion();
   const railRef = useRef<HTMLDivElement | null>(null);
-  const [selectedIndex, setSelectedIndex] = useState(1);
+  const [selectedIndex, setSelectedIndex] = useState(0);
   const [isTouchDevice, setIsTouchDevice] = useState(false);
-  const selectedEntry = milestones[selectedIndex];
-
-  const orderedMilestones = useMemo(() => milestones, []);
+  const timelineEntries = initialEntries.length ? initialEntries : seedTimelineEntries;
+  const selectedEntry = timelineEntries[Math.min(selectedIndex, timelineEntries.length - 1)] ?? timelineEntries[0];
+  const startLabel = timelineEntries[timelineEntries.length - 1]?.year ?? "2025";
+  const endLabel = timelineEntries[0]?.year ?? "2031";
 
   useEffect(() => {
     const touchQuery = window.matchMedia("(hover: none)");
@@ -396,6 +329,10 @@ export function TimelinePage() {
       pointerQuery.removeEventListener("change", updateTouchState);
     };
   }, []);
+
+  useEffect(() => {
+    setSelectedIndex(0);
+  }, [timelineEntries.length]);
 
   function handleWheel(event: ReactWheelEvent<HTMLDivElement>) {
     const rail = railRef.current;
@@ -431,9 +368,9 @@ export function TimelinePage() {
                   Milestones
                 </p>
                 <p className="mt-2 hidden text-base uppercase tracking-[0.35em] text-[#E7DECC] sm:block sm:text-lg">
-                  2025 ─────●─────●─────●─────●─────●─────●───── 2031
+                  {startLabel} ─────●─────●─────●─────●─────●─────●───── {endLabel}
                 </p>
-                <TimelineRuler />
+                <TimelineRuler startLabel={startLabel} endLabel={endLabel} />
               </div>
               <div className="hidden items-center gap-3 text-[0.64rem] uppercase tracking-[0.35em] text-[#c5b8a0] sm:flex">
                 <Link href="/" className="transition-colors hover:text-[#fbf6eb]">
@@ -460,13 +397,13 @@ export function TimelinePage() {
                 className="relative flex gap-4 overflow-x-auto pb-2 pt-3 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
                 style={{ touchAction: "pan-x" }}
               >
-                {orderedMilestones.map((entry, index) => {
+                {timelineEntries.map((entry, index) => {
                   const active = index === selectedIndex;
                   const before = index < selectedIndex;
 
                   return (
                     <motion.div
-                      key={`${entry.year}-${entry.title}`}
+                      key={`${entry.date}-${entry.title}`}
                       onMouseEnter={() => setSelectedIndex(index)}
                       onFocus={() => setSelectedIndex(index)}
                       whileHover={reduceMotion ? undefined : { y: -5, scale: 1.04 }}
@@ -485,11 +422,17 @@ export function TimelinePage() {
                             backgroundColor: active ? palette.highlight : undefined,
                           }}
                         >
-                          {active ? <span className="absolute -top-7 whitespace-nowrap text-[0.62rem] uppercase tracking-[0.38em] text-[#6f675b]">YOU ARE HERE</span> : null}
+                          {active ? (
+                            <span className="absolute -top-7 whitespace-nowrap text-[0.62rem] uppercase tracking-[0.38em] text-[#6f675b]">
+                              YOU ARE HERE
+                            </span>
+                          ) : null}
                         </div>
                       </div>
                       <div className="relative">
-                        {active ? <div className="absolute -top-2 left-1/2 h-3 w-3 -translate-x-1/2 rounded-full bg-[#3A4367] shadow-[0_0_0_10px_rgba(58,67,103,0.1)]" /> : null}
+                        {active ? (
+                          <div className="absolute -top-2 left-1/2 h-3 w-3 -translate-x-1/2 rounded-full bg-[#3A4367] shadow-[0_0_0_10px_rgba(58,67,103,0.1)]" />
+                        ) : null}
                         <MuseumCard entry={entry} active={active} onActivate={() => setSelectedIndex(index)} isTouchDevice={isTouchDevice} />
                       </div>
                     </motion.div>
@@ -499,10 +442,22 @@ export function TimelinePage() {
             </div>
           </div>
 
-        <div className="mt-3 rounded-[3rem] border border-white/10 bg-[linear-gradient(180deg,rgba(255,247,232,0.05),rgba(255,247,232,0.02))] px-5 py-5 shadow-[0_24px_90px_rgba(0,0,0,0.2)] backdrop-blur-sm sm:mt-5 sm:px-6 sm:py-6 xl:px-8 xl:py-7">
-          <TimelineHero entry={selectedEntry} isTouchDevice={isTouchDevice} />
-        </div>
+          <div className="mt-3 rounded-[3rem] border border-white/10 bg-[linear-gradient(180deg,rgba(255,247,232,0.05),rgba(255,247,232,0.02))] px-5 py-5 shadow-[0_24px_90px_rgba(0,0,0,0.2)] backdrop-blur-sm sm:mt-5 sm:px-6 sm:py-6 xl:px-8 xl:py-7">
+            <TimelineHero entry={selectedEntry} isTouchDevice={isTouchDevice} />
+          </div>
         </section>
+
+        <Section
+          eyebrow="Archive Logs"
+          title="Timeline notes."
+          subtitle="A clean log generated from the same archive records that power the public timeline."
+        >
+          <div className="rounded-[2rem] border border-white/8 bg-surface/70 px-6 py-3 backdrop-blur-sm sm:px-8">
+            {timelineEntries.map((entry) => (
+              <TimelineLogEntry key={`${entry.date}-${entry.title}`} entry={entry} />
+            ))}
+          </div>
+        </Section>
       </div>
     </main>
   );

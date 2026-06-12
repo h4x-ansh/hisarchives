@@ -7,6 +7,7 @@ import { SiteHeader } from "@/components/site-header";
 export function ArchiveFrame({
   activePath,
   timestamp,
+  timestampDate,
   children,
 }: {
   activePath:
@@ -14,10 +15,12 @@ export function ArchiveFrame({
     | "/archives"
     | "/now"
     | "/me"
+  | "/identity"
   | "/timeline"
   | "/activity"
   | "/gallery";
   timestamp?: string;
+  timestampDate?: string | Date | null;
   children: ReactNode;
 }) {
   return (
@@ -26,7 +29,7 @@ export function ArchiveFrame({
       <div aria-hidden className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(139,92,246,0.18),transparent_30%),radial-gradient(circle_at_bottom_right,rgba(255,255,255,0.05),transparent_25%)]" />
 
       <div className="relative mx-auto flex w-full max-w-7xl flex-col px-5 pb-24 pt-5 sm:px-8 xl:pl-[6.75rem] xl:pr-12">
-        <SiteHeader activePath={activePath} timestamp={timestamp} />
+        <SiteHeader activePath={activePath} timestamp={timestamp} timestampDate={timestampDate} />
         {children}
       </div>
     </main>

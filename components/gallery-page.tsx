@@ -3,18 +3,11 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { ArchiveFrame } from "@/components/archive-frame";
+import type { CuratedGalleryItem } from "@/lib/curated/types";
 
-type CuratedCategory =
-  | "Songs"
-  | "Anime"
-  | "Marvel"
-  | "RCB"
-  | "FC Barcelona"
-  | "Virat Kohli"
-  | "Chess"
-  | "Badminton";
+type CuratedCategory = string;
 
-type Filter = "All" | CuratedCategory;
+type Filter = string;
 
 type CuratedItem = {
   id: string;
@@ -24,6 +17,9 @@ type CuratedItem = {
   fallbackImage: string;
   accent: string;
   imagePosition?: string;
+  description?: string;
+  year?: string;
+  displayOrder?: number;
 };
 
 const curatedCollections: Record<CuratedCategory, CuratedItem[]> = {
@@ -333,10 +329,42 @@ const curatedCollections: Record<CuratedCategory, CuratedItem[]> = {
   ],
 };
 
-const categories = Object.keys(curatedCollections) as CuratedCategory[];
-const filterOptions: Filter[] = ["All", ...categories];
-const allItems = categories.flatMap((category) => curatedCollections[category]);
-const totalItems = allItems.length;
+function getCategoryDescription(category: string) {
+  if (category === "Songs") return "A quiet reminder to build slowly and keep moving.";
+  if (category === "Anime") return "A story that stays long after the screen goes dark.";
+  if (category === "Marvel") return "Stories of heroes, sacrifice and imagination.";
+  if (category === "RCB") return "More than a team. More like an emotion.";
+  if (category === "FC Barcelona") return "The beautiful game played with identity and rhythm.";
+  if (category === "Virat Kohli") return "Discipline, hunger and a never-give-up mindset.";
+  if (category === "Chess") return "A game of patience, strategy and mindset.";
+  return "Speed, focus and a great stress buster.";
+}
+
+function buildCuratedCollections(items: CuratedGalleryItem[]) {
+  const grouped = items.reduce<Record<string, CuratedItem[]>>((collection, item) => {
+    const card: CuratedItem = {
+      id: item.id,
+      category: item.category as CuratedCategory,
+      title: item.title,
+      image: item.image,
+      fallbackImage: item.fallbackImage,
+      accent: item.accent,
+      imagePosition: item.imagePosition,
+      description: item.description,
+      year: item.year,
+      displayOrder: item.displayOrder,
+    };
+
+    if (!collection[item.category]) {
+      collection[item.category] = [];
+    }
+
+    collection[item.category].push(card);
+    return collection;
+  }, {});
+
+  return grouped;
+}
 
 function GalleryCard({ item, index }: { item: CuratedItem; index: number }) {
   const [loaded, setLoaded] = useState(false);
@@ -392,24 +420,10 @@ function GalleryCard({ item, index }: { item: CuratedItem; index: number }) {
           </h3>
           <div className="space-y-1 overflow-hidden">
             <p className="max-h-0 max-w-[82%] overflow-hidden text-[0.8rem] leading-5 text-white/76 opacity-0 transition-all duration-300 group-hover:max-h-24 group-hover:opacity-100 sm:text-[0.9rem] sm:leading-6">
-              {item.category === "Songs"
-                ? "A quiet reminder to build slowly and keep moving."
-                : item.category === "Anime"
-                  ? "A story that stays long after the screen goes dark."
-                  : item.category === "Marvel"
-                    ? "Stories of heroes, sacrifice and imagination."
-                    : item.category === "RCB"
-                      ? "More than a team. More like an emotion."
-                      : item.category === "FC Barcelona"
-                        ? "The beautiful game played with identity and rhythm."
-                        : item.category === "Virat Kohli"
-                          ? "Discipline, hunger and a never-give-up mindset."
-                          : item.category === "Chess"
-                            ? "A game of patience, strategy and mindset."
-                            : "Speed, focus and a great stress buster."}
+              {item.description || getCategoryDescription(item.category)}
             </p>
             <p className="max-h-0 text-[0.7rem] uppercase tracking-[0.38em] text-white/52 opacity-0 transition-all duration-300 group-hover:max-h-8 group-hover:opacity-100">
-              2026
+              {item.year || String(new Date().getFullYear())}
             </p>
           </div>
         </div>
@@ -434,16 +448,24 @@ function FilterPill({ label, active, onClick }: { label: Filter; active: boolean
   );
 }
 
-export function GalleryPage() {
+export function GalleryPage({ initialItems = [] }: { initialItems?: CuratedGalleryItem[] }) {
   const reduceMotion = useReducedMotion();
   const [activeFilter, setActiveFilter] = useState<Filter>("All");
+  const collections = useMemo(
+    () => (initialItems.length ? buildCuratedCollections(initialItems) : curatedCollections),
+    [initialItems],
+  );
+  const categories = Object.keys(collections);
+  const filterOptions: Filter[] = ["All", ...categories];
+  const allItems = categories.flatMap((category) => collections[category] ?? []);
+  const totalItems = allItems.length;
 
   const filteredItems = useMemo(() => {
     if (activeFilter === "All") {
       return allItems;
     }
-    return curatedCollections[activeFilter];
-  }, [activeFilter]);
+    return collections[activeFilter] ?? [];
+  }, [activeFilter, allItems, collections]);
 
   return (
     <ArchiveFrame activePath="/gallery" timestamp="curated">

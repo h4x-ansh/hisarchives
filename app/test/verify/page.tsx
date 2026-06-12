@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
-import { auth, OWNER_EMAIL } from "@/auth";
+import { auth } from "@/auth";
 import { TestVerifyClient } from "@/components/test-verify-client";
+import { isOwnerSession } from "@/lib/auth/owner";
 
 export const metadata: Metadata = {
   title: "verify | hisarchives.xyz",
@@ -15,8 +16,8 @@ export default async function TestVerifyRoute() {
     redirect("/test");
   }
 
-  if (OWNER_EMAIL && session.user.email.toLowerCase() === OWNER_EMAIL) {
-    redirect("/");
+  if (isOwnerSession(session)) {
+    redirect("/test/dashboard");
   }
 
   return <TestVerifyClient />;
