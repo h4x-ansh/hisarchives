@@ -18,16 +18,18 @@ export async function generateMetadata({ params }: { params: { slug: string } })
       return {};
     }
 
-    const recordRow = await getArchiveRecordBySlug(slug);
-
-    if (!recordRow || recordRow.status !== "Published") {
+    try {
+      const recordRow = await getArchiveRecordBySlug(slug);
+      if (!recordRow || recordRow.status !== "Published") {
+        return {};
+      }
+      return {
+        title: `${recordRow.title} | hisarchives.xyz`,
+        description: recordRow.short_summary,
+      };
+    } catch {
       return {};
     }
-
-    return {
-      title: `${recordRow.title} | hisarchives.xyz`,
-      description: recordRow.short_summary,
-    };
   }
 
   const titleMap: Record<(typeof validSlugs)[number], string> = {
@@ -46,10 +48,13 @@ export default async function ArchiveDetailRoute({ params }: { params: { slug: s
   const slug = params.slug;
 
   if (hasSupabaseAdminEnv()) {
-    const recordRow = await getArchiveRecordBySlug(slug);
-
-    if (recordRow?.status === "Published") {
-      return <ArchiveDetailPage record={archiveRowToRecord(recordRow)} />;
+    try {
+      const recordRow = await getArchiveRecordBySlug(slug);
+      if (recordRow?.status === "Published") {
+        return <ArchiveDetailPage record={archiveRowToRecord(recordRow)} />;
+      }
+    } catch {
+      // DB unavailable or table missing at build time — fall through to seed data
     }
   }
 

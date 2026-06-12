@@ -1,402 +1,1313 @@
-﻿"use client";
+"use client";
 
 import Link from "next/link";
-import Image from "next/image";
+import { useState, useEffect } from "react";
 import type { ReactNode } from "react";
-import { motion, useReducedMotion } from "framer-motion";
-import { Activity, Clock3, MapPin, Search, Sparkles, Zap } from "lucide-react";
+import {
+  Activity,
+  BarChart2,
+  BookOpen,
+  CheckSquare,
+  ChevronRight,
+  Clock,
+  Code2,
+  Dumbbell,
+  FileText,
+  Flame,
+  Palette,
+  SkipForward,
+  Target,
+  Timer,
+  TrendingUp,
+  Triangle,
+  Zap,
+} from "lucide-react";
+import {
+  artAnalytics,
+  artSkills,
+  healthAnalytics,
+  healthExercises,
+  jeeAnalytics,
+  jeeChapters,
+  nowProfile,
+  projectFeatures,
+  projectsAnalytics,
+  type CheckItem,
+} from "@/lib/now/data";
 
-const focusCards = [
-  { title: "JEE 2027", detail: "Study track", hint: "Class 11 • physics focus" },
-  { title: "HisArchives", detail: "Build track", hint: "Main site • product feel" },
-  { title: "Fitness", detail: "Routine track", hint: "Consistency • nightly work" },
-  { title: "Projects", detail: "Work track", hint: "Bugs, polish, releases" },
-] as const;
+// ─── Design Tokens ────────────────────────────────────────────────────────────
 
-const statusNodes = [
-  { code: "JEE", label: "Study mode", tone: "bg-amber-300" },
-  { code: "FIT", label: "Routine active", tone: "bg-orange-300" },
-  { code: "WEB", label: "Build state", tone: "bg-yellow-200" },
-  { code: "LIFE", label: "Daily flow", tone: "bg-amber-200" },
-  { code: "MEM", label: "Memory log", tone: "bg-stone-200" },
-] as const;
+const BG = "#0c0b1e";
+const CARD = "#12102a";
+const CARD2 = "#1a1735";
+const BORDER = "rgba(139,92,246,0.22)";
+const PURPLE = "#8b5cf6";
+const PURPLE_DIM = "#a78bfa";
+const GREEN = "#22c55e";
+const ORANGE = "#f59e0b";
+const RED = "#ef4444";
+const TEAL = "#2dd4bf";
 
-const liveLog = [
-  { time: "21:42", tag: "SYSTEM", text: "Sync complete. Archive state remains active." },
-  { time: "21:18", tag: "BUILD", text: "Adjusted the archive shelf spacing and spine titles." },
-  { time: "20:54", tag: "FOCUS", text: "Returned to JEE 2027 after the layout pass." },
-  { time: "19:36", tag: "NOTE", text: "Recorded the latest site polish and motion cleanup." },
-  { time: "18:12", tag: "WORK", text: "Refreshed /now into a warm workstation view." },
-] as const;
+// ─── Breakpoint hook ─────────────────────────────────────────────────────────
 
-const metrics = [
-  { label: "Study Hours", value: "6.5h", percent: 72 },
-  { label: "Build Hours", value: "2.8h", percent: 49 },
-  { label: "Fitness Hours", value: "1.2h", percent: 31 },
-  { label: "Discipline Index", value: "87", percent: 87 },
-] as const;
+function useBreakpoint() {
+  const [w, setW] = useState(1200); // SSR default = desktop, updates after mount
+  useEffect(() => {
+    const update = () => setW(window.innerWidth);
+    update();
+    window.addEventListener("resize", update);
+    return () => window.removeEventListener("resize", update);
+  }, []);
+  return { isMobile: w < 640, isTablet: w < 1024, w };
+}
 
-function WorkPanel({ className = "", children }: { className?: string; children: ReactNode }) {
+// ─── Types ────────────────────────────────────────────────────────────────────
+
+type Section = "overview" | "jee" | "health" | "art" | "projects";
+type JeeTab = "chapters" | "analytics" | "mocktests";
+type HealthTab = "workouts" | "analytics" | "prs";
+type ArtTab = "skills" | "analytics" | "portfolio";
+type ProjectTab = "features" | "analytics";
+
+// ─── Layout ───────────────────────────────────────────────────────────────────
+
+function TrackerLayout({ active, children, isOwner }: { active: Section; children: ReactNode; isOwner: boolean }) {
+  const { isMobile, isTablet } = useBreakpoint();
+
+  const tabs: { href: string; label: string; section: Section; icon: typeof Clock }[] = [
+    { href: "/now", label: "Study", section: "overview", icon: Clock },
+    { href: "/now/jee", label: "JEE", section: "jee", icon: BookOpen },
+    { href: "/now/health", label: "Health", section: "health", icon: Dumbbell },
+    { href: "/now/art", label: "Art", section: "art", icon: Palette },
+    { href: "/now/projects", label: "Projects", section: "projects", icon: Code2 },
+  ];
+
+  const contentPad = isMobile ? "12px 12px 48px" : isTablet ? "16px 16px 48px" : "24px 24px 48px";
+
   return (
-    <div
-      className={`rounded-[2rem] border border-[#d28a41]/18 bg-[linear-gradient(180deg,rgba(57,35,22,0.74),rgba(19,11,8,0.9))] shadow-[0_26px_90px_rgba(0,0,0,0.34)] backdrop-blur-md ${className}`}
-    >
+    <div style={{ background: BG, minHeight: "100vh", fontFamily: "Inter, system-ui, sans-serif" }}>
+      <style>{`.tracker-tabs::-webkit-scrollbar{display:none}`}</style>
+      {/* Top nav */}
+      <nav style={{ background: "#07060f", borderBottom: `1px solid ${BORDER}`, position: "sticky", top: 0, zIndex: 50 }}>
+        <div style={{ maxWidth: 1400, margin: "0 auto", padding: isMobile ? "0 8px" : "0 24px", display: "flex", alignItems: "center", height: 52, gap: 0 }}>
+          {/* Logo — icon only on mobile */}
+          <div style={{ display: "flex", alignItems: "center", gap: 8, marginRight: isMobile ? 4 : 24, flexShrink: 0 }}>
+            <div style={{ width: 28, height: 28, background: PURPLE, borderRadius: 7, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+              <Target size={14} color="white" />
+            </div>
+            {!isMobile && (
+              <>
+                <span style={{ fontWeight: 600, color: "white", fontSize: 14, whiteSpace: "nowrap" }}>Mission Control</span>
+                {!isTablet && <span style={{ color: "rgba(139,92,246,0.5)", fontSize: 12 }}>— {nowProfile.handle}</span>}
+              </>
+            )}
+          </div>
+
+          {/* Tabs — scrollable on mobile/tablet */}
+          <div className="tracker-tabs" style={{ display: "flex", flex: 1, overflowX: "auto", scrollbarWidth: "none" }}>
+            {tabs.map((tab) => (
+              <Link
+                key={tab.href}
+                href={tab.href}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: isMobile ? 0 : 6,
+                  padding: isMobile ? "0 10px" : "0 14px",
+                  height: 52,
+                  fontSize: 12,
+                  fontWeight: 500,
+                  borderBottom: active === tab.section ? `2px solid ${PURPLE}` : "2px solid transparent",
+                  color: active === tab.section ? PURPLE : "#9ca3af",
+                  textDecoration: "none",
+                  transition: "color 0.15s",
+                  whiteSpace: "nowrap",
+                  flexShrink: 0,
+                }}
+              >
+                <tab.icon size={14} />
+                {!isMobile && <span style={{ marginLeft: 6 }}>{tab.label}</span>}
+                {isMobile && <span style={{ fontSize: 10, marginLeft: 4 }}>{tab.label}</span>}
+              </Link>
+            ))}
+          </div>
+
+          {/* Back link — hide on mobile */}
+          {!isMobile && (
+            <Link href="/" style={{ fontSize: 11, color: "#6b7280", textDecoration: "none", whiteSpace: "nowrap", marginLeft: 8, flexShrink: 0 }}>
+              ← Home
+            </Link>
+          )}
+        </div>
+      </nav>
+
+      {/* Read-only banner for visitors */}
+      {!isOwner && (
+        <div style={{ background: "rgba(139,92,246,0.08)", borderBottom: `1px solid ${BORDER}`, padding: "8px 24px", textAlign: "center" }}>
+          <span style={{ fontSize: 12, color: PURPLE_DIM }}>
+            👁 Viewing Ansh&apos;s tracker — read only.{" "}
+            <a href="/test" style={{ color: PURPLE, textDecoration: "underline" }}>Sign in</a>
+            {" "}to edit.
+          </span>
+        </div>
+      )}
+
+      {/* Content */}
+      <div style={{ maxWidth: 1400, margin: "0 auto", padding: contentPad }}>
+        {children}
+      </div>
+    </div>
+  );
+}
+
+// ─── Card ─────────────────────────────────────────────────────────────────────
+
+function Card({ children, style }: { children: ReactNode; style?: React.CSSProperties }) {
+  return (
+    <div style={{ background: CARD, border: `1px solid ${BORDER}`, borderRadius: 12, padding: 20, ...style }}>
       {children}
     </div>
   );
 }
 
-function Bar({ value }: { value: number }) {
+function CardHeader({ icon: Icon, title, color }: { icon: typeof Clock; title: string; color?: string }) {
   return (
-    <div className="h-2 overflow-hidden rounded-full bg-white/8">
-      <div className="h-full rounded-full bg-gradient-to-r from-amber-200 via-amber-400 to-orange-400" style={{ width: `${value}%` }} />
+    <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 20 }}>
+      <Icon size={15} color={color ?? PURPLE} />
+      <h2 style={{ fontWeight: 600, color: color ?? PURPLE, fontSize: 14, margin: 0 }}>{title}</h2>
     </div>
   );
 }
 
-function FocusChip({ title, detail, hint }: (typeof focusCards)[number]) {
-  const reduceMotion = useReducedMotion();
+// ─── Sub-tabs ────────────────────────────────────────────────────────────────
 
+function SubTabs<T extends string>({ tabs, active, onChange }: { tabs: { value: T; label: string }[]; active: T; onChange: (v: T) => void }) {
   return (
-    <motion.div
-      whileHover={reduceMotion ? undefined : { y: -4, scale: 1.015 }}
-      transition={{ duration: 0.18 }}
-      className="group relative overflow-hidden rounded-[1.5rem] border border-[#d28a41]/15 bg-[linear-gradient(180deg,rgba(255,255,255,0.045),rgba(0,0,0,0.04))] p-3 sm:p-4"
-    >
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,177,98,0.16),transparent_32%)] opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
-      <div className="relative space-y-1.5 sm:space-y-2">
-        <div className="flex items-center justify-between gap-3">
-          <p className="text-[0.95rem] font-light tracking-wide text-[#f8efe6] sm:text-[1rem]">{title}</p>
-          <span className="h-2.5 w-2.5 rounded-full bg-amber-300/80 shadow-[0_0_16px_rgba(251,191,36,0.7)]" />
-        </div>
-        <p className="text-[0.66rem] uppercase tracking-[0.38em] text-amber-100/60">{detail}</p>
-        <p className="text-[0.82rem] leading-6 text-amber-50/70 sm:text-sm">{hint}</p>
-      </div>
-    </motion.div>
+    <div style={{ display: "flex", gap: 0, marginBottom: 20, borderBottom: `1px solid ${BORDER}` }}>
+      {tabs.map((tab) => (
+        <button
+          key={tab.value}
+          onClick={() => onChange(tab.value)}
+          style={{
+            padding: "8px 16px",
+            fontSize: 13,
+            fontWeight: 500,
+            color: active === tab.value ? PURPLE : "#9ca3af",
+            background: "none",
+            border: "none",
+            borderBottom: active === tab.value ? `2px solid ${PURPLE}` : "2px solid transparent",
+            cursor: "pointer",
+            transition: "color 0.15s",
+          }}
+        >
+          {tab.label}
+        </button>
+      ))}
+    </div>
   );
 }
 
-function StatRing() {
-  const reduceMotion = useReducedMotion();
-  const ring = 87;
+// ─── Circular Timer ───────────────────────────────────────────────────────────
+
+function CircularTimer({ timeLeft, total, label }: { timeLeft: number; total: number; label: string }) {
+  const R = 58;
+  const circ = 2 * Math.PI * R;
+  const progress = total > 0 ? (total - timeLeft) / total : 0;
+  const offset = circ * (1 - progress);
+  const mm = String(Math.floor(timeLeft / 60)).padStart(2, "0");
+  const ss = String(timeLeft % 60).padStart(2, "0");
 
   return (
-    <motion.div
-      initial={reduceMotion ? false : { opacity: 0, y: 18 }}
-      animate={reduceMotion ? undefined : { opacity: 1, y: 0 }}
-      transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-      className="relative overflow-hidden rounded-[2rem] border border-[#d28a41]/18 bg-[linear-gradient(180deg,rgba(56,34,22,0.72),rgba(18,10,7,0.94))] p-4 sm:p-5"
-    >
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(255,177,98,0.16),transparent_30%),radial-gradient(circle_at_bottom_right,rgba(255,255,255,0.04),transparent_28%)]" />
-      <div className="relative space-y-5">
-        <div className="flex items-center justify-between gap-4">
-          <div>
-            <p className="text-[0.66rem] uppercase tracking-[0.45em] text-amber-100/55">Statistics</p>
-            <h2 className="mt-2 text-2xl font-light tracking-wide text-[#f8efe6]">Work Rhythm</h2>
-          </div>
-          <div className="rounded-full border border-[#d28a41]/18 bg-white/[0.04] px-3 py-1 text-[0.62rem] uppercase tracking-[0.35em] text-amber-100/70">
-            Live
-          </div>
-        </div>
+    <div style={{ position: "relative", width: 152, height: 152, display: "flex", alignItems: "center", justifyContent: "center" }}>
+      <svg width="152" height="152" style={{ position: "absolute", transform: "rotate(-90deg)" }}>
+        <circle cx="76" cy="76" r={R} fill="none" stroke="rgba(139,92,246,0.18)" strokeWidth="7" />
+        <circle
+          cx="76" cy="76" r={R} fill="none"
+          stroke={PURPLE} strokeWidth="7" strokeLinecap="round"
+          strokeDasharray={circ}
+          strokeDashoffset={offset}
+          style={{ transition: "stroke-dashoffset 0.8s ease" }}
+        />
+      </svg>
+      <div style={{ position: "relative", textAlign: "center", zIndex: 1 }}>
+        <p style={{ fontSize: 32, fontWeight: 700, color: "white", margin: 0, lineHeight: 1, letterSpacing: "-0.02em", fontVariantNumeric: "tabular-nums" }}>
+          {mm}:{ss}
+        </p>
+        <p style={{ fontSize: 12, color: PURPLE_DIM, marginTop: 4 }}>{label}</p>
+      </div>
+    </div>
+  );
+}
 
-        <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_12rem] sm:gap-5">
-          <div className="flex items-center justify-center">
-            <div className="relative flex aspect-square w-full max-w-[18rem] items-center justify-center sm:max-w-[23rem]">
-              <div
-                className="absolute inset-0 rounded-full"
-                style={{
-                  background:
-                    "conic-gradient(from 225deg, rgba(251,191,36,0.95) 0 72%, rgba(249,115,22,0.78) 72% 84%, rgba(245,158,11,0.48) 84% 93%, rgba(255,255,255,0.24) 93% 100%)",
-                }}
-              />
-              <div className="absolute inset-[1.1rem] rounded-full bg-[#1f130d] shadow-[inset_0_0_0_1px_rgba(255,255,255,0.04)]" />
-              <div className="relative text-center">
-                <p className="text-[0.66rem] uppercase tracking-[0.45em] text-amber-100/55">Discipline Index</p>
-                <p className="mt-3 text-5xl font-light text-[#f8efe6] sm:mt-4 sm:text-6xl">{ring}</p>
-                <p className="mt-2 text-[0.72rem] uppercase tracking-[0.35em] text-amber-100/70 sm:mt-3 sm:text-sm">Active</p>
+// ─── Today-minutes persistence ───────────────────────────────────────────────
+
+// Timer persisted in Supabase via /api/now/timer. Resets server-side by date key.
+function useTimerData(isOwner: boolean) {
+  const [minutes, setMinutes] = useState(0);
+
+  useEffect(() => {
+    fetch("/api/now/timer")
+      .then((r) => r.json())
+      .then((d: { minutes?: number }) => setMinutes(d.minutes ?? 0))
+      .catch(() => {});
+  }, []);
+
+  const addMinutes = (mins: number) => {
+    if (!isOwner || mins <= 0) return;
+    setMinutes((prev) => {
+      const next = prev + mins;
+      fetch("/api/now/timer", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ minutes: next }),
+      }).catch(() => {});
+      return next;
+    });
+  };
+
+  return { minutes, addMinutes };
+}
+
+// ─── Pomodoro Card ────────────────────────────────────────────────────────────
+
+const PRESETS = [
+  { label: "25/5", work: 25, brk: 5 },
+  { label: "50/10", work: 50, brk: 10 },
+  { label: "90/20", work: 90, brk: 20 },
+];
+
+function PomodoroCard({ onAdd }: { onAdd: (mins: number) => void }) {
+  const [presetIdx, setPresetIdx] = useState(0);
+  const [custom, setCustom] = useState(false);
+  const [workMins, setWorkMins] = useState(25);
+  const [breakMins, setBreakMins] = useState(5);
+  const [mode, setMode] = useState<"work" | "break">("work");
+  const [timeLeft, setTimeLeft] = useState(25 * 60);
+  const [running, setRunning] = useState(false);
+  const [sessions, setSessions] = useState(0);
+  const [focusMins, setFocusMins] = useState(0);
+
+  // Refs so the interval closure always sees current values
+  const workMinsRef = { current: workMins };
+  workMinsRef.current = workMins;
+  const breakMinsRef = { current: breakMins };
+  breakMinsRef.current = breakMins;
+  const modeRef = { current: mode };
+  modeRef.current = mode;
+  const onAddRef = { current: onAdd };
+  onAddRef.current = onAdd;
+
+  useEffect(() => {
+    if (!running) return;
+    const id = setInterval(() => {
+      setTimeLeft((t) => {
+        if (t <= 0) {
+          if (modeRef.current === "work") {
+            setSessions((s) => s + 1);
+            setFocusMins((f) => f + workMinsRef.current);
+            onAddRef.current(workMinsRef.current);
+            setMode("break");
+            return breakMinsRef.current * 60;
+          }
+          setMode("work");
+          return workMinsRef.current * 60;
+        }
+        return t - 1;
+      });
+    }, 1000);
+    return () => clearInterval(id);
+  }, [running]);
+
+  const applyPreset = (i: number) => {
+    const p = PRESETS[i];
+    setPresetIdx(i);
+    setWorkMins(p.work);
+    setBreakMins(p.brk);
+    setRunning(false);
+    setMode("work");
+    setTimeLeft(p.work * 60);
+    setCustom(false);
+  };
+
+  const reset = () => { setRunning(false); setMode("work"); setTimeLeft(workMins * 60); };
+  const skip = () => {
+    if (mode === "work") { setSessions((s) => s + 1); setMode("break"); setTimeLeft(breakMins * 60); }
+    else { setMode("work"); setTimeLeft(workMins * 60); }
+    setRunning(false);
+  };
+  const total = mode === "work" ? workMins * 60 : breakMins * 60;
+
+  return (
+    <Card>
+      <CardHeader icon={Clock} title="Pomodoro Timer" />
+
+      {/* Presets */}
+      <div style={{ display: "flex", gap: 8, marginBottom: 20 }}>
+        {PRESETS.map((p, i) => (
+          <button
+            key={p.label}
+            onClick={() => applyPreset(i)}
+            style={{
+              padding: "4px 12px",
+              borderRadius: 999,
+              fontSize: 12,
+              fontWeight: 500,
+              cursor: "pointer",
+              transition: "all 0.15s",
+              background: presetIdx === i && !custom ? PURPLE : "transparent",
+              border: presetIdx === i && !custom ? `1px solid ${PURPLE}` : `1px solid ${BORDER}`,
+              color: presetIdx === i && !custom ? "white" : PURPLE_DIM,
+            }}
+          >
+            {p.label}
+          </button>
+        ))}
+        <button
+          onClick={() => setCustom(!custom)}
+          style={{
+            padding: "4px 12px",
+            borderRadius: 999,
+            fontSize: 12,
+            fontWeight: 500,
+            cursor: "pointer",
+            background: custom ? PURPLE : "transparent",
+            border: custom ? `1px solid ${PURPLE}` : `1px solid ${BORDER}`,
+            color: custom ? "white" : PURPLE_DIM,
+          }}
+        >
+          Custom
+        </button>
+      </div>
+
+      {/* Circular timer */}
+      <div style={{ display: "flex", justifyContent: "center", marginBottom: 16 }}>
+        <CircularTimer timeLeft={timeLeft} total={total} label={mode === "work" ? "Work" : "Break"} />
+      </div>
+
+      {/* Sessions */}
+      <p style={{ textAlign: "center", fontSize: 13, color: "#6b7280", marginBottom: 16 }}>
+        Sessions: <strong style={{ color: PURPLE }}>{sessions}</strong> · Focus:{" "}
+        <strong style={{ color: PURPLE }}>{focusMins} min</strong>
+      </p>
+
+      {/* Buttons */}
+      <div style={{ display: "flex", justifyContent: "center", gap: 10, marginBottom: 12 }}>
+        <button
+          onClick={() => setRunning(true)}
+          style={{ background: GREEN, color: "white", border: "none", borderRadius: 8, padding: "8px 18px", fontSize: 13, fontWeight: 600, cursor: "pointer", display: "flex", alignItems: "center", gap: 6 }}
+        >
+          ▶ Start
+        </button>
+        <button
+          onClick={() => setRunning(false)}
+          style={{ background: "transparent", color: ORANGE, border: `1px solid ${ORANGE}`, borderRadius: 8, padding: "8px 14px", fontSize: 13, cursor: "pointer" }}
+        >
+          ⏸ Pause
+        </button>
+        <button
+          onClick={reset}
+          style={{ background: "transparent", color: RED, border: `1px solid ${RED}`, borderRadius: 8, padding: "8px 14px", fontSize: 13, cursor: "pointer" }}
+        >
+          ↺ Reset
+        </button>
+        <button
+          onClick={skip}
+          style={{ background: "transparent", color: "#9ca3af", border: "1px solid #374151", borderRadius: 8, padding: "8px 14px", fontSize: 13, cursor: "pointer", display: "flex", alignItems: "center", gap: 5 }}
+        >
+          <SkipForward size={13} /> Skip
+        </button>
+      </div>
+
+      <p style={{ textAlign: "center", fontSize: 12, color: "#4b5563" }}>
+        {running ? "In progress..." : "Ready to focus"}
+      </p>
+
+      {/* Custom */}
+      {custom && (
+        <div style={{ marginTop: 16, display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+          {[
+            { label: "Work (min)", value: workMins, set: (n: number) => { setWorkMins(n); if (mode === "work" && !running) setTimeLeft(n * 60); }, min: 5, max: 90, step: 5 },
+            { label: "Break (min)", value: breakMins, set: (n: number) => { setBreakMins(n); if (mode === "break" && !running) setTimeLeft(n * 60); }, min: 1, max: 30, step: 1 },
+          ].map(({ label, value, set, min, max, step }) => (
+            <div key={label} style={{ background: CARD2, border: `1px solid ${BORDER}`, borderRadius: 8, padding: 12 }}>
+              <p style={{ fontSize: 10, textTransform: "uppercase", letterSpacing: "0.08em", color: "#6b7280", marginBottom: 8 }}>{label}</p>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                <button onClick={() => set(Math.max(min, value - step))} style={{ background: "none", border: "none", color: PURPLE_DIM, fontSize: 18, cursor: "pointer" }}>−</button>
+                <span style={{ color: "white", fontSize: 16 }}>{value}</span>
+                <button onClick={() => set(Math.min(max, value + step))} style={{ background: "none", border: "none", color: PURPLE_DIM, fontSize: 18, cursor: "pointer" }}>+</button>
               </div>
             </div>
-          </div>
+          ))}
+        </div>
+      )}
+    </Card>
+  );
+}
 
-          <div className="space-y-2.5 sm:space-y-3">
-            {metrics.map((item) => (
-              <div key={item.label} className="rounded-[1.4rem] border border-white/6 bg-white/[0.03] px-4 py-3 sm:py-4">
-                <div className="flex items-center justify-between gap-4 text-[0.66rem] uppercase tracking-[0.35em] text-amber-100/60">
-                  <span>{item.label}</span>
-                  <span>{item.value}</span>
+// ─── Stopwatch Card ───────────────────────────────────────────────────────────
+
+function StopwatchCard({ onAdd }: { onAdd: (mins: number) => void }) {
+  const [elapsed, setElapsed] = useState(0);
+  const [running, setRunning] = useState(false);
+  const [logged, setLogged] = useState(0);
+
+  useEffect(() => {
+    if (!running) return;
+    const id = setInterval(() => setElapsed((e) => e + 1), 1000);
+    return () => clearInterval(id);
+  }, [running]);
+
+  const logAndReset = () => {
+    const mins = Math.floor(elapsed / 60);
+    if (mins > 0) onAdd(mins);
+    setLogged((l) => l + mins);
+    setRunning(false);
+    setElapsed(0);
+  };
+
+  const hh = String(Math.floor(elapsed / 3600)).padStart(2, "0");
+  const mm = String(Math.floor((elapsed % 3600) / 60)).padStart(2, "0");
+  const ss = String(elapsed % 60).padStart(2, "0");
+
+  return (
+    <Card>
+      <CardHeader icon={Timer} title="Stopwatch" />
+      <p style={{ textAlign: "center", fontSize: 48, fontWeight: 700, color: PURPLE, fontFamily: "monospace", letterSpacing: "0.08em", margin: "20px 0 4px" }}>
+        {hh} : {mm} : {ss}
+      </p>
+      <p style={{ textAlign: "center", fontSize: 12, color: "#6b7280", marginBottom: 8 }}>Elapsed time</p>
+      {logged > 0 && (
+        <p style={{ textAlign: "center", fontSize: 13, color: GREEN, marginBottom: 16 }}>
+          +{logged} min logged today
+        </p>
+      )}
+      {logged === 0 && <div style={{ marginBottom: 16 }} />}
+      <div style={{ display: "flex", justifyContent: "center", gap: 10 }}>
+        <button onClick={() => setRunning(true)} style={{ background: "transparent", color: GREEN, border: `1px solid ${GREEN}`, borderRadius: 8, padding: "8px 16px", fontSize: 13, cursor: "pointer" }}>▶ Start</button>
+        <button onClick={() => setRunning(false)} style={{ background: "transparent", color: ORANGE, border: `1px solid ${ORANGE}`, borderRadius: 8, padding: "8px 16px", fontSize: 13, cursor: "pointer" }}>⏸ Pause</button>
+        <button onClick={logAndReset} style={{ background: GREEN, color: "white", border: "none", borderRadius: 8, padding: "8px 14px", fontSize: 13, cursor: "pointer" }}>✓ Log & Reset</button>
+      </div>
+      <p style={{ textAlign: "center", fontSize: 12, color: "#4b5563", marginTop: 10 }}>
+        "Log & Reset" saves elapsed time to Today's total
+      </p>
+    </Card>
+  );
+}
+
+// ─── Today's Study Card ───────────────────────────────────────────────────────
+
+function TodayCard({ minutes, label, goalHours }: { minutes: number; label: string; goalHours: number }) {
+  const hours = minutes / 60;
+  const pct = Math.min(100, Math.round((hours / goalHours) * 100));
+  return (
+    <Card>
+      <CardHeader icon={Activity} title={`Today's ${label}`} />
+      <p style={{ textAlign: "center", fontSize: 52, fontWeight: 700, color: PURPLE, margin: "8px 0 4px", lineHeight: 1 }}>
+        {hours.toFixed(1)} <span style={{ fontSize: 28 }}>hrs</span>
+      </p>
+      <p style={{ textAlign: "center", color: "#6b7280", fontSize: 13, marginBottom: 12 }}>
+        {minutes} min tracked · resets at midnight
+      </p>
+      {/* Goal progress bar */}
+      <div style={{ background: "rgba(139,92,246,0.12)", borderRadius: 999, height: 6, margin: "0 8px 10px" }}>
+        <div style={{ background: PURPLE, height: 6, borderRadius: 999, width: `${pct}%`, transition: "width 0.4s ease" }} />
+      </div>
+      <p style={{ textAlign: "center", fontSize: 13, color: "#6b7280" }}>
+        Goal: {goalHours}h ·{" "}
+        <span style={{ color: pct >= 100 ? GREEN : PURPLE_DIM }}>{pct}%</span>
+        {pct >= 100 && <span style={{ color: GREEN }}> — Goal hit! </span>}
+      </p>
+    </Card>
+  );
+}
+
+// ─── Smart Weakness Card ──────────────────────────────────────────────────────
+
+function WeaknessCard({ chapter, subject, score }: { chapter: string; subject: string; score: string }) {
+  return (
+    <Card>
+      <CardHeader icon={Zap} title="Smart Weakness Detector" color={ORANGE} />
+      <div style={{ background: CARD2, border: `1px solid ${BORDER}`, borderRadius: 8, padding: 16, marginBottom: 12 }}>
+        <p style={{ textAlign: "center", fontSize: 12, color: "#9ca3af", marginBottom: 8 }}>Chapter needing most attention:</p>
+        <p style={{ textAlign: "center", fontSize: 15, fontWeight: 600, color: ORANGE }}>
+          {subject}: {chapter}
+        </p>
+        <p style={{ textAlign: "center", fontSize: 13, color: "#9ca3af", marginTop: 6 }}>Score {score} — Focus here!</p>
+      </div>
+      <p style={{ textAlign: "center", fontSize: 12, color: "#6b7280" }}>Based on completion across all subjects</p>
+    </Card>
+  );
+}
+
+// ─── Bar Chart ────────────────────────────────────────────────────────────────
+
+function BarChart({ data, color = PURPLE }: { data: { day: string; hours: number }[]; color?: string }) {
+  const max = Math.max(...data.map((d) => d.hours), 1);
+  const H = 160;
+  const W = 100;
+  const levels = [0, 0.25, 0.5, 0.75, 1.0];
+
+  return (
+    <div style={{ width: "100%", overflowX: "auto", WebkitOverflowScrolling: "touch" }}>
+      <div style={{ display: "flex", alignItems: "flex-start", gap: 0 }}>
+        {/* Y axis labels */}
+        <div style={{ display: "flex", flexDirection: "column", justifyContent: "space-between", height: H, paddingBottom: 24, marginRight: 8 }}>
+          {levels.slice().reverse().map((l) => (
+            <span key={l} style={{ fontSize: 10, color: "#6b7280", lineHeight: 1 }}>{(l * max).toFixed(1)}</span>
+          ))}
+        </div>
+        {/* Chart area */}
+        <div style={{ flex: 1, position: "relative" }}>
+          {/* Grid lines */}
+          <div style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 24 }}>
+            {levels.map((l) => (
+              <div key={l} style={{ position: "absolute", left: 0, right: 0, bottom: `${l * 100}%`, borderTop: "1px solid rgba(139,92,246,0.1)" }} />
+            ))}
+          </div>
+          {/* Bars */}
+          <div style={{ display: "flex", alignItems: "flex-end", height: H, gap: 8 }}>
+            {data.map((d) => (
+              <div key={d.day} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 4, height: "100%" }}>
+                <div style={{ flex: 1, display: "flex", alignItems: "flex-end", width: "100%" }}>
+                  <div
+                    style={{
+                      width: "100%",
+                      height: `${Math.max(2, (d.hours / max) * 100)}%`,
+                      background: d.hours > 0 ? `rgba(139,92,246,0.75)` : "rgba(139,92,246,0.12)",
+                      borderRadius: "4px 4px 0 0",
+                      transition: "height 0.3s ease",
+                    }}
+                  />
                 </div>
-                <div className="mt-3">
-                  <Bar value={item.percent} />
-                </div>
+                <span style={{ fontSize: 11, color: "#6b7280", whiteSpace: "nowrap" }}>{d.day}</span>
               </div>
             ))}
           </div>
         </div>
       </div>
-    </motion.div>
+      {/* Legend */}
+      <div style={{ display: "flex", justifyContent: "center", gap: 8, marginTop: 8 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+          <div style={{ width: 24, height: 8, background: "rgba(139,92,246,0.75)", borderRadius: 2 }} />
+          <span style={{ fontSize: 11, color: "#9ca3af" }}>Hours Studied</span>
+        </div>
+      </div>
+    </div>
   );
 }
 
-function StatusRail() {
-  const reduceMotion = useReducedMotion();
+// ─── Stat Cards Row ───────────────────────────────────────────────────────────
+
+function StatsRow({ stats }: { stats: { label: string; value: string; emoji?: string }[] }) {
+  const { isMobile } = useBreakpoint();
+  return (
+    <div style={{ display: "grid", gridTemplateColumns: isMobile ? "repeat(2, 1fr)" : "repeat(4, 1fr)", gap: isMobile ? 8 : 12, marginBottom: 20 }}>
+      {stats.map((s) => (
+        <div key={s.label} style={{ background: CARD2, border: `1px solid ${BORDER}`, borderRadius: 8, padding: isMobile ? 12 : 16, textAlign: "center" }}>
+          <p style={{ fontSize: isMobile ? 22 : 28, fontWeight: 700, color: PURPLE, margin: 0, lineHeight: 1 }}>
+            {s.value} {s.emoji}
+          </p>
+          <p style={{ fontSize: 11, color: "#9ca3af", marginTop: 6 }}>{s.label}</p>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// ─── Chapter Checklist ────────────────────────────────────────────────────────
+
+function useChecklist(subjects: { label: string; items: CheckItem[] }[], domain: string, isOwner: boolean) {
+  const [state, setState] = useState<Record<string, [boolean, boolean, boolean, boolean]>>(
+    () => Object.fromEntries(
+      subjects.flatMap((s) => s.items).map((it) => [it.name, [...it.checks] as [boolean, boolean, boolean, boolean]]),
+    ),
+  );
+
+  // Merge DB state over static defaults on mount
+  useEffect(() => {
+    fetch(`/api/now/checklist?domain=${domain}`)
+      .then((r) => r.json())
+      .then((dbMap: Record<string, boolean[]>) => {
+        setState((prev) => {
+          const next = { ...prev };
+          for (const [name, checks] of Object.entries(dbMap)) {
+            if (next[name] !== undefined) {
+              next[name] = checks as [boolean, boolean, boolean, boolean];
+            }
+          }
+          return next;
+        });
+      })
+      .catch(() => {});
+  }, [domain]);
+
+  const toggle = (name: string, idx: number) => {
+    if (!isOwner) return;
+    setState((prev) => {
+      const existing = prev[name] ?? [false, false, false, false];
+      const arr = [...existing] as [boolean, boolean, boolean, boolean];
+      arr[idx] = !arr[idx];
+      fetch("/api/now/checklist", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ domain, item_name: name, checks: arr }),
+      }).catch(() => {});
+      return { ...prev, [name]: arr };
+    });
+  };
+
+  return { state, toggle };
+}
+
+function ChapterRow({
+  num,
+  name,
+  checks,
+  checkLabels,
+  onToggle,
+  isOwner,
+}: {
+  num: number;
+  name: string;
+  checks: [boolean, boolean, boolean, boolean];
+  checkLabels: [string, string, string, string];
+  onToggle: (idx: number) => void;
+  isOwner: boolean;
+}) {
+  const { isMobile } = useBreakpoint();
+  const done = checks.filter(Boolean).length;
+  const total = checks.length;
+  const isComplete = done === total;
 
   return (
-      <motion.aside
-      initial={reduceMotion ? false : { opacity: 0, y: 18 }}
-      animate={reduceMotion ? undefined : { opacity: 1, y: 0 }}
-      transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
-      className="rounded-[2rem] border border-[#d28a41]/18 bg-[linear-gradient(180deg,rgba(54,33,22,0.66),rgba(18,10,7,0.94))] p-4 shadow-[0_26px_90px_rgba(0,0,0,0.3)] sm:p-5"
+    <div
+      style={{
+        borderBottom: `1px solid ${BORDER}`,
+        padding: isMobile ? "10px 12px" : "14px 16px",
+        background: isComplete ? "rgba(34,197,94,0.04)" : "transparent",
+      }}
     >
-        <div className="space-y-3 sm:space-y-4">
-        <div>
-          <p className="text-[0.66rem] uppercase tracking-[0.45em] text-amber-100/55">Active Status</p>
-          <h2 className="mt-2 text-2xl font-light tracking-wide text-[#f8efe6]">Node rail</h2>
+      <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 8, gap: 8 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 6, minWidth: 0 }}>
+          <span style={{ fontWeight: 600, color: "white", fontSize: isMobile ? 13 : 14, wordBreak: "break-word" }}>
+            {num}. {name}
+          </span>
+          {isComplete && !isMobile && (
+            <span style={{ fontSize: 11, color: GREEN, fontWeight: 500, whiteSpace: "nowrap" }}>✓ Complete</span>
+          )}
         </div>
-        <div className="space-y-2.5 sm:space-y-3">
-          {statusNodes.map((node) => (
-            <div key={node.code} className="flex items-center gap-3 rounded-[1.2rem] bg-white/[0.04] px-4 py-2.5 transition hover:bg-white/[0.06] sm:py-3">
-              <span className={`h-3 w-3 rounded-full ${node.tone} shadow-[0_0_16px_rgba(251,191,36,0.45)]`} />
-              <div className="min-w-0 flex-1">
-                <p className="text-sm uppercase tracking-[0.35em] text-[#f8efe6]">{node.code}</p>
-                <p className="mt-1 text-[0.7rem] uppercase tracking-[0.25em] text-amber-100/55">{node.label}</p>
-              </div>
+        <div style={{ display: "flex", alignItems: "center", gap: 6, flexShrink: 0 }}>
+          <span style={{ fontSize: 11, color: "#6b7280" }}>{done}/{total}</span>
+          <div style={{ display: "flex", gap: 2 }}>
+            {checks.map((c, i) => (
+              <div key={i} style={{ width: 7, height: 7, borderRadius: 1, background: c ? PURPLE : "rgba(139,92,246,0.2)" }} />
+            ))}
+          </div>
+        </div>
+      </div>
+      {/* On mobile: 2×2 grid. Desktop: 1 row */}
+      <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr 1fr" : "repeat(4, auto)", gap: isMobile ? "6px 16px" : "0 20px" }}>
+        {checkLabels.map((label, idx) => (
+          <label
+            key={label}
+            style={{ display: "flex", alignItems: "center", gap: 6, fontSize: isMobile ? 12 : 13, color: checks[idx] ? "white" : "#9ca3af", cursor: "pointer" }}
+          >
+            <input
+              type="checkbox"
+              checked={checks[idx]}
+              onChange={() => onToggle(idx)}
+              disabled={!isOwner}
+              style={{ accentColor: PURPLE, width: 14, height: 14, cursor: isOwner ? "pointer" : "not-allowed", flexShrink: 0, opacity: isOwner ? 1 : 0.7 }}
+            />
+            {label}
+          </label>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function ChapterChecklist({
+  subjects,
+  checkLabels,
+  title,
+  domain,
+  isOwner,
+}: {
+  subjects: { label: string; items: CheckItem[] }[];
+  checkLabels: [string, string, string, string];
+  title: string;
+  domain: string;
+  isOwner: boolean;
+}) {
+  const { isMobile } = useBreakpoint();
+  const [activeSubject, setActiveSubject] = useState(0);
+  const currentItems = subjects[activeSubject].items;
+
+  const { state, toggle } = useChecklist(subjects, domain, isOwner);
+
+  const allStateChecks = Object.values(state).flat();
+  const totalDone = allStateChecks.filter(Boolean).length;
+  const totalPossible = allStateChecks.length;
+  const pct = totalPossible > 0 ? Math.round((totalDone / totalPossible) * 100) : 0;
+
+  return (
+    <Card style={{ padding: 0 }}>
+      <div style={{ padding: isMobile ? 12 : 20 }}>
+        <CardHeader icon={CheckSquare} title={title} />
+        <p style={{ textAlign: "center", fontSize: isMobile ? 32 : 40, fontWeight: 700, color: TEAL, margin: "8px 0 4px" }}>{pct}%</p>
+        <p style={{ textAlign: "center", fontSize: 13, color: "#9ca3af", marginBottom: 16 }}>Overall Completion</p>
+
+        {/* Subject tabs — wrap on mobile */}
+        <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+          {subjects.map((s, i) => (
+            <button
+              key={s.label}
+              onClick={() => setActiveSubject(i)}
+              style={{
+                padding: isMobile ? "5px 10px" : "6px 14px",
+                borderRadius: 999,
+                fontSize: isMobile ? 12 : 13,
+                fontWeight: 500,
+                cursor: "pointer",
+                transition: "all 0.15s",
+                background: activeSubject === i ? PURPLE : "transparent",
+                border: activeSubject === i ? `1px solid ${PURPLE}` : `1px solid ${BORDER}`,
+                color: activeSubject === i ? "white" : "#9ca3af",
+                display: "flex",
+                alignItems: "center",
+                gap: 6,
+              }}
+            >
+              {s.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Chapter rows */}
+      <div>
+        {currentItems.map((item, i) => (
+          <ChapterRow
+            key={item.name}
+            num={i + 1}
+            name={item.name}
+            checks={state[item.name] ?? item.checks}
+            checkLabels={checkLabels}
+            onToggle={(idx) => toggle(item.name, idx)}
+            isOwner={isOwner}
+          />
+        ))}
+      </div>
+    </Card>
+  );
+}
+
+// ─── Analytics Section ────────────────────────────────────────────────────────
+
+function AnalyticsSection({
+  title,
+  stats,
+  weeklyData,
+}: {
+  title: string;
+  stats: { label: string; value: string; emoji?: string }[];
+  weeklyData: { day: string; hours: number }[];
+}) {
+  return (
+    <Card>
+      <CardHeader icon={BarChart2} title={title} />
+      <StatsRow stats={stats} />
+      <BarChart data={weeklyData} />
+    </Card>
+  );
+}
+
+// ─── Mock Test Section ────────────────────────────────────────────────────────
+
+type MockTest = { date: string; name: string; physics: number; chemistry: number; maths: number };
+
+function MockTestsSection({ isOwner }: { isOwner: boolean }) {
+  const { isMobile, isTablet } = useBreakpoint();
+  const [tests, setTests] = useState<MockTest[]>(jeeAnalytics.mockTests);
+  const [form, setForm] = useState({ name: "", date: "", physics: "", chemistry: "", maths: "" });
+
+  useEffect(() => {
+    fetch("/api/now/records?type=mocktest")
+      .then((r) => r.json())
+      .then((d: { records?: MockTest[] }) => { if (d.records?.length) setTests(d.records); })
+      .catch(() => {});
+  }, []);
+
+  const addTest = () => {
+    if (!isOwner) return;
+    const p = parseInt(form.physics) || 0;
+    const c = parseInt(form.chemistry) || 0;
+    const m = parseInt(form.maths) || 0;
+    if (!form.name || !form.date) return;
+    const record = { date: form.date, name: form.name, physics: p, chemistry: c, maths: m };
+    setTests((prev) => [...prev, record]);
+    setForm({ name: "", date: "", physics: "", chemistry: "", maths: "" });
+    fetch("/api/now/records", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ type: "mocktest", data: record }),
+    }).catch(() => {});
+  };
+
+  const inputStyle: React.CSSProperties = {
+    background: CARD2, border: `1px solid ${BORDER}`, borderRadius: 6,
+    color: "white", fontSize: 13, padding: "10px 12px", width: "100%", outline: "none",
+  };
+  const labelStyle: React.CSSProperties = {
+    fontSize: 11, fontWeight: 600, color: PURPLE_DIM, textTransform: "uppercase",
+    letterSpacing: "0.08em", display: "block", marginBottom: 6,
+  };
+
+  const formCols = isMobile ? "1fr 1fr" : isTablet ? "1fr 1fr 1fr" : "2fr 1.5fr 1fr 1fr 1fr";
+  const formFields = [
+    { key: "name", label: "Test Name", placeholder: "e.g. JEE Mock #3", type: "text" },
+    { key: "date", label: "Date", placeholder: "", type: "date" },
+    { key: "physics", label: "Physics /100", placeholder: "0", type: "number" },
+    { key: "chemistry", label: "Chemistry /100", placeholder: "0", type: "number" },
+    { key: "maths", label: "Maths /100", placeholder: "0", type: "number" },
+  ];
+
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+      <Card>
+        <CardHeader icon={FileText} title="Add Mock Test Result" color={ORANGE} />
+        <div style={{ display: "grid", gridTemplateColumns: formCols, gap: 10, marginBottom: 14 }}>
+          {formFields.map(({ key, label, placeholder, type }) => (
+            <div key={key}>
+              <label style={labelStyle}>{label}</label>
+              <input type={type} placeholder={placeholder} value={form[key as keyof typeof form]}
+                onChange={(e) => setForm((f) => ({ ...f, [key]: e.target.value }))} style={inputStyle} />
             </div>
           ))}
         </div>
+        {isOwner ? (
+          <button onClick={addTest}
+            style={{ background: PURPLE, color: "white", border: "none", borderRadius: 8, padding: "9px 20px", fontSize: 13, fontWeight: 600, cursor: "pointer" }}>
+            + Add Test
+          </button>
+        ) : (
+          <p style={{ fontSize: 12, color: "#6b7280" }}>Log in as owner to add tests.</p>
+        )}
+      </Card>
 
-        <div className="rounded-[1.4rem] border border-white/6 bg-black/18 p-3 sm:p-4">
-          <div className="flex items-center justify-between text-[0.66rem] uppercase tracking-[0.35em] text-amber-100/55">
-            <span>Session</span>
-            <span>Tonight</span>
-          </div>
-          <div className="mt-2.5 space-y-2 text-[0.88rem] text-[#f8efe6] sm:mt-3 sm:text-sm">
-            <div className="flex items-center gap-2 text-amber-100/70"><Clock3 className="h-4 w-4" /> 9:42 PM</div>
-            <div className="flex items-center gap-2 text-amber-100/70"><MapPin className="h-4 w-4" /> India</div>
-            <div className="flex items-center gap-2 text-amber-100/70"><Activity className="h-4 w-4" /> Focus mode on</div>
-            <div className="flex items-center gap-2 text-amber-100/70"><Zap className="h-4 w-4" /> Archive active</div>
-          </div>
-        </div>
-      </div>
-    </motion.aside>
+      <Card>
+        <CardHeader icon={TrendingUp} title="Score Trend" />
+        {tests.length === 0 ? (
+          <p style={{ textAlign: "center", color: "#6b7280", padding: "40px 0" }}>No tests yet. Add your first above!</p>
+        ) : (
+          <>
+            {/* Scrollable table on mobile */}
+            <div style={{ overflowX: "auto", WebkitOverflowScrolling: "touch", marginBottom: 20 }}>
+              <div style={{ minWidth: 480 }}>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 2fr 1fr 1fr 1fr 1fr", gap: 8, padding: "8px 12px", background: CARD2, borderRadius: 6, marginBottom: 8 }}>
+                  {["Date", "Name", "Phy", "Chem", "Math", "Total"].map((h) => (
+                    <span key={h} style={{ fontSize: 11, fontWeight: 600, color: PURPLE_DIM, textTransform: "uppercase", letterSpacing: "0.06em" }}>{h}</span>
+                  ))}
+                </div>
+                {tests.map((t, i) => {
+                  const total = t.physics + t.chemistry + t.maths;
+                  const prev = tests[i - 1];
+                  const delta = prev ? total - (prev.physics + prev.chemistry + prev.maths) : null;
+                  return (
+                    <div key={i} style={{ display: "grid", gridTemplateColumns: "1fr 2fr 1fr 1fr 1fr 1fr", gap: 8, padding: "10px 12px", borderBottom: `1px solid ${BORDER}` }}>
+                      <span style={{ fontSize: 12, color: "#9ca3af" }}>{t.date}</span>
+                      <span style={{ fontSize: 12, color: "white" }}>{t.name}</span>
+                      <span style={{ fontSize: 12, color: "white" }}>{t.physics}</span>
+                      <span style={{ fontSize: 12, color: "white" }}>{t.chemistry}</span>
+                      <span style={{ fontSize: 12, color: "white" }}>{t.maths}</span>
+                      <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+                        <span style={{ fontSize: 12, fontWeight: 600, color: "white" }}>{total}/300</span>
+                        {delta !== null && (
+                          <span style={{ fontSize: 10, color: delta > 0 ? GREEN : RED }}>{delta > 0 ? "+" : ""}{delta}</span>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+            {/* Score bars */}
+            <div style={{ display: "flex", gap: 10, alignItems: "flex-end", height: 90 }}>
+              {tests.map((t, i) => {
+                const total = t.physics + t.chemistry + t.maths;
+                const pct = (total / 300) * 100;
+                return (
+                  <div key={i} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 4 }}>
+                    <span style={{ fontSize: 10, color: PURPLE_DIM }}>{total}</span>
+                    <div style={{ width: "100%", height: 56, display: "flex", alignItems: "flex-end" }}>
+                      <div style={{ width: "100%", height: `${pct}%`, background: "rgba(139,92,246,0.7)", borderRadius: "4px 4px 0 0" }} />
+                    </div>
+                    <span style={{ fontSize: 9, color: "#6b7280", textAlign: "center" }}>{t.name.replace("Full Mock #", "#")}</span>
+                  </div>
+                );
+              })}
+            </div>
+          </>
+        )}
+      </Card>
+    </div>
   );
 }
 
-export function NowPage() {
-  const reduceMotion = useReducedMotion();
+// ─── PR Log Section ───────────────────────────────────────────────────────────
+
+function PRSection({ isOwner }: { isOwner: boolean }) {
+  const { isMobile } = useBreakpoint();
+  const [prs, setPRs] = useState(healthAnalytics.prs);
+  const [form, setForm] = useState({ exercise: "", date: "", value: "" });
+
+  useEffect(() => {
+    fetch("/api/now/records?type=pr")
+      .then((r) => r.json())
+      .then((d: { records?: typeof healthAnalytics.prs }) => { if (d.records?.length) setPRs(d.records); })
+      .catch(() => {});
+  }, []);
+
+  const addPR = () => {
+    if (!isOwner || !form.exercise || !form.value) return;
+    const record = { date: form.date || new Date().toISOString().slice(0, 10), exercise: form.exercise, value: form.value };
+    setPRs((p) => [...p, record]);
+    setForm({ exercise: "", date: "", value: "" });
+    fetch("/api/now/records", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ type: "pr", data: record }),
+    }).catch(() => {});
+  };
+
+  const inputStyle: React.CSSProperties = {
+    background: CARD2, border: `1px solid ${BORDER}`, borderRadius: 6,
+    color: "white", fontSize: 13, padding: "10px 12px", width: "100%", outline: "none",
+  };
 
   return (
-    <main className="relative isolate min-h-screen overflow-hidden bg-[#160e09] text-[#f8efe6]">
-      <div aria-hidden className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_70%_12%,rgba(255,178,92,0.24),transparent_26%),radial-gradient(circle_at_8%_18%,rgba(255,255,255,0.05),transparent_18%),linear-gradient(180deg,#271812_0%,#140d09_58%,#0f0906_100%)]" />
-      <motion.div
-        aria-hidden
-        className="pointer-events-none absolute left-[55%] top-[6%] h-96 w-96 rounded-full bg-amber-200/12 blur-3xl"
-        animate={reduceMotion ? undefined : { x: [0, 12, 0], y: [0, -10, 0], opacity: [0.45, 0.75, 0.45] }}
-        transition={{ duration: 9, repeat: Infinity, ease: "easeInOut" }}
-      />
-      <motion.div
-        aria-hidden
-        className="pointer-events-none absolute -left-24 top-24 h-72 w-72 rounded-full bg-orange-300/10 blur-3xl"
-        animate={reduceMotion ? undefined : { x: [0, 10, 0], y: [0, 6, 0], opacity: [0.2, 0.45, 0.2] }}
-        transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
-      />
-      <motion.div
-        aria-hidden
-        className="pointer-events-none absolute bottom-0 left-0 right-0 h-40 bg-[linear-gradient(180deg,transparent,rgba(10,6,4,0.44))]"
-        animate={reduceMotion ? undefined : { opacity: [0.35, 0.6, 0.35] }}
-        transition={{ duration: 11, repeat: Infinity, ease: "easeInOut" }}
-      />
-
-      <div className="relative mx-auto w-full max-w-[96rem] px-5 pb-14 pt-5 sm:px-8 lg:px-10 xl:px-12">
-        <header className="grid gap-4 lg:grid-cols-[minmax(0,1.2fr)_minmax(16rem,0.8fr)] lg:items-start">
-          <div className="space-y-4">
-            <p className="text-[0.66rem] uppercase tracking-[0.45em] text-amber-100/55">Current Session</p>
-            <h1 className="text-4xl font-light tracking-wide text-[#f8efe6] sm:text-5xl xl:text-6xl">Good Evening, Ansh</h1>
-            <p className="max-w-3xl text-base leading-8 text-amber-50/72 sm:text-lg">
-              Ansh&apos;s personal workstation at night — warm, focused, and built for the next move.
-            </p>
-            <div className="flex items-center gap-3 text-[0.68rem] uppercase tracking-[0.4em] text-amber-100/60">
-              <Link href="/" className="transition hover:text-[#f8efe6]">
-                Home
-              </Link>
-              <span className="text-amber-100/30">/</span>
-              <Link href="/archives" className="transition hover:text-[#f8efe6]">
-                Archives
-              </Link>
+    <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+      <Card>
+        <CardHeader icon={FileText} title="Log Personal Record" color={ORANGE} />
+        <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr 1fr" : "2fr 1.5fr 1fr", gap: 10, marginBottom: 14 }}>
+          {[
+            { key: "exercise", label: "Exercise", placeholder: "e.g. Bench Press", type: "text" },
+            { key: "date", label: "Date", placeholder: "dd-mm-yyyy", type: "date" },
+            { key: "value", label: "Weight / Reps", placeholder: "e.g. 65 kg", type: "text" },
+          ].map(({ key, label, placeholder, type }) => (
+            <div key={key}>
+              <label style={{ fontSize: 11, fontWeight: 600, color: PURPLE_DIM, textTransform: "uppercase", letterSpacing: "0.08em", display: "block", marginBottom: 6 }}>{label}</label>
+              <input type={type} placeholder={placeholder} value={form[key as keyof typeof form]} onChange={(e) => setForm((f) => ({ ...f, [key]: e.target.value }))} style={inputStyle} />
             </div>
-            <div className="flex flex-wrap gap-3 pt-1">
-              {[
-                ["Current time", "21:42"],
-                ["Session status", "Active"],
-                ["Location", "India"],
-                ["Archive status", "Live"],
-                ["Focus mode", "On"],
-              ].map(([label, value]) => (
-                <div key={label} className="rounded-full border border-[#d28a41]/16 bg-white/[0.04] px-4 py-2 text-[0.68rem] uppercase tracking-[0.35em] text-amber-100/70">
-                  {label}: {value}
-                </div>
-              ))}
+          ))}
+        </div>
+        {isOwner ? (
+          <button onClick={addPR} style={{ background: PURPLE, color: "white", border: "none", borderRadius: 8, padding: "9px 20px", fontSize: 13, fontWeight: 600, cursor: "pointer" }}>
+            + Add PR
+          </button>
+        ) : (
+          <p style={{ fontSize: 12, color: "#6b7280" }}>Log in as owner to add records.</p>
+        )}
+      </Card>
+      <Card>
+        <CardHeader icon={TrendingUp} title="PR History" />
+        {prs.map((pr, i) => (
+          <div key={i} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px 0", borderBottom: `1px solid ${BORDER}` }}>
+            <div>
+              <p style={{ fontWeight: 600, color: "white", fontSize: 14, margin: 0 }}>{pr.exercise}</p>
+              <p style={{ color: "#6b7280", fontSize: 12, margin: "2px 0 0" }}>{pr.date}</p>
             </div>
+            <span style={{ color: GREEN, fontWeight: 700, fontSize: 15 }}>{pr.value}</span>
           </div>
+        ))}
+      </Card>
+    </div>
+  );
+}
 
-          <div className="hidden lg:flex lg:justify-end" />
-        </header>
+// ─── Portfolio Section ────────────────────────────────────────────────────────
 
-        <section className="mt-4 grid gap-4 sm:mt-7 sm:gap-5 xl:grid-cols-[minmax(0,1.45fr)_minmax(22rem,0.7fr)] xl:items-start">
-          <WorkPanel className="relative overflow-visible p-4 sm:p-7 xl:p-8">
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_72%_12%,rgba(255,178,92,0.2),transparent_26%),radial-gradient(circle_at_15%_18%,rgba(255,255,255,0.05),transparent_16%),radial-gradient(circle_at_70%_72%,rgba(255,124,58,0.12),transparent_20%)]" />
-            <div className="relative grid gap-5 xl:grid-cols-[minmax(0,1.1fr)_minmax(24rem,1fr)] xl:items-stretch">
-              <div className="space-y-5 sm:space-y-6">
-                <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_15rem] sm:gap-4">
-                  <div className="space-y-3 sm:space-y-4">
-                    <div className="inline-flex items-center gap-2 rounded-full border border-[#d28a41]/16 bg-white/[0.04] px-4 py-2 text-[0.66rem] uppercase tracking-[0.35em] text-amber-100/70">
-                      <Sparkles className="h-3.5 w-3.5 text-amber-300" />
-                      Current Focus
-                    </div>
-                    <label className="flex items-center gap-3 rounded-[1.5rem] border border-[#d28a41]/16 bg-[#1a110c]/78 px-4 py-3.5 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.02)] transition focus-within:border-amber-300/35 hover:bg-[#1c130d]/88 sm:py-4">
-                      <Search className="h-4 w-4 text-amber-200/65" />
-                      <input
-                        type="text"
-                        placeholder="Search projects, archives, logs"
-                        className="w-full bg-transparent text-sm text-[#f8efe6] placeholder:text-amber-100/35 outline-none"
-                      />
-                    </label>
-                  </div>
+function PortfolioSection({ isOwner }: { isOwner: boolean }) {
+  const { isMobile } = useBreakpoint();
+  const [pieces, setPieces] = useState(artAnalytics.recentPieces);
+  const [form, setForm] = useState({ name: "", date: "", medium: "" });
 
-                  <div className="rounded-[2rem] border border-[#d28a41]/16 bg-[linear-gradient(180deg,rgba(255,255,255,0.04),rgba(0,0,0,0.06))] p-3.5 sm:p-4">
-                    <p className="text-[0.66rem] uppercase tracking-[0.45em] text-amber-100/55">Current Mission</p>
-                    <p className="mt-2.5 text-2xl font-light text-[#f8efe6] sm:mt-3 sm:text-3xl">JEE 2027</p>
-                    <p className="mt-2.5 text-[0.88rem] leading-6 text-amber-50/70 sm:mt-3 sm:text-sm sm:leading-7">
-                      The anchor for the session. Everything else supports this track.
-                    </p>
-                  </div>
-                </div>
+  useEffect(() => {
+    fetch("/api/now/records?type=portfolio")
+      .then((r) => r.json())
+      .then((d: { records?: typeof artAnalytics.recentPieces }) => { if (d.records?.length) setPieces(d.records); })
+      .catch(() => {});
+  }, []);
 
-                <div className="grid gap-2.5 sm:grid-cols-2 sm:gap-3 xl:grid-cols-2">
-                  {focusCards.map((card) => (
-                    <FocusChip key={card.title} {...card} />
-                  ))}
-                </div>
-              </div>
+  const addPiece = () => {
+    if (!isOwner || !form.name) return;
+    const record = { name: form.name, date: form.date || new Date().toISOString().slice(0, 10), medium: form.medium || "Mixed" };
+    setPieces((p) => [...p, record]);
+    setForm({ name: "", date: "", medium: "" });
+    fetch("/api/now/records", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ type: "portfolio", data: record }),
+    }).catch(() => {});
+  };
 
-              <div className="relative min-h-[28rem] sm:min-h-[42rem] xl:min-h-[46rem]">
-                <div className="absolute inset-0 overflow-visible">
-                  <motion.div
-                    aria-hidden
-                    className="absolute left-1/2 top-[-1rem] h-[24rem] w-[24rem] -translate-x-1/2 rounded-full bg-[radial-gradient(circle,rgba(255,180,92,0.42)_0%,rgba(255,145,60,0.2)_32%,transparent_70%)] blur-3xl sm:h-[36rem] sm:w-[36rem] xl:h-[42rem] xl:w-[42rem]"
-                    animate={reduceMotion ? undefined : { opacity: [0.58, 0.9, 0.58], scale: [1, 1.05, 1] }}
-                    transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
-                  />
-                  <motion.div
-                    className="absolute inset-0"
-                    animate={reduceMotion ? undefined : { x: [0, 10, 0], y: [0, -6, 0] }}
-                    transition={{ duration: 9, repeat: Infinity, ease: "easeInOut" }}
-                  >
-                    <Image
-                      src="/potrait-fotor-bg-remover-20260606231944.png"
-                      alt="Ansh cutout portrait"
-                      fill
-                      priority
-                      sizes="(max-width: 1280px) 74vw, 30rem"
-                      className="object-contain object-bottom drop-shadow-[0_32px_48px_rgba(0,0,0,0.5)]"
-                    />
-                  </motion.div>
-                  <div className="absolute inset-x-[16%] bottom-[6%] h-32 rounded-full bg-amber-300/16 blur-3xl sm:h-40" />
-                  <div className="absolute inset-x-[18%] top-[14%] h-[5.5rem] rounded-full bg-white/10 blur-3xl sm:h-28" />
-                  <div className="absolute left-[10%] top-[14%] text-4xl font-light tracking-[-0.06em] text-[#f8efe6]/4 sm:text-6xl">0007</div>
-                  <div className="absolute right-[8%] top-[28%] text-3xl font-light tracking-[-0.06em] text-[#f8efe6]/4 sm:text-5xl">JEE 2027</div>
-                  <div className="absolute inset-x-[14%] top-[44%] h-[1px] bg-white/[0.08]" />
-                </div>
+  const inputStyle: React.CSSProperties = {
+    background: CARD2, border: `1px solid ${BORDER}`, borderRadius: 6,
+    color: "white", fontSize: 13, padding: "10px 12px", width: "100%", outline: "none",
+  };
 
-                <div className="absolute left-4 top-4 rounded-[1.4rem] border border-[#d28a41]/16 bg-black/20 px-4 py-3 backdrop-blur-md sm:left-6 sm:top-6">
-                  <p className="text-[0.66rem] uppercase tracking-[0.45em] text-amber-100/55">Archive pulse</p>
-                  <p className="mt-2 max-w-[14rem] text-sm leading-7 text-[#f8efe6]">Warm light. Open tabs. Silent progress.</p>
-                </div>
-              </div>
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+      <Card>
+        <CardHeader icon={FileText} title="Log Completed Piece" color={ORANGE} />
+        <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr 1fr" : "2fr 1.5fr 1fr", gap: 10, marginBottom: 14 }}>
+          {[
+            { key: "name", label: "Piece Title", placeholder: "e.g. Portrait Study #4", type: "text" },
+            { key: "date", label: "Date", placeholder: "dd-mm-yyyy", type: "date" },
+            { key: "medium", label: "Medium", placeholder: "e.g. Digital", type: "text" },
+          ].map(({ key, label, placeholder, type }) => (
+            <div key={key}>
+              <label style={{ fontSize: 11, fontWeight: 600, color: PURPLE_DIM, textTransform: "uppercase", letterSpacing: "0.08em", display: "block", marginBottom: 6 }}>{label}</label>
+              <input type={type} placeholder={placeholder} value={form[key as keyof typeof form]} onChange={(e) => setForm((f) => ({ ...f, [key]: e.target.value }))} style={inputStyle} />
             </div>
-          </WorkPanel>
-
-          <div className="grid gap-5">
-            <StatRing />
-            <StatusRail />
+          ))}
+        </div>
+        {isOwner ? (
+          <button onClick={addPiece} style={{ background: PURPLE, color: "white", border: "none", borderRadius: 8, padding: "9px 20px", fontSize: 13, fontWeight: 600, cursor: "pointer" }}>
+            + Add Piece
+          </button>
+        ) : (
+          <p style={{ fontSize: 12, color: "#6b7280" }}>Log in as owner to log pieces.</p>
+        )}
+      </Card>
+      <Card>
+        <CardHeader icon={TrendingUp} title="Portfolio Log" />
+        {pieces.slice().reverse().map((p, i) => (
+          <div key={i} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px 0", borderBottom: `1px solid ${BORDER}` }}>
+            <div>
+              <p style={{ fontWeight: 600, color: "white", fontSize: 14, margin: 0 }}>{p.name}</p>
+              <p style={{ color: "#6b7280", fontSize: 12, margin: "2px 0 0" }}>{p.date}</p>
+            </div>
+            <span style={{ color: PURPLE_DIM, fontSize: 13, background: CARD2, border: `1px solid ${BORDER}`, borderRadius: 6, padding: "3px 10px" }}>{p.medium}</span>
           </div>
-        </section>
+        ))}
+      </Card>
+    </div>
+  );
+}
 
-        <section className="mt-4 grid gap-4 sm:mt-5 sm:gap-5 xl:grid-cols-[minmax(0,1.2fr)_minmax(18rem,0.8fr)]">
-          <WorkPanel className="p-4 sm:p-6">
-            <div className="flex items-center justify-between gap-4">
-              <div>
-                <p className="text-[0.66rem] uppercase tracking-[0.45em] text-amber-100/55">Recent Activity</p>
-                <h2 className="mt-1.5 text-2xl font-light tracking-wide text-[#f8efe6] sm:mt-2">Live archive log</h2>
-              </div>
-              <div className="flex items-center gap-2 rounded-full border border-[#d28a41]/16 bg-white/[0.04] px-3 py-1 text-[0.62rem] uppercase tracking-[0.35em] text-amber-100/65">
-                <span className="h-2 w-2 rounded-full bg-amber-300 shadow-[0_0_12px_rgba(251,191,36,0.85)] animate-pulse" />
-                Terminal feed
-              </div>
-            </div>
+// ─── Page: Study (Overview) ───────────────────────────────────────────────────
 
-            <div className="mt-4 space-y-3 sm:mt-5">
-              {liveLog.map((entry, index) => (
-                <motion.div
-                  key={`${entry.time}-${entry.text}`}
-                  initial={reduceMotion ? false : { opacity: 0, y: 12 }}
-                  animate={reduceMotion ? undefined : { opacity: 1, y: 0 }}
-                  transition={{ duration: 0.35, delay: index * 0.04, ease: [0.22, 1, 0.36, 1] }}
-                  whileHover={reduceMotion ? undefined : { x: 4 }}
-                  className={`rounded-[1.45rem] border px-4 py-4 transition ${
-                    index === 0
-                      ? "border-amber-300/20 bg-amber-300/8 shadow-[0_0_0_1px_rgba(251,191,36,0.08)]"
-                      : "border-white/6 bg-black/16 hover:bg-black/20"
-                  }`}
-                >
-                  <div className="flex items-center justify-between gap-4 text-[0.66rem] uppercase tracking-[0.35em] text-amber-100/55">
-                    <span>{entry.time}</span>
-                    <span>{entry.tag}</span>
-                  </div>
-                  <p className="mt-3 text-base font-light leading-7 text-[#f8efe6]">{entry.text}</p>
-                </motion.div>
-              ))}
-            </div>
-          </WorkPanel>
+export function NowPage({ isOwner }: { isOwner: boolean }) {
+  const { minutes, addMinutes } = useTimerData(isOwner);
+  const { isMobile } = useBreakpoint();
+  const cols = isMobile ? "1fr" : "1fr 1fr";
 
-          <WorkPanel className="p-4 sm:p-6">
-            <div className="space-y-4 sm:space-y-5">
-              <div>
-                <p className="text-[0.66rem] uppercase tracking-[0.45em] text-amber-100/55">Session Notes</p>
-                <h2 className="mt-1.5 text-2xl font-light tracking-wide text-[#f8efe6] sm:mt-2">Desk temperature</h2>
-              </div>
-
-              <div className="rounded-[1.5rem] border border-[#d28a41]/16 bg-[#1f130d]/72 p-3.5 sm:p-4">
-                <div className="flex items-center justify-between text-[0.66rem] uppercase tracking-[0.4em] text-amber-100/55">
-                  <span>Current state</span>
-                  <span>Warm</span>
-                </div>
-                <div className="mt-2.5 h-2 rounded-full bg-white/8 sm:mt-3">
-                  <div className="h-full w-[82%] rounded-full bg-gradient-to-r from-amber-300 via-orange-300 to-amber-500" />
-                </div>
-                <p className="mt-3 text-[0.88rem] leading-6 text-amber-100/70 sm:mt-4 sm:text-sm sm:leading-7">Late-night workstation energy with contrast, glow, and enough negative space for the cuts to breathe.</p>
-              </div>
-
-              <div className="grid grid-cols-2 gap-2.5 sm:gap-3">
-                {[
-                  ["Focus", "Strong"],
-                  ["Session", "Active"],
-                  ["Mood", "Calm"],
-                  ["Mode", "Work"],
-                ].map(([label, value]) => (
-                  <div key={label} className="rounded-[1.2rem] border border-white/6 bg-white/[0.04] px-4 py-3.5 sm:py-4">
-                    <p className="text-[0.62rem] uppercase tracking-[0.35em] text-amber-100/55">{label}</p>
-                    <p className="mt-2 text-base font-light text-[#f8efe6] sm:text-lg">{value}</p>
-                  </div>
-                ))}
-              </div>
-
-              <div className="rounded-[1.5rem] border border-[#d28a41]/16 bg-black/18 px-4 py-3.5 text-[0.66rem] uppercase tracking-[0.45em] text-amber-100/65 sm:py-4">
-                Session active • Focus mode on • Local time 21:42 • Archive connection stable
-              </div>
-            </div>
-          </WorkPanel>
-        </section>
+  return (
+    <TrackerLayout active="overview" isOwner={isOwner}>
+      <div style={{ display: "grid", gridTemplateColumns: cols, gap: isMobile ? 12 : 16, marginBottom: isMobile ? 12 : 16 }}>
+        <PomodoroCard onAdd={addMinutes} />
+        <StopwatchCard onAdd={addMinutes} />
       </div>
-    </main>
+      <div style={{ display: "grid", gridTemplateColumns: cols, gap: isMobile ? 12 : 16 }}>
+        <TodayCard minutes={minutes} label="Study" goalHours={4} />
+        <WeaknessCard chapter={jeeAnalytics.weakChapter} subject={jeeAnalytics.weakChapterSubject} score={jeeAnalytics.weakChapterScore} />
+      </div>
+    </TrackerLayout>
+  );
+}
+
+// ─── Page: JEE ────────────────────────────────────────────────────────────────
+
+export function JEEPage({ isOwner }: { isOwner: boolean }) {
+  const [tab, setTab] = useState<JeeTab>("chapters");
+
+  return (
+    <TrackerLayout active="jee" isOwner={isOwner}>
+      <SubTabs<JeeTab>
+        tabs={[
+          { value: "chapters", label: "Chapters" },
+          { value: "analytics", label: "Analytics" },
+          { value: "mocktests", label: "Mock Tests" },
+        ]}
+        active={tab}
+        onChange={setTab}
+      />
+
+      {tab === "chapters" && (
+        <ChapterChecklist
+          title="JEE Chapter Checklist"
+          domain="jee"
+          isOwner={isOwner}
+          subjects={[
+            { label: "⚛ Physics (28)", items: jeeChapters.physics },
+            { label: "⚗ Chemistry (30)", items: jeeChapters.chemistry },
+            { label: "√ Maths (30)", items: jeeChapters.maths },
+          ]}
+          checkLabels={["Theory", "NCERT", "Mains PYQs", "Adv PYQs"]}
+        />
+      )}
+
+      {tab === "analytics" && (
+        <AnalyticsSection
+          title="Study Analytics"
+          stats={[
+            { label: "Total Hours", value: `${jeeAnalytics.totalHours}h` },
+            { label: "Streak 🔥", value: String(jeeAnalytics.streak) },
+            { label: "Today", value: `${jeeAnalytics.todayHours}h` },
+            { label: "7-Day Avg", value: `${jeeAnalytics.sevenDayAvg}h` },
+          ]}
+          weeklyData={jeeAnalytics.weeklyData}
+        />
+      )}
+
+      {tab === "mocktests" && <MockTestsSection isOwner={isOwner} />}
+    </TrackerLayout>
+  );
+}
+
+// ─── Page: Health ─────────────────────────────────────────────────────────────
+
+export function HealthPage({ isOwner }: { isOwner: boolean }) {
+  const [tab, setTab] = useState<HealthTab>("workouts");
+
+  return (
+    <TrackerLayout active="health" isOwner={isOwner}>
+      <SubTabs<HealthTab>
+        tabs={[
+          { value: "workouts", label: "Workouts" },
+          { value: "analytics", label: "Analytics" },
+          { value: "prs", label: "Personal Records" },
+        ]}
+        active={tab}
+        onChange={setTab}
+      />
+
+      {tab === "workouts" && (
+        <ChapterChecklist
+          title="Workout Checklist"
+          domain="health"
+          isOwner={isOwner}
+          subjects={[
+            { label: "💪 Push", items: healthExercises.push },
+            { label: "🔙 Pull", items: healthExercises.pull },
+            { label: "🦵 Legs", items: healthExercises.legs },
+            { label: "🔥 Core", items: healthExercises.core },
+          ]}
+          checkLabels={["Warm-up", "Sets Done", "Cool-down", "Logged"]}
+        />
+      )}
+
+      {tab === "analytics" && (
+        <AnalyticsSection
+          title="Workout Analytics"
+          stats={[
+            { label: "Total Hours", value: `${healthAnalytics.totalHours}h` },
+            { label: "Streak 🔥", value: String(healthAnalytics.streak) },
+            { label: "Today", value: `${healthAnalytics.todayHours}h` },
+            { label: "7-Day Avg", value: `${healthAnalytics.sevenDayAvg}h` },
+          ]}
+          weeklyData={healthAnalytics.weeklyData}
+        />
+      )}
+
+      {tab === "prs" && <PRSection isOwner={isOwner} />}
+    </TrackerLayout>
+  );
+}
+
+// ─── Page: Art ────────────────────────────────────────────────────────────────
+
+export function ArtPage({ isOwner }: { isOwner: boolean }) {
+  const [tab, setTab] = useState<ArtTab>("skills");
+
+  return (
+    <TrackerLayout active="art" isOwner={isOwner}>
+      <SubTabs<ArtTab>
+        tabs={[
+          { value: "skills", label: "Skills" },
+          { value: "analytics", label: "Analytics" },
+          { value: "portfolio", label: "Portfolio" },
+        ]}
+        active={tab}
+        onChange={setTab}
+      />
+
+      {tab === "skills" && (
+        <ChapterChecklist
+          title="Art Skill Checklist"
+          domain="art"
+          isOwner={isOwner}
+          subjects={[
+            { label: "✏ Fundamentals", items: artSkills.fundamentals },
+            { label: "🧍 Figure Drawing", items: artSkills.figure },
+            { label: "💻 Digital", items: artSkills.digital },
+          ]}
+          checkLabels={["Theory", "Practice", "Reference", "Complete"]}
+        />
+      )}
+
+      {tab === "analytics" && (
+        <AnalyticsSection
+          title="Practice Analytics"
+          stats={[
+            { label: "Total Hours", value: `${artAnalytics.totalHours}h` },
+            { label: "Streak 🔥", value: String(artAnalytics.streak) },
+            { label: "Today", value: `${artAnalytics.todayHours}h` },
+            { label: "7-Day Avg", value: `${artAnalytics.sevenDayAvg}h` },
+          ]}
+          weeklyData={artAnalytics.weeklyData}
+        />
+      )}
+
+      {tab === "portfolio" && <PortfolioSection isOwner={isOwner} />}
+    </TrackerLayout>
+  );
+}
+
+// ─── Page: Projects ───────────────────────────────────────────────────────────
+
+export function ProjectsPage({ isOwner }: { isOwner: boolean }) {
+  const [tab, setTab] = useState<ProjectTab>("features");
+
+  return (
+    <TrackerLayout active="projects" isOwner={isOwner}>
+      <SubTabs<ProjectTab>
+        tabs={[
+          { value: "features", label: "Features" },
+          { value: "analytics", label: "Analytics" },
+        ]}
+        active={tab}
+        onChange={setTab}
+      />
+
+      {tab === "features" && (
+        <ChapterChecklist
+          title="Project Feature Checklist"
+          domain="projects"
+          isOwner={isOwner}
+          subjects={[
+            { label: "🗂 HisArchives", items: projectFeatures.hisarchives },
+            { label: "🤖 Discord Bot", items: projectFeatures.discordbot },
+            { label: "🔭 Future Projects", items: projectFeatures.future },
+          ]}
+          checkLabels={["Design", "Dev", "Test", "Shipped"]}
+        />
+      )}
+
+      {tab === "analytics" && (
+        <AnalyticsSection
+          title="Coding Analytics"
+          stats={[
+            { label: "Total Hours", value: `${projectsAnalytics.totalHours}h` },
+            { label: "Streak 🔥", value: String(projectsAnalytics.streak) },
+            { label: "Today", value: `${projectsAnalytics.todayHours}h` },
+            { label: "7-Day Avg", value: `${projectsAnalytics.sevenDayAvg}h` },
+          ]}
+          weeklyData={projectsAnalytics.weeklyData}
+        />
+      )}
+    </TrackerLayout>
   );
 }

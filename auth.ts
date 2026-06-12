@@ -2,6 +2,20 @@ import GoogleProvider from "next-auth/providers/google";
 import NextAuth from "next-auth/next";
 import { getServerSession } from "next-auth/next";
 
+// Resolve the correct public URL for NextAuth callbacks.
+// NEXTAUTH_URL in .env.local is set to localhost; on Vercel we override it
+// with the actual deployment URL so OAuth redirects work in production.
+(function resolveNextAuthUrl() {
+  const current = process.env.NEXTAUTH_URL ?? "";
+  if (current && !current.includes("localhost")) return; // already set to a real domain
+  if (process.env.VERCEL_PROJECT_PRODUCTION_URL) {
+    process.env.NEXTAUTH_URL = `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`;
+  } else if (process.env.VERCEL_URL) {
+    process.env.NEXTAUTH_URL = `https://${process.env.VERCEL_URL}`;
+  }
+  // else: local dev, keep whatever is in NEXTAUTH_URL (localhost)
+})();
+
 const ownerEmail = (process.env.OWNER_EMAIL ?? "anuneet.og@gmail.com").trim().toLowerCase();
 const authSecret =
   process.env.AUTH_SECRET ??

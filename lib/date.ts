@@ -78,3 +78,17 @@ export function formatDurationSince(startValue: string | Date, endValue = new Da
 
   return parts.length ? parts.join(", ") : "0 days";
 }
+
+export function formatDurationUntil(targetValue: string | Date, referenceDate = new Date()) {
+  const targetDate = toDate(targetValue);
+  const startDate = referenceDate <= targetDate ? referenceDate : targetDate;
+  const endDate = referenceDate <= targetDate ? targetDate : referenceDate;
+  const duration = intervalToDuration({ start: startDate, end: endDate });
+  const parts = [
+    duration.years ? `${duration.years} year${duration.years === 1 ? "" : "s"}` : "",
+    duration.months ? `${duration.months} month${duration.months === 1 ? "" : "s"}` : "",
+    duration.days ? `${duration.days} day${duration.days === 1 ? "" : "s"}` : "",
+  ].filter(Boolean);
+
+  return parts.length ? parts.join(", ") : "0 days";
+}

@@ -1,6 +1,21 @@
 export type Database = {
   public: {
     Tables: {
+      now_checklist: {
+        Row: { domain: string; item_name: string; checks: boolean[]; updated_at: string };
+        Insert: { domain: string; item_name: string; checks?: boolean[]; updated_at?: string };
+        Update: { checks?: boolean[]; updated_at?: string };
+      };
+      now_daily_minutes: {
+        Row: { date: string; minutes: number };
+        Insert: { date: string; minutes?: number };
+        Update: { minutes?: number };
+      };
+      now_records: {
+        Row: { id: number; type: string; data: unknown; created_at: string };
+        Insert: { type: string; data: unknown; created_at?: string };
+        Update: { type?: string; data?: unknown };
+      };
       identity_record: {
         Row: {
           id: string;
