@@ -9,8 +9,11 @@ export default async function ArchivesRoute() {
     return <ArchivePage initialItems={listSeedArchiveEntries()} />;
   }
 
-  await seedArchiveEntriesIfEmpty();
-  const initialItems = await listArchiveEntries();
-
-  return <ArchivePage initialItems={initialItems} />;
+  try {
+    await seedArchiveEntriesIfEmpty();
+    const initialItems = await listArchiveEntries();
+    return <ArchivePage initialItems={initialItems} />;
+  } catch {
+    return <ArchivePage initialItems={listSeedArchiveEntries()} />;
+  }
 }
