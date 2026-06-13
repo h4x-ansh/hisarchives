@@ -367,7 +367,7 @@ const PRESETS = [
   { label: "90/20", work: 90, brk: 20 },
 ];
 
-function PomodoroCard({ onAdd }: { onAdd: (mins: number) => void }) {
+function PomodoroCard({ onAdd, isOwner }: { onAdd: (mins: number) => void; isOwner: boolean }) {
   const [presetIdx, setPresetIdx] = useState(0);
   const [custom, setCustom] = useState(false);
   const [workMins, setWorkMins] = useState(25);
@@ -539,7 +539,7 @@ function PomodoroCard({ onAdd }: { onAdd: (mins: number) => void }) {
 
 // ─── Stopwatch Card ───────────────────────────────────────────────────────────
 
-function StopwatchCard({ onAdd }: { onAdd: (mins: number) => void }) {
+function StopwatchCard({ onAdd, isOwner }: { onAdd: (mins: number) => void; isOwner: boolean }) {
   const [elapsed, setElapsed] = useState(0);
   const [running, setRunning] = useState(false);
   const [logged, setLogged] = useState(0);
@@ -585,7 +585,7 @@ function StopwatchCard({ onAdd }: { onAdd: (mins: number) => void }) {
         <button onClick={logAndReset} style={{ background: GREEN, color: "white", border: "none", borderRadius: 8, padding: "8px 14px", fontSize: 13, cursor: "pointer" }}>✓ Log & Reset</button>
       </div>
       <p style={{ textAlign: "center", fontSize: 12, color: "#4b5563", marginTop: 10 }}>
-        &quot;Log &amp; Reset&quot; saves elapsed time to Today&apos;s total
+        {isOwner ? <>&quot;Log &amp; Reset&quot; saves elapsed time to Today&apos;s total</> : "Timer runs locally — data won't be saved"}
       </p>
     </Card>
   );
@@ -1248,8 +1248,8 @@ export function NowPage({ isOwner }: { isOwner: boolean }) {
   return (
     <TrackerLayout active="overview" isOwner={isOwner}>
       <div style={{ display: "grid", gridTemplateColumns: cols, gap: isMobile ? 12 : 16, marginBottom: isMobile ? 12 : 16 }}>
-        <PomodoroCard onAdd={addMinutes} />
-        <StopwatchCard onAdd={addMinutes} />
+        <PomodoroCard onAdd={addMinutes} isOwner={isOwner} />
+        <StopwatchCard onAdd={addMinutes} isOwner={isOwner} />
       </div>
       <div style={{ display: "grid", gridTemplateColumns: cols, gap: isMobile ? 12 : 16 }}>
         <TodayCard minutes={minutes} label="Study" goalHours={4} saveState={saveState} onRetry={retrySave} />

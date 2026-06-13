@@ -17,6 +17,8 @@ export type CuratedRecordRow = {
   title: string;
   category: string;
   image_url: string | null;
+  image_position: string;
+  accent: string;
   short_description: string;
   full_description: string | null;
   external_link: string | null;

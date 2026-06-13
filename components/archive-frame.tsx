@@ -15,10 +15,9 @@ export function ArchiveFrame({
     | "/archives"
     | "/now"
     | "/me"
-  | "/identity"
-  | "/timeline"
-  | "/activity"
-  | "/gallery";
+    | "/timeline"
+    | "/activity"
+    | "/gallery";
   timestamp?: string;
   timestampDate?: string | Date | null;
   children: ReactNode;

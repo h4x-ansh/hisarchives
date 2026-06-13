@@ -64,6 +64,8 @@ export default async function CuratedNewRoute() {
             values={{
               title: "",
               category: "",
+              accent: "#8b92a5",
+              imagePosition: "center",
               shortDescription: "",
               fullDescription: "",
               externalLink: "",

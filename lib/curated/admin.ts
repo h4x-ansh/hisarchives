@@ -7,6 +7,8 @@ import type { CuratedRecordRow } from "./types";
 export type CuratedSubmission = {
   title: string;
   category: string;
+  accent: string;
+  imagePosition: string;
   shortDescription: string;
   fullDescription: string;
   externalLink: string;
@@ -84,6 +86,8 @@ export function parseCuratedSubmission(formData: FormData): CuratedSubmission {
   return {
     title: readTextField(formData.get("title")),
     category: readTextField(formData.get("category")),
+    accent: readTextField(formData.get("accent")) || "#8b92a5",
+    imagePosition: readTextField(formData.get("imagePosition")) || "center",
     shortDescription: readTextField(formData.get("shortDescription")),
     fullDescription: readTextField(formData.get("fullDescription")),
     externalLink: readTextField(formData.get("externalLink")),
@@ -103,6 +107,8 @@ export async function createCuratedEntry(submission: CuratedSubmission) {
     title: submission.title,
     category: submission.category,
     image_url: uploadedImage,
+    image_position: submission.imagePosition,
+    accent: submission.accent,
     short_description: submission.shortDescription,
     full_description: submission.fullDescription || null,
     external_link: submission.externalLink || null,
@@ -141,6 +147,8 @@ export async function updateCuratedEntry(id: string, submission: CuratedSubmissi
     title: submission.title,
     category: submission.category,
     image_url: uploadedImage ?? existingRecord.image_url,
+    image_position: submission.imagePosition,
+    accent: submission.accent,
     short_description: submission.shortDescription,
     full_description: submission.fullDescription || null,
     external_link: submission.externalLink || null,

@@ -1,10 +1,12 @@
-"use client";
+  "use client";
 
 import { useEffect, useState } from "react";
 
 export type CuratedEditorValues = {
   title: string;
   category: string;
+  accent: string;
+  imagePosition: string;
   shortDescription: string;
   fullDescription: string;
   externalLink: string;
@@ -69,6 +71,35 @@ export function CuratedEditorForm({
                 className="w-full rounded-[1.1rem] border border-white/10 bg-black/20 px-4 py-3 text-white outline-none ring-0 placeholder:text-white/30 focus:border-white/20"
                 placeholder="1"
                 required
+              />
+            </label>
+          </div>
+
+          <div className="grid gap-4 sm:grid-cols-2">
+            <label className="block space-y-2">
+              <span className="text-[0.66rem] uppercase tracking-[0.42em] text-white/45">Accent color</span>
+              <div className="flex gap-2">
+                <input
+                  type="color"
+                  name="accent"
+                  defaultValue={values.accent || "#8b92a5"}
+                  className="h-[46px] w-14 shrink-0 cursor-pointer rounded-[0.9rem] border border-white/10 bg-black/20 p-1"
+                  onChange={(e) => {
+                    const sib = e.currentTarget.nextElementSibling as HTMLInputElement | null;
+                    if (sib) sib.value = e.currentTarget.value;
+                  }}
+                />
+                <input defaultValue={values.accent} readOnly className="w-full rounded-[1.1rem] border border-white/10 bg-black/20 px-4 py-3 font-mono text-sm text-white/70" tabIndex={-1} aria-hidden />
+              </div>
+            </label>
+
+            <label className="block space-y-2">
+              <span className="text-[0.66rem] uppercase tracking-[0.42em] text-white/45">Image position</span>
+              <input
+                name="imagePosition"
+                defaultValue={values.imagePosition || "center"}
+                className="w-full rounded-[1.1rem] border border-white/10 bg-black/20 px-4 py-3 text-white outline-none ring-0 placeholder:text-white/30 focus:border-white/20"
+                placeholder="center / center 20%"
               />
             </label>
           </div>

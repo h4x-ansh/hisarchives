@@ -4,7 +4,12 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion, useMotionValue, useSpring, useTransform } from "framer-motion";
 import Link from "next/link";
 import { SiteHeader } from "@/components/site-header";
-import type { IdentityRecord } from "@/lib/identity/types";
+type IdentityRecord = {
+  name: string; shortTagline: string; fullBio: string;
+  profilePhotoUrl?: string | null; location?: string | null;
+  email?: string | null; github?: string | null; discord?: string | null;
+  instagram?: string | null; linkedin?: string | null; website?: string | null;
+};
 
 // ─── Data ─────────────────────────────────────────────────────────────────────
 

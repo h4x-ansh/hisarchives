@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 import { Geist, Instrument_Serif } from "next/font/google";
 import "./globals.css";
 import { SiteFooter } from "@/components/site-footer";
+import { AuthProvider } from "@/components/auth-provider";
 
 const geist = Geist({
   subsets: ["latin"],
@@ -52,8 +53,10 @@ export default async function RootLayout({
   return (
     <html lang="en" className={`${geist.variable} ${instrumentSerif.variable}`}>
       <body>
-        {children}
-        <SiteFooter />
+        <AuthProvider>
+          {children}
+          <SiteFooter />
+        </AuthProvider>
       </body>
     </html>
   );
