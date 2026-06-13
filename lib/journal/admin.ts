@@ -67,7 +67,12 @@ function getStoragePathFromPublicUrl(publicUrl: string) {
   }
 }
 
+const ALLOWED_IMAGE_TYPES = new Set(["image/jpeg","image/png","image/webp","image/gif","image/avif"]);
+const MAX_FILE_SIZE = 10 * 1024 * 1024;
+
 async function uploadPhoto(entryId: string, file: File) {
+  if (!ALLOWED_IMAGE_TYPES.has(file.type)) throw new Error(`Unsupported file type: ${file.type}`);
+  if (file.size > MAX_FILE_SIZE) throw new Error("File too large (max 10 MB).");
   const supabase = getSupabaseAdminClient();
   const safeFileName = normalizeFileName(file.name || "journal-photo");
   const extension = safeFileName.includes(".") ? `.${safeFileName.split(".").pop()}` : "";

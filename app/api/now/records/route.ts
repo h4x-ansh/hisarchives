@@ -43,6 +43,6 @@ export async function POST(req: Request) {
   const db = getSupabaseAdminClient() as any;
   const { error } = await db.from("now_records").insert({ type, data });
 
-  if (error) return new Response(String(error.message), { status: 500 });
+  if (error) { console.error("[records] DB error:", error.message); return new Response("Internal Server Error", { status: 500 }); }
   return NextResponse.json({ ok: true });
 }

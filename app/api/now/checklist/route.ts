@@ -50,6 +50,6 @@ export async function POST(req: Request) {
     .from("now_checklist")
     .upsert({ domain, item_name, checks, updated_at: new Date().toISOString() }, { onConflict: "domain,item_name" });
 
-  if (error) return new Response(String(error.message), { status: 500 });
+  if (error) { console.error("[checklist] DB error:", error.message); return new Response("Internal Server Error", { status: 500 }); }
   return NextResponse.json({ ok: true });
 }

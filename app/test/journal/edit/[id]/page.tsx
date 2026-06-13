@@ -8,7 +8,7 @@ import { hasSupabaseAdminEnv } from "@/lib/supabase/admin";
 import { getJournalEntryRecordById } from "@/lib/journal/repository";
 
 type PageProps = {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 };
 
 export const metadata: Metadata = {
@@ -17,7 +17,7 @@ export const metadata: Metadata = {
 };
 
 export default async function JournalEditRoute({ params }: PageProps) {
-  const { id } = params;
+  const { id } = await params;
   console.info("[journal] params.id", id);
 
   if (!id || id === "undefined" || id === "null") {

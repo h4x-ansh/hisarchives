@@ -1,12 +1,14 @@
 import { NextResponse } from "next/server";
 import { parseIdentitySubmission, upsertIdentityRecord } from "@/lib/identity/admin";
+import { getOwnerSession } from "@/lib/auth/owner";
 
 export async function POST(request: Request) {
+  const { isOwner } = await getOwnerSession();
+  if (!isOwner) return NextResponse.redirect(new URL("/test", request.url), 303);
   try {
     const formData = await request.formData();
     const submission = parseIdentitySubmission(formData);
     const record = await upsertIdentityRecord(submission);
-    console.log("updatedIdentity.id", record.id);
     return NextResponse.redirect(new URL("/test/identity", request.url));
   } catch (error) {
     console.error("Identity submit failed:", error);

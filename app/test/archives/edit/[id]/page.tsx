@@ -8,7 +8,8 @@ import { hasSupabaseAdminEnv } from "@/lib/supabase/admin";
 import { getArchiveRecordById, archiveRecordToFormValues } from "@/lib/archive/repository";
 
 type PageProps = {
-  params: { id: string };
+  params: Promise<{ id: string }>;
+  searchParams: Promise<{ saved?: string }>;
 };
 
 export const metadata: Metadata = {
@@ -16,8 +17,9 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-export default async function ArchivesEditRoute({ params }: PageProps) {
-  const { id } = params;
+export default async function ArchivesEditRoute({ params, searchParams }: PageProps) {
+  const { id } = await params;
+  const { saved } = await searchParams;
 
   if (!id || id === "undefined" || id === "null") {
     notFound();
@@ -75,6 +77,12 @@ export default async function ArchivesEditRoute({ params }: PageProps) {
             <AdminSignOutButton />
           </div>
         </header>
+
+        {saved === "1" && (
+          <div className="rounded-[1.4rem] border border-emerald-400/20 bg-emerald-400/10 px-5 py-3 text-sm text-emerald-300">
+            Saved successfully.
+          </div>
+        )}
 
         <section className="rounded-[1.8rem] border border-white/8 bg-white/[0.03] p-5 shadow-[0_18px_60px_rgba(0,0,0,0.2)] sm:p-6">
           <ArchiveEditorForm

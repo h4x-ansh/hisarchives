@@ -35,13 +35,9 @@ export async function POST(request: Request) {
     }
 
     const record = await updateArchiveEntry(id, submission);
-    const redirectTarget = `/test/archives/edit/${record.id}`;
-    console.info("[archives] updatedRecord.id", record.id, "redirectTarget", redirectTarget);
-    return NextResponse.redirect(new URL(redirectTarget, request.url), 303);
+    return NextResponse.redirect(new URL(`/test/archives/edit/${record.id}?saved=1`, request.url), 303);
   }
 
   const record = await createArchiveEntry(submission);
-  const redirectTarget = `/test/archives/edit/${record.id}`;
-  console.info("[archives] createdRecord.id", record.id, "redirectTarget", redirectTarget);
-  return NextResponse.redirect(new URL(redirectTarget, request.url), 303);
+  return NextResponse.redirect(new URL(`/test/archives/edit/${record.id}?saved=1`, request.url), 303);
 }

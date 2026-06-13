@@ -18,12 +18,12 @@ const instrumentSerif = Instrument_Serif({
 });
 
 export const metadata: Metadata = {
-  title: "hisarchives.xyz",
-  description: "A living archive of projects, progress, lessons, and records.",
+  title: "hisarchives.xyz — V3",
+  description: "A living archive of projects, progress, lessons, and records. V3 — CMS operational, archive infrastructure complete.",
   metadataBase: new URL("https://hisarchives.xyz"),
   openGraph: {
-    title: "hisarchives.xyz",
-    description: "A living archive of projects, progress, lessons, and records.",
+    title: "hisarchives.xyz — V3",
+    description: "A living archive of projects, progress, lessons, and records. V3 — CMS operational, archive infrastructure complete.",
     siteName: "hisarchives.xyz",
     url: "https://hisarchives.xyz",
     type: "website",
@@ -38,8 +38,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "hisarchives.xyz",
-    description: "A living archive of projects, progress, lessons, and records.",
+    title: "hisarchives.xyz — V3",
+    description: "A living archive of projects, progress, lessons, and records. V3 — CMS operational, archive infrastructure complete.",
     images: ["/og-image.svg"],
   },
 };

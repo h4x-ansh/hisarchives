@@ -113,7 +113,7 @@ export default async function ArchivesAdminRoute() {
                       </Link>
                       <form action="/test/archives/submit" method="post">
                         <input type="hidden" name="intent" value="delete" />
-                        <input type="hidden" name="id" value={entry.id} />
+                        <input type="hidden" name="id" value={entry.rawId} />
                         <button
                           type="submit"
                           className="rounded-full border border-red-400/30 bg-red-400/10 px-4 py-2 text-xs uppercase tracking-[0.32em] text-red-100 transition hover:bg-red-400/20"

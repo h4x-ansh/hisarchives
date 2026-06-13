@@ -8,7 +8,7 @@ import { hasSupabaseAdminEnv } from "@/lib/supabase/admin";
 import { curatedRecordToFormValues, getCuratedRecordById } from "@/lib/curated/repository";
 
 type PageProps = {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 };
 
 export const metadata: Metadata = {
@@ -17,7 +17,7 @@ export const metadata: Metadata = {
 };
 
 export default async function CuratedEditRoute({ params }: PageProps) {
-  const { id } = params;
+  const { id } = await params;
 
   if (!id || id === "undefined" || id === "null") {
     notFound();

@@ -41,10 +41,12 @@ export function archiveRowToRecord(row: ArchiveRecordRow): ArchiveRecord {
 function rowToArchiveCard(row: ArchiveRecordRow): ArchiveCard {
   return {
     id: row.slug,
+    rawId: row.id,
     title: row.title,
     description: row.short_summary,
     status: row.status === "Published" ? "Published" : "Draft",
     year: formatArchiveYear(row.archive_date),
+    archiveDate: row.archive_date,
     accent: slugToAccent(row.slug),
     word: wordFromTitle(row.title),
     href: `/archives/${row.slug}`,

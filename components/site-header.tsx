@@ -9,8 +9,8 @@ import {
   Activity,
   Calendar,
   FolderArchive,
-  Images,
   House,
+  Images,
   Menu,
   User,
   X,
@@ -58,7 +58,7 @@ export function SiteHeader({
         aria-label="Open archive navigation"
         aria-expanded={mobileOpen}
         onClick={() => setMobileOpen(true)}
-        className="fixed left-4 top-4 z-50 inline-flex h-11 w-11 items-center justify-center rounded-[1rem] bg-black/35 text-text shadow-[0_16px_40px_rgba(0,0,0,0.24)] backdrop-blur-2xl transition-transform hover:scale-[1.03] xl:hidden"
+        className="fixed left-4 top-4 z-[70] inline-flex h-11 w-11 items-center justify-center rounded-[1rem] bg-black/35 text-text shadow-[0_16px_40px_rgba(0,0,0,0.24)] backdrop-blur-2xl transition-transform hover:scale-[1.03] xl:hidden"
       >
         <Menu className="h-4.5 w-4.5" />
       </button>
@@ -83,11 +83,7 @@ export function SiteHeader({
               transition={{ type: "spring", stiffness: 300, damping: 34 }}
               className="fixed inset-y-0 left-0 z-50 w-[min(86vw,20rem)] bg-black/22 shadow-[0_24px_80px_rgba(0,0,0,0.3)] backdrop-blur-3xl xl:hidden"
             >
-              <div className="flex items-center justify-between px-5 py-4">
-                <div>
-                  <p className="text-[0.68rem] uppercase tracking-[0.45em] text-muted">HisArchives</p>
-                  <p className="mt-1 text-sm uppercase tracking-[0.3em] text-text">Archive Index</p>
-                </div>
+              <div className="flex items-center justify-end px-5 py-4">
                 <button
                   type="button"
                   aria-label="Close archive navigation"
@@ -135,22 +131,8 @@ export function SiteHeader({
       </AnimatePresence>
 
       <aside className="group fixed left-5 top-5 bottom-5 z-30 hidden w-[72px] flex-col rounded-[1.5rem] bg-black/18 shadow-[0_16px_40px_rgba(0,0,0,0.18)] backdrop-blur-3xl transition-[width] duration-300 xl:flex xl:hover:w-[18rem] xl:focus-within:w-[18rem]">
-        <div className="flex h-18 items-center px-2.5">
-          <Link
-            href="/"
-            aria-label="Go to home"
-            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[0.9rem] bg-white/[0.05] text-text transition-all hover:bg-white/[0.1] hover:scale-[1.03]"
-          >
-            <House className="h-4 w-4" />
-          </Link>
-          <div className="ml-3 min-w-0 overflow-hidden whitespace-nowrap opacity-0 transition-opacity duration-200 xl:group-hover:opacity-100 xl:group-focus-within:opacity-100">
-            <p className="text-[0.68rem] uppercase tracking-[0.45em] text-muted">HisArchives</p>
-            <p className="mt-1 text-sm uppercase tracking-[0.3em] text-text">Archive Index</p>
-          </div>
-        </div>
-
-        <nav className="flex min-h-0 flex-1 flex-col justify-between px-1.5 py-2">
-          <div className="space-y-0.5">
+        <nav className="flex min-h-0 flex-1 flex-col justify-between px-1.5 py-3">
+          <div className="space-y-0.5 pt-10">
             {archiveNavItems.map((item) => {
               const isActive = item.href === activePath;
               const Icon = item.icon;

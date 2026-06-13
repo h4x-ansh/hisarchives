@@ -42,6 +42,6 @@ export async function POST(req: Request) {
     .from("now_daily_minutes")
     .upsert({ date: todayStr(), minutes }, { onConflict: "date" });
 
-  if (error) return new Response(String(error.message), { status: 500 });
+  if (error) { console.error("[timer] DB error:", error.message); return new Response("Internal Server Error", { status: 500 }); }
   return NextResponse.json({ ok: true });
 }

@@ -21,7 +21,7 @@ type ArchiveEditorFormProps = {
 
 export function ArchiveEditorForm({ mode, actionPath, archiveId, values }: ArchiveEditorFormProps) {
   return (
-    <form action={actionPath} method="post" encType="multipart/form-data" className="space-y-6">
+    <form action={actionPath} method="post" encType="multipart/form-data" autoComplete="off" className="space-y-6">
       <input type="hidden" name="mode" value={mode} />
       {archiveId ? <input type="hidden" name="id" value={archiveId} /> : null}
 

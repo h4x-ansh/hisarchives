@@ -145,7 +145,7 @@ function TrackerLayout({ active, children, isOwner }: { active: Section; childre
       <style>{`.tracker-tabs::-webkit-scrollbar{display:none}`}</style>
       {/* Top nav */}
       <nav style={{ background: "#07060f", borderBottom: `1px solid ${BORDER}`, position: "sticky", top: 0, zIndex: 50 }}>
-        <div style={{ maxWidth: 1400, margin: "0 auto", paddingLeft: isMobile ? 8 : sidebarOffset || 24, paddingRight: isMobile ? 8 : 24, display: "flex", alignItems: "center", height: 52, gap: 0 }}>
+        <div style={{ maxWidth: 1400, margin: "0 auto", paddingLeft: isMobile ? 60 : sidebarOffset || 24, paddingRight: isMobile ? 8 : 24, display: "flex", alignItems: "center", height: 52, gap: 0 }}>
           {/* Logo — icon only on mobile */}
           <div style={{ display: "flex", alignItems: "center", gap: 8, marginRight: isMobile ? 4 : 24, flexShrink: 0 }}>
             <div style={{ width: 28, height: 28, background: PURPLE, borderRadius: 7, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>

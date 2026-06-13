@@ -28,10 +28,12 @@ export type ArchiveRecordRow = {
 
 export type ArchiveCard = {
   id: string;
+  rawId: string;
   title: string;
   description: string;
   status: string;
   year: string;
+  archiveDate: string;
   accent: string;
   word: string;
   href: string;

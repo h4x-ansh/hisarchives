@@ -16,11 +16,11 @@ import { getServerSession } from "next-auth/next";
   // else: local dev, keep whatever is in NEXTAUTH_URL (localhost)
 })();
 
-const ownerEmail = (process.env.OWNER_EMAIL ?? "anuneet.og@gmail.com").trim().toLowerCase();
-const authSecret =
-  process.env.AUTH_SECRET ??
-  process.env.NEXTAUTH_SECRET ??
-  "ansh-siddhi-naacho-secret";
+const ownerEmail = process.env.OWNER_EMAIL?.trim().toLowerCase();
+if (!ownerEmail) throw new Error("Missing OWNER_EMAIL environment variable.");
+
+const authSecret = process.env.AUTH_SECRET ?? process.env.NEXTAUTH_SECRET;
+if (!authSecret) throw new Error("Missing AUTH_SECRET environment variable.");
 
 export const authOptions = {
   providers: [

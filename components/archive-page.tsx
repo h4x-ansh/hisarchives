@@ -1,22 +1,23 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import Link from "next/link";
 import { SiteHeader } from "@/components/site-header";
 import type { ArchiveCard } from "@/lib/archive/types";
-import { formatExactDate } from "@/lib/date";
 
 const currentYear = String(new Date().getFullYear());
 
 const fallbackArchivedWork: ArchiveCard[] = [
   {
     id: "001",
+    rawId: "001",
     title: "Discord Automation",
     description: "Utility tooling and workflow automation preserved as an active line of work.",
     status: "Active",
     year: currentYear,
+    archiveDate: "2026-06-04",
     accent: "#3b82f6",
     word: "DISCORD",
     href: "/archives/discord-automation",
@@ -24,10 +25,12 @@ const fallbackArchivedWork: ArchiveCard[] = [
   },
   {
     id: "002",
+    rawId: "002",
     title: "Tournament Platform",
     description: "A structured competitive system archived after its first complete pass.",
     status: "Archived",
     year: currentYear,
+    archiveDate: "2026-06-04",
     accent: "#eab308",
     word: "TOURNAMENT",
     href: "/archives/tournament-platform",
@@ -35,10 +38,12 @@ const fallbackArchivedWork: ArchiveCard[] = [
   },
   {
     id: "003",
+    rawId: "003",
     title: "HisArchives",
     description: "The record itself, evolving in public while staying personal.",
     status: "Building",
     year: currentYear,
+    archiveDate: "2026-06-04",
     accent: "#6d28d9",
     word: "HISARCHIVES",
     href: "/archives/hisarchives",
@@ -46,10 +51,12 @@ const fallbackArchivedWork: ArchiveCard[] = [
   },
   {
     id: "004",
+    rawId: "004",
     title: "JEE 2027",
     description: "A long-running objective tracked as a live archive record.",
     status: "Active",
     year: currentYear,
+    archiveDate: "2026-06-04",
     accent: "#38bdf8",
     word: "JEE 2027",
     href: "/now",
@@ -57,10 +64,12 @@ const fallbackArchivedWork: ArchiveCard[] = [
   },
   {
     id: "005",
+    rawId: "005",
     title: "Fitness",
     description: "Conditioning, consistency, and body discipline stored as a living log.",
     status: "Active",
     year: currentYear,
+    archiveDate: "2026-06-04",
     accent: "#10b981",
     word: "FITNESS",
     href: "/me",
@@ -68,10 +77,12 @@ const fallbackArchivedWork: ArchiveCard[] = [
   },
   {
     id: "006",
+    rawId: "006",
     title: "Memories",
     description: "Personal fragments, moments, and reminders kept inside the archive.",
     status: "Active",
     year: currentYear,
+    archiveDate: "2026-06-04",
     accent: "#fb7185",
     word: "MEMORIES",
     href: "/timeline",
@@ -79,10 +90,12 @@ const fallbackArchivedWork: ArchiveCard[] = [
   },
   {
     id: "007",
+    rawId: "007",
     title: "Notes",
     description: "Quick records, references, and ideas that remain available later.",
     status: "Open",
     year: currentYear,
+    archiveDate: "2026-06-04",
     accent: "#f59e0b",
     word: "NOTES",
     href: "/activity",
@@ -90,20 +103,131 @@ const fallbackArchivedWork: ArchiveCard[] = [
   },
 ];
 
-const archiveLogs = [
-  {
-    eventDate: "2026-06-04",
-    text: "Purchased hisarchives.xyz",
-  },
-  {
-    eventDate: "2026-06-04",
-    text: "Built the first version of the archive",
-  },
-  {
-    eventDate: "2026-06-04",
-    text: "Started documenting the journey",
-  },
-];
+
+function ThorfinnFigure() {
+  const [hovered, setHovered] = useState(false);
+  const reduceMotion = useReducedMotion();
+
+  return (
+    <div
+      className="relative select-none cursor-pointer"
+      style={{ width: 340 }}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+    >
+      {/* Ambient glow */}
+      <div className="pointer-events-none absolute inset-0 flex items-center justify-center" style={{ zIndex: 0 }}>
+        <div style={{
+          width: 320, height: 420,
+          background: "radial-gradient(ellipse at 50% 60%, rgba(80,40,180,0.22), transparent 68%)",
+          filter: "blur(40px)",
+          opacity: hovered ? 1 : 0.5,
+          transition: "opacity 0.6s ease",
+        }} />
+      </div>
+
+      {/* Norse runic targeting circle — SVG */}
+      <div className="pointer-events-none absolute inset-0 flex items-center justify-center" style={{ zIndex: 1 }}>
+        <svg viewBox="0 0 340 480" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", overflow: "visible" }}>
+          <defs>
+            <filter id="arc-glow">
+              <feGaussianBlur stdDeviation="2" result="blur" />
+              <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+            </filter>
+          </defs>
+
+          {/* Outer rotating dashed ring — around head */}
+          <circle cx={166} cy={120} r={100}
+            fill="none" stroke="rgba(139,92,246,0.38)" strokeWidth={1.2} strokeDasharray="4 8"
+            style={{ transformOrigin: "166px 120px", animation: reduceMotion ? undefined : "runic-rot 24s linear infinite" }}
+          />
+
+          {/* Mid arc — appears on hover */}
+          <circle cx={166} cy={120} r={76}
+            fill="none"
+            stroke="rgba(139,92,246,0.7)" strokeWidth={1.5}
+            strokeDasharray={hovered ? "240 50" : "0 500"}
+            strokeDashoffset={-10}
+            filter="url(#arc-glow)"
+            style={{
+              transformOrigin: "166px 120px",
+              transition: reduceMotion ? undefined : "stroke-dasharray 0.7s ease",
+              animation: reduceMotion ? undefined : "runic-rot-rev 16s linear infinite",
+            }}
+          />
+
+          {/* Inner tight arc */}
+          <circle cx={166} cy={120} r={56}
+            fill="none"
+            stroke="rgba(180,140,255,0.65)" strokeWidth={1.2}
+            strokeDasharray={hovered ? "160 60" : "0 500"}
+            filter="url(#arc-glow)"
+            style={{
+              transformOrigin: "166px 120px",
+              transition: reduceMotion ? undefined : "stroke-dasharray 0.5s ease 0.1s",
+              animation: reduceMotion ? undefined : "runic-rot 10s linear infinite",
+            }}
+          />
+
+          {/* 4 crosshair brackets around head */}
+          {[[166-76, 120], [166+76, 120], [166, 120-76], [166, 120+76]].map(([x, y], i) => (
+            <g key={i} style={{ opacity: hovered ? 1 : 0, transition: "opacity 0.4s ease" }} filter="url(#arc-glow)">
+              <line x1={x as number - 7} y1={y as number} x2={x as number + 7} y2={y as number} stroke="rgba(180,140,255,0.7)" strokeWidth={1.5} />
+              <line x1={x as number} y1={y as number - 7} x2={x as number} y2={y as number + 7} stroke="rgba(180,140,255,0.7)" strokeWidth={1.5} />
+            </g>
+          ))}
+
+          {/* Ground ellipse */}
+          <ellipse cx={170} cy={430} rx={80} ry={12}
+            fill="none" stroke="rgba(139,92,246,0.3)" strokeWidth={1}
+            style={{ opacity: hovered ? 1 : 0.3, transition: "opacity 0.5s ease" }}
+          />
+        </svg>
+      </div>
+
+      {/* Main image */}
+      <div style={{
+        position: "relative", zIndex: 2,
+        animation: reduceMotion ? undefined : "thorfin-float 5s ease-in-out infinite",
+        transform: hovered ? "scale(1.03)" : "scale(1)",
+        transition: "transform 0.5s ease",
+      }}>
+        <img
+          src="/thorfin-cutout.jpg"
+          alt=""
+          draggable={false}
+          style={{
+            width: "100%", height: "auto", display: "block",
+            filter: hovered
+              ? "brightness(1.08) contrast(1.05) drop-shadow(0 0 20px rgba(120,80,255,0.5))"
+              : "brightness(0.94) contrast(1.03)",
+            transition: "filter 0.5s ease",
+          }}
+        />
+      </div>
+
+      {/* Bottom fade */}
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-24" style={{
+        zIndex: 4,
+        background: "linear-gradient(to top, #050508 20%, transparent 100%)",
+      }} />
+      {/* Left fade */}
+      <div className="pointer-events-none absolute inset-y-0 left-0 w-10" style={{
+        zIndex: 4,
+        background: "linear-gradient(to right, #050508 0%, transparent 100%)",
+      }} />
+
+      <style>{`
+        @keyframes thorfin-float {
+          0%, 100% { transform: translateY(0px); }
+          50%       { transform: translateY(-10px); }
+        }
+        @keyframes runic-rot     { from { transform: rotate(0deg); }   to { transform: rotate(360deg); } }
+        @keyframes runic-rot-rev { from { transform: rotate(0deg); }   to { transform: rotate(-360deg); } }
+      `}</style>
+    </div>
+  );
+}
 
 function Section({
   eyebrow,
@@ -132,6 +256,7 @@ function Section({
 
 function ShelfSpine({
   id,
+  displayIndex,
   title,
   description,
   status,
@@ -145,6 +270,7 @@ function ShelfSpine({
   onActivate,
 }: {
   id: string;
+  displayIndex: number;
   title: string;
   description: string;
   status: string;
@@ -222,19 +348,27 @@ function ShelfSpine({
             {itemWordFromTitle(title)}
           </motion.p>
           <div className="relative z-10 flex h-full flex-col justify-between gap-3">
-            <div className="flex items-start justify-between gap-3">
-              <div className="space-y-2">
-                <p className="text-[0.62rem] uppercase tracking-[0.45em] text-muted">{id}</p>
-                {isActive ? (<p className="max-w-[7rem] text-[0.62rem] uppercase tracking-[0.35em] text-muted/80">{shelfLabel}</p>) : null}
+            {isActive ? (
+              <div className="flex items-start justify-between gap-3">
+                <div className="space-y-2">
+                  <p className="text-[0.62rem] uppercase tracking-[0.45em] text-muted">{id}</p>
+                  <p className="max-w-[7rem] text-[0.62rem] uppercase tracking-[0.35em] text-muted/80">{shelfLabel}</p>
+                </div>
+                <p className="text-[0.6rem] uppercase tracking-[0.4em] text-text/85">
+                  <span
+                    className="mr-2 inline-block h-1.5 w-1.5 rounded-full align-middle"
+                    style={{ backgroundColor: accent, boxShadow: `0 0 10px ${accent}80` }}
+                  />
+                  {status.toUpperCase()}
+                </p>
               </div>
-              <p className={`text-[0.6rem] uppercase tracking-[0.4em] ${isActive ? "text-text/85" : "text-muted/75"}`}>
-                <span
-                  className="mr-2 inline-block h-1.5 w-1.5 rounded-full align-middle"
-                  style={{ backgroundColor: accent, boxShadow: `0 0 10px ${accent}80` }}
-                />
-                {status.toUpperCase()}
-              </p>
-            </div>
+            ) : (
+              <div className="flex w-full justify-center">
+                <p className="text-[0.82rem] font-semibold tabular-nums tracking-widest text-muted/70">
+                  {String(displayIndex).padStart(2, "0")}
+                </p>
+              </div>
+            )}
 
             <motion.div
               animate={reduceMotion ? undefined : { x: isActive ? [0, 6, 0] : 0, y: isActive ? [0, -2, 0] : 0 }}
@@ -261,14 +395,14 @@ function ShelfSpine({
               ) : (
                 <div className="flex h-full items-center justify-center">
                   <div className="flex select-none flex-col items-center justify-center gap-[0.82em] text-center font-medium uppercase tracking-[0.4em] text-text/90">
-                    {spineTitleGroups.map((group, groupIndex) => (
+                    {getSpineTitleGroups(title).map((group, groupIndex) => (
                       <div key={`${group}-${groupIndex}`} className="flex flex-col items-center justify-center gap-[0.48em]">
                         {group.split("").map((character, characterIndex) => (
                           <span
                             key={`${group}-${character}-${characterIndex}`}
                             className="block text-[0.72rem] leading-none sm:text-[0.76rem]"
                           >
-                            {character === " " ? "\u00a0" : character}
+                            {character === " " ? " " : character}
                           </span>
                         ))}
                       </div>
@@ -339,64 +473,7 @@ function getSpineTitleGroups(title: string) {
   return title.split(" ").map((word) => word.toUpperCase());
 }
 
-function TimelineEntry({
-  date,
-  text,
-}: {
-  date: string;
-  text: string;
-}) {
-  const reduceMotion = useReducedMotion();
 
-  return (
-    <motion.div
-      initial={reduceMotion ? false : { opacity: 0, y: 14 }}
-      whileInView={reduceMotion ? undefined : { opacity: 1, y: 0 }}
-      viewport={{ once: true, amount: 0.45 }}
-      transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-      className="grid gap-4 border-b border-white/5 py-5 sm:grid-cols-[9rem_1fr]"
-    >
-      <p className="text-sm uppercase tracking-[0.35em] text-muted">{formatExactDate(date)}</p>
-      <p className="text-lg font-light leading-8 text-text sm:text-xl">{text}</p>
-    </motion.div>
-  );
-}
-
-function StatusCard() {
-  const reduceMotion = useReducedMotion();
-
-  return (
-    <motion.aside
-      initial={reduceMotion ? false : { opacity: 0, y: 18 }}
-      whileInView={reduceMotion ? undefined : { opacity: 1, y: 0 }}
-      viewport={{ once: true, amount: 0.5 }}
-      transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
-      className="rounded-[2rem] border border-white/8 bg-surface/70 p-7 shadow-glow backdrop-blur-sm sm:p-8"
-    >
-      <div className="space-y-5">
-        <p className="text-[0.72rem] uppercase tracking-[0.45em] text-muted">Active record</p>
-        <div className="space-y-4">
-          <div>
-            <p className="text-xs uppercase tracking-[0.35em] text-muted">Active build</p>
-            <p className="mt-2 text-2xl font-light">HisArchives</p>
-          </div>
-          <div>
-            <p className="text-xs uppercase tracking-[0.35em] text-muted">Primary objective</p>
-            <p className="mt-2 text-2xl font-light">JEE 2027</p>
-          </div>
-          <div>
-            <p className="text-xs uppercase tracking-[0.35em] text-muted">Record status</p>
-            <p className="mt-2 text-2xl font-light">In Progress</p>
-          </div>
-          <div>
-            <p className="text-xs uppercase tracking-[0.35em] text-muted">Current phase</p>
-            <p className="mt-2 text-2xl font-light">Class 11</p>
-          </div>
-        </div>
-      </div>
-    </motion.aside>
-  );
-}
 
 export function ArchivePage({ initialItems = [] }: { initialItems?: ArchiveCard[] }) {
   const reduceMotion = useReducedMotion();
@@ -477,20 +554,44 @@ export function ArchivePage({ initialItems = [] }: { initialItems?: ArchiveCard[
       <div className="relative mx-auto flex w-full max-w-7xl flex-col px-5 pb-24 pt-5 sm:px-8 lg:px-12">
         <SiteHeader activePath="/archives" />
 
-        <section className="flex min-h-[20vh] items-end py-6 sm:min-h-[52vh] sm:py-24">
+        <section className="relative flex min-h-[20vh] items-end overflow-hidden py-6 sm:min-h-[52vh] sm:py-24">
+          {/* Mobile: faded ghost background */}
+          <img
+            src="/thorfin-cutout.jpg"
+            alt=""
+            className="pointer-events-none lg:hidden"
+            style={{
+              position: "absolute", bottom: 0, right: "-8%",
+              height: "105%", width: "auto",
+              opacity: 0.18,
+              filter: "brightness(0.85)",
+              zIndex: 0,
+            }}
+          />
+
           <motion.div
             initial={false}
             animate={reduceMotion ? undefined : { opacity: 1, y: 0 }}
             transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
-            className="max-w-4xl space-y-6"
+            className="relative z-10 max-w-4xl space-y-6"
           >
-            <p className="text-[0.72rem] uppercase tracking-[0.5em] text-muted">Archives</p>
+            <p className="pt-10 text-[0.72rem] uppercase tracking-[0.5em] text-muted sm:pt-0">Beauty Saves</p>
             <h1 className="text-balance text-[clamp(3rem,12vw,4.5rem)] font-light tracking-[0.15em] sm:text-8xl lg:text-[8rem]">
               ARCHIVES
             </h1>
             <p className="max-w-2xl text-base leading-8 text-muted sm:text-lg">
-              A record of projects, lessons, experiments, and moments preserved over time.
+              Kahin pahunchne ke liye, kahin se nikalna bahut zaroori hota hai.
             </p>
+          </motion.div>
+
+          {/* Desktop only — full figure */}
+          <motion.div
+            initial={reduceMotion ? false : { opacity: 0, x: 40 }}
+            animate={reduceMotion ? undefined : { opacity: 1, x: 0 }}
+            transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1], delay: 0.2 }}
+            className="pointer-events-auto absolute bottom-0 right-0 hidden lg:block"
+          >
+            <ThorfinnFigure />
           </motion.div>
         </section>
 
@@ -499,7 +600,9 @@ export function ArchivePage({ initialItems = [] }: { initialItems?: ArchiveCard[
             <div className="space-y-2">
               <p className="text-[0.72rem] uppercase tracking-[0.45em] text-muted">Archived Work</p>
               <p className="text-[0.62rem] uppercase tracking-[0.4em] text-muted/70">
-                {archivedWork.length} records | last entry: {archivedWork[0]?.year ?? String(new Date().getFullYear())} | status: {archivedWork[0]?.status.toLowerCase() ?? "active"}
+                {archivedWork.length} records | last entry: {archivedWork[0]?.archiveDate
+                  ? new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "short", timeZone: "UTC" }).format(new Date(archivedWork[0].archiveDate + "T00:00:00Z"))
+                  : "—"}
               </p>
             </div>
             <div className="space-y-4" onMouseLeave={() => setActiveIndex(null)}>
@@ -541,6 +644,7 @@ export function ArchivePage({ initialItems = [] }: { initialItems?: ArchiveCard[
                       <ShelfSpine
                         key={item.id}
                         id={item.id}
+                        displayIndex={index + 1}
                         title={item.title}
                         description={item.description}
                         status={item.status}
@@ -561,21 +665,6 @@ export function ArchivePage({ initialItems = [] }: { initialItems?: ArchiveCard[
           </div>
         </section>
 
-        <Section
-          eyebrow="Archive Logs"
-          title="Timeline notes."
-          subtitle="A clean log that can grow into a larger record without changing its structure."
-        >
-          <div className="rounded-[2rem] border border-white/8 bg-surface/70 px-6 py-3 backdrop-blur-sm sm:px-8">
-            {archiveLogs.map((entry) => (
-              <TimelineEntry key={`${entry.eventDate}-${entry.text}`} date={entry.eventDate} text={entry.text} />
-            ))}
-          </div>
-        </Section>
-
-        <Section eyebrow="Active Record" title="RECORD IN PROGRESS">
-          <StatusCard />
-        </Section>
 
       </div>
     </main>
