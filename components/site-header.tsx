@@ -107,6 +107,7 @@ export function SiteHeader({
     | "/archives"
     | "/now"
     | "/me"
+    | "/identity"
     | "/timeline"
     | "/activity"
     | "/gallery"
